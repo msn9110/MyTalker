@@ -35,9 +35,7 @@ import java.util.Locale;
 
 import static android.os.StrictMode.setThreadPolicy;
 
-/**
- * Created by jim84_000 on 2016/5/19.
- */
+
 public class SpeechMode extends ListActivity implements AdapterView.OnItemClickListener, TextToSpeech.OnInitListener {
     public static String path="Main";
     private String parentPath;
@@ -74,8 +72,11 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             setThreadPolicy(policy);
         }
+
+        System.out.println(Locale.getDefault().toString());
         tw=new TextToSpeech(this,this);
         en=new TextToSpeech(this,this);
+
         this.setListAdapter(this.createListAdapter());
         ListView lv = (ListView) this.findViewById(android.R.id.list);
         lv.setOnItemClickListener(this);
@@ -210,25 +211,24 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
         int result;
         if(!mode){
             result = en.setLanguage(Locale.US);//<<<===================================
+
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e(TAG, "Language is not available.");
+                System.out.println("EN ERROR");
             }
             else{
                 en.setSpeechRate(speed);
-                //Toast.makeText(this,"EN",Toast.LENGTH_SHORT).show();
                 System.out.println("EN READY");
             }
         }
 
         else {
-            result = tw.setLanguage(Locale.TAIWAN);//<<<===================================
-            mode=!mode;
+            mode=false;
+            result = tw.setLanguage(Locale.CHINESE);//<<<===================================
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e(TAG, "Language is not available.");
+                System.out.println("TW ERROR");
             }
             else{
                 tw.setSpeechRate(speed);
-                //Toast.makeText(this,"TW",Toast.LENGTH_SHORT).show();
                 System.out.println("TW READY");
             }
         }

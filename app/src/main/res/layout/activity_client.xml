@@ -13,9 +13,7 @@
             android:layout_width="wrap_content"
             android:text="搜尋句子"
             android:textSize="40dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button"
-            android:textColor="@color/MainText">
+            android:layout_height="wrap_content">
         </Button>
         <Spinner android:id="@+id/Spinner_sentence"
             android:layout_width="match_parent"
@@ -36,9 +34,7 @@
         android:layout_height="wrap_content"
         android:textSize="30dp"
         android:text="送出"
-        android:id="@+id/btn_send"
-        android:background="@drawable/button"
-        android:textColor="@color/MainText"/>
+        android:id="@+id/btn_send"/>
 
     <HorizontalScrollView
         android:layout_width="fill_parent"
@@ -54,62 +50,37 @@
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="135dp"
                 android:layout_height="60dp"
-                android:text="下一頁"
-                android:id="@+id/btn_next"
-                android:background="@drawable/button"
-                android:textColor="@color/MainText"/>
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="135dp"
-                android:layout_height="60dp"
                 android:text="主層"
-                android:id="@+id/btn_lv1"
-                android:background="@drawable/button"
-                android:textColor="@color/MainText"/>
+                android:id="@+id/btn_lv1"/>
 
             <Button
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="135dp"
                 android:layout_height="60dp"
                 android:text="清除"
-                android:id="@+id/btn_clear"
-                android:background="@drawable/button"
-                android:textColor="@color/MainText"/>
+                android:id="@+id/btn_clear"/>
 
             <Button
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="135dp"
                 android:layout_height="60dp"
                 android:text="載入資料"
-                android:id="@+id/btn_load"
-                android:background="@drawable/button"
-                android:textColor="@color/MainText"/>
+                android:id="@+id/btn_load"/>
 
             <Button
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="135dp"
                 android:layout_height="60dp"
                 android:text="連接語音"
-                android:id="@+id/btn_speech"
-                android:background="@drawable/button"
-                android:textColor="@color/MainText"/>
+                android:id="@+id/btn_speech"/>
         </LinearLayout>
     </HorizontalScrollView>
 
-
-    <ScrollView
+     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/scrollView2" >
-
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnView" >
-
-        </ListView>
-
-    </ScrollView>
+        android:id="@+id/btnView"
+         android:forceHasOverlappingRendering="false">
+    </ListView>
 
 </LinearLayout>

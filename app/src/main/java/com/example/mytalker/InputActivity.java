@@ -2,13 +2,11 @@ package com.example.mytalker;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
@@ -16,8 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -39,13 +37,14 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     private Socket socket;
 
 
-    Button btn_send, btn_next, btn_lv1, btn_load, btn_clear, btn_mwm, btn_speech;
+    Button btn_send, btn_lv1, btn_load, btn_clear, btn_speech;
     boolean status_speech = false;
-    Button[] btn = new Button[9];
+    ListView view;
     EditText editText;
     public static boolean con = false;
 
-    InputData[] datas=new InputData[1], currentDatas = new InputData[9];
+    //for data variable
+    InputData[] Data=new InputData[1], currentData = new InputData[9];
     int[] map=new int[1];
     //SQLiteDatabase db;
     int[][] next_id=new int[1][1];
@@ -71,24 +70,22 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             ThreadPolicy policy = new ThreadPolicy.Builder().permitAll().build();
             setThreadPolicy(policy);
         }
+        //initialize
+        for(int i=0;i<9;i++)
+            currentData[i]=new InputData();
         btn_send = (Button) findViewById(R.id.btn_send);
-        btn_next = (Button) findViewById(R.id.btn_next);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
         btn_speech = (Button) findViewById(R.id.btn_speech);
 
-        int[] btnid = {R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9};
-        for (int i = 0; i < 9; i++) {
-            btn[i] = (Button) findViewById(btnid[i]);
-            btn[i].setTextSize(25);//<===========================BTN TEXT SIZE
-            btn[i].setEnabled(false);
-            currentDatas[i] = new InputData();
-        }
-        datas[0]=new InputData();
+        view=(ListView)findViewById(R.id.btnView);
+
+        Data[0]=new InputData();
 
         if (!con) {
-            btn_send.setText("TALK");
+            String text="TALK";
+            btn_send.setText(text);
             btn_speech.setVisibility(View.GONE);
         }
         status_speech = !con;
@@ -119,8 +116,6 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         System.out.println(Locale.getDefault().toString());
         tw = new TextToSpeech(this,this);
         en = new TextToSpeech(this,this);
-        char ch='我';
-        System.out.println();
 
         btn_load.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,38 +123,12 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
                 Update();
             }
         });
-
-        for (int i = 0; i < 9; i++) {
-            final int arg = i;
-            btn[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String s = editText.getText().toString();
-                    int index=editText.getSelectionStart();
-                    String part1=spilt(s,0,index),part2=spilt(s,index,s.length());
-                    s=part1+btn[arg].getText().toString()+part2;
-                    editText.setText(s);
-                    editText.setSelection(part1.length()+btn[arg].getText().toString().length());
-                    offset = 0;
-                    current_id = currentDatas[arg].id;
-                    setCurrentDatas(current_id);
-                }
-            });
-
-        }
-
-        btn_next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setCurrentDatas(current_id);
-            }
-        });
         btn_lv1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 current_id = 0;
                 offset = 0;
-                setCurrentDatas(current_id);
+                setCurrentData(current_id);
             }
         });
 
@@ -174,7 +143,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
                 spinner.setAdapter(adapter);
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        String _content = ((Spinner) parent).getSelectedItem().toString();
+                        String _content = parent.getSelectedItem().toString();
                         //editText.postInvalidate();
                         if(_content.length()>0){
                             editText.setText(_content);
@@ -230,10 +199,10 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         int size = c.getCount();
         if (size > 0) {
             c.moveToFirst();
-            datas = null; //RELEASE
+            Data = null; //RELEASE
             next_id = null; //RELEASE
             map=null; //RELEASE
-            datas = new InputData[size];
+            Data = new InputData[size];
             map = new int[size + 1];
             next_id = new int[size + 1][];
             next_id[0] = new int[size];
@@ -241,9 +210,9 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
                 final int id = Integer.parseInt(c.getString(c.getColumnIndex(DBConnection.VocSchema.ID)));
                 next_id[0][i] = id;
                 map[id] = i;
-                datas[i] = new InputData(c.getString(c.getColumnIndex(DBConnection.VocSchema.CONTENT)), id);
+                Data[i] = new InputData(c.getString(c.getColumnIndex(DBConnection.VocSchema.CONTENT)), id);
                 //==============================
-                LoadRelation(id);
+                //LoadRelation(id);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -261,7 +230,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             @Override
             public void run() {
                 Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
-                setCurrentDatas(current_id);
+                setCurrentData(current_id);
             }
         });
     }
@@ -281,12 +250,10 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             }
         }
         c.close();
-
-
     }
 
     //===============================================================================================
-    private void setCurrentDatas(int id) //OR NEXT PAGE
+    private void setCurrentData(int id) //OR NEXT PAGE
     {
         int size = next_id[id].length;
         if (size == 0) {
@@ -295,7 +262,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             size = next_id[0].length;
         } else if (size == 1) {
             int position = map[next_id[id][0]];
-            String str = datas[position].text;
+            String str = Data[position].text;
             if (str.equals("#")) {
                 offset = 0;
                 current_id = id = 0;
@@ -305,16 +272,16 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         for (int i = 0; i < 9; ) {
             if (offset + i < size) {
                 int position = map[next_id[id][i + offset]];
-                String str = datas[position].text;
+                String str = Data[position].text;
                 if (str.equals("#")) {
                     offset += 1;
                     continue;
                 }
-                currentDatas[i].text = str;
-                currentDatas[i].id = datas[position].id;
+                currentData[i].text = str;
+                currentData[i].id = Data[position].id;
             } else {
-                currentDatas[i].id = 0;
-                currentDatas[i].text = "";
+                currentData[i].id = 0;
+                currentData[i].text = "";
             }
             i++;
         }
@@ -323,21 +290,6 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             offset = 0;
             current_id = 0;
         }
-        setBtnText();
-    }
-
-    private void setBtnText() {
-        int count = 0;
-        for (int i = 0; i < 9; i++) {
-            btn[i].setText(currentDatas[i].text);
-            if (currentDatas[i].text.equals("")) {
-                btn[i].setEnabled(false);
-                count++;
-            } else
-                btn[i].setEnabled(true);
-        }
-        if (count == 9 && current_id != 0)
-            setCurrentDatas(current_id);
     }
 
     private void send() {
@@ -384,7 +336,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     private void clear(){
         editText.setText("");
         current_id=offset=0;
-        setCurrentDatas(current_id);
+        setCurrentData(current_id);
     }
 
     private void terminate() {
@@ -393,7 +345,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
                 out.close();
                 socket.close();
             } catch (Exception e) {
-                String err= e.toString();
+                Log.e("terminate",e.toString());
             }
         }
     }
@@ -467,11 +419,10 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             result = en.setLanguage(Locale.US);//<<<===================================
 
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                System.out.println("en error");
+                System.out.println("EN ERROR");
             }
             else{
                 en.setSpeechRate(speed);
-                //Toast.makeText(this,"EN",Toast.LENGTH_SHORT).show();
                 System.out.println("EN READY");
             }
         }
@@ -480,11 +431,10 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             mode=false;
             result = tw.setLanguage(Locale.CHINESE);//<<<===================================
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                System.out.println("tw error");
+                System.out.println("TW ERROR");
             }
             else{
                 tw.setSpeechRate(speed);
-                //Toast.makeText(this,"TW",Toast.LENGTH_SHORT).show();
                 System.out.println("TW READY");
             }
         }
