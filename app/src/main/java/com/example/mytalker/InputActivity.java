@@ -44,12 +44,11 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     public static boolean con = false;
 
     //for data variable
-    InputData[] Data=new InputData[1], currentData = new InputData[9];
+    InputData[] Data=new InputData[1], currentData;
     int[] map=new int[1];
     //SQLiteDatabase db;
     int[][] next_id=new int[1][1];
     int current_id = 0;//0 denote main level
-    int offset = 0; // offset=9n
 
     DBConnection helper = new DBConnection(this);
     Learn learn = new Learn(this, helper);
@@ -71,8 +70,6 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             setThreadPolicy(policy);
         }
         //initialize
-        for(int i=0;i<9;i++)
-            currentData[i]=new InputData();
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
@@ -80,7 +77,19 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         btn_speech = (Button) findViewById(R.id.btn_speech);
 
         view=(ListView)findViewById(R.id.btnView);
-
+        view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s = editText.getText().toString();
+                int index=editText.getSelectionStart();
+                String part1=spilt(s,0,index),part2=spilt(s,index,s.length());
+                s=part1+currentData[position].text+part2;
+                editText.setText(s);
+                editText.setSelection(part1.length()+currentData[position].text.length());
+                current_id = currentData[position].id;
+                setCurrentData(current_id);
+            }
+        });
         Data[0]=new InputData();
 
         if (!con) {
@@ -127,7 +136,6 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             @Override
             public void onClick(View v) {
                 current_id = 0;
-                offset = 0;
                 setCurrentData(current_id);
             }
         });
@@ -225,7 +233,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         }
         c.close();
         final long avg = (System.currentTimeMillis() - stime);
-        current_id = offset = 0;
+        current_id = 0;
         uihandler.post(new Runnable() {
             @Override
             public void run() {
@@ -253,43 +261,28 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     }
 
     //===============================================================================================
-    private void setCurrentData(int id) //OR NEXT PAGE
+    private void setCurrentData(int id)
     {
         int size = next_id[id].length;
+        currentData=new InputData[size];
         if (size == 0) {
-            offset = 0;
             current_id = id = 0;
             size = next_id[0].length;
-        } else if (size == 1) {
-            int position = map[next_id[id][0]];
-            String str = Data[position].text;
-            if (str.equals("#")) {
-                offset = 0;
-                current_id = id = 0;
-                size = next_id[0].length;
-            }
         }
-        for (int i = 0; i < 9; ) {
-            if (offset + i < size) {
-                int position = map[next_id[id][i + offset]];
-                String str = Data[position].text;
-                if (str.equals("#")) {
-                    offset += 1;
-                    continue;
-                }
-                currentData[i].text = str;
-                currentData[i].id = Data[position].id;
-            } else {
-                currentData[i].id = 0;
-                currentData[i].text = "";
-            }
-            i++;
+        for (int i = 0; i < size; i++ ) {
+            int position = map[next_id[id][i]];
+            currentData[i]=Data[position];
         }
-        offset += 9;
-        if (offset > size) {
-            offset = 0;
-            current_id = 0;
-        }
+        setList();
+    }
+
+    private void setList(){
+        int size=currentData.length;
+        String[] lists=new String[size];
+        for(int i=0;i<size;i++)
+            lists[i]=currentData[i].text;
+        ArrayAdapter<String> listAdapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,lists);
+        view.setAdapter(listAdapter);
     }
 
     private void send() {
@@ -335,7 +328,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
 
     private void clear(){
         editText.setText("");
-        current_id=offset=0;
+        current_id=0;
         setCurrentData(current_id);
     }
 

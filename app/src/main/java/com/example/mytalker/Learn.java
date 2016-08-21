@@ -47,24 +47,22 @@ public class Learn {
             System.out.println(msg);
 
             //handle vocabulary
-            for(int i = 0 ; i < pointer_storewordspilt+1 ; i++){
-                String tem_word=((i==pointer_storewordspilt)?"#":storewordspilt[i]);
-
-                //System.out.println(tem_word);
-                if(!helper.update(true,tem_word,db)){
-                    helper.insert(true,tem_word,db);
+            for(int i = 0 ; i < pointer_storewordspilt ; i++){
+                String word=storewordspilt[i];
+                if(!helper.update(true,word,db)){
+                    helper.insert(true,word,db);
                 }
             }
             //handle relation
             for(int i = 0 ; i < pointer_storewordspilt ; i++){
-                String tem_secondword=((i==pointer_storewordspilt-1)?"#":storewordspilt[i+1]);
-                int id1=helper.getVocID(storewordspilt[i],db);
-                int id2=helper.getVocID(tem_secondword,db);
-                //System.out.println(tem_secondword);
-                if(!helper.update(id1,id2,db)){
-                    helper.insert(id1,id2,db);
+                if(i < pointer_storewordspilt-1){//there is a word behind current word
+                    String next_word=storewordspilt[i+1];
+                    int id1=helper.getVocID(storewordspilt[i],db);
+                    int id2=helper.getVocID(next_word,db);
+                    if(!helper.update(id1,id2,db)){
+                        helper.insert(id1,id2,db);
+                    }
                 }
-
             }
             clear_storeword_spilt();
 
@@ -94,7 +92,7 @@ public class Learn {
         StringBuilder sb = new StringBuilder();
         Seg seg = getSeg();
         MMSeg mmSeg = new MMSeg(input, seg);
-        Word word = null;
+        Word word;
         boolean first = true;
         while((word=mmSeg.next())!=null) {
             if(!first) {
@@ -172,7 +170,7 @@ public class Learn {
     }
 
     public String spilt(String args) throws IOException {
-        String txt = "";
+        String txt;
 
         if(args.length() > 0) {
             txt = args;
