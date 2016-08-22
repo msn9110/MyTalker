@@ -8,7 +8,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,36 +30,28 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static android.os.StrictMode.setThreadPolicy;
 
 
-public class SpeechMode extends ListActivity implements AdapterView.OnItemClickListener, TextToSpeech.OnInitListener {
+public class SpeechMode extends ListActivity implements AdapterView.OnItemClickListener {
     public static String path="Main";
     private String parentPath;
     File _CurrentFilePath;
-    Handler handler=new Handler();
-    ProgressDialog dialog;
     private DataOutputStream out; //for transfer
     public static boolean con = false;
     public static final String IP_SERVER = "192.168.49.1";
     public static int PORT = 8988;
     private Socket socket;
+    static final String TAG="SpeechMode";
+    //Handler handler=new Handler();
+    //ProgressDialog dialog;
+    Speaker speaker;
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Don't forget to shutdown!
-        if (tw != null) {
-            tw.stop();
-            tw.shutdown();
-        }
-
-        if (en != null) {
-            en.stop();
-            en.shutdown();
-        }
+        speaker.stop();
         terminate();
     }
 
@@ -73,9 +64,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
             setThreadPolicy(policy);
         }
 
-        System.out.println(Locale.getDefault().toString());
-        tw=new TextToSpeech(this,this);
-        en=new TextToSpeech(this,this);
+        speaker=new Speaker(getApplicationContext());
 
         this.setListAdapter(this.createListAdapter());
         ListView lv = (ListView) this.findViewById(android.R.id.list);
@@ -96,17 +85,12 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
             list.add(f.getName());
             Log.d(TAG, "加入檔案：" + f.getName());
         }
-        return new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, list);
+        return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position,
-                            long id) {
-        File file = new File(this.parentPath,
-                ((TextView) view).getText().toString());
-        _CurrentFilePath=file;
-
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        _CurrentFilePath=new File(this.parentPath,((TextView) view).getText().toString());
         new Thread(SpeakFile).start();
     }
 
@@ -141,6 +125,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
                 out.close();
                 socket.close();
             } catch (Exception e) {
+                Log.e("Terminate",e.toString());
             }
         }
     }
@@ -154,7 +139,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
                 File myFile = _CurrentFilePath;
                 FileInputStream fIn = new FileInputStream(myFile);
                 BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                String aDataRow = "";
+                String aDataRow;
                 while ((aDataRow = myReader.readLine()) != null) {
                     if(aDataRow.length()==0)
                         continue;
@@ -168,16 +153,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
                         }
                     }
                     else{
-                        char ch=aDataRow.charAt(0);
-                        if(Check.check_eng(ch))
-                        {
-                            //System.out.println("EN Line");
-                            sayHello(aDataRow,0);
-                        }
-                        else{
-                            //System.out.println("TW Line");
-                            sayHello(aDataRow,1);
-                        }
+                        speaker.speak(aDataRow);
                     }
 
                 }
@@ -191,54 +167,4 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
         }
     };
 
-    //=============================================語音==============================================
-    private TextToSpeech tw,en;
-    private static final String TAG = "SPEAKER";
-    boolean mode=true;
-    // Implements TextToSpeech.OnInitListener.
-    public void onInit(int status) {
-        // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-        if (status == TextToSpeech.SUCCESS) {
-            language();
-        }
-
-        else {
-            Log.e(TAG, "Could not initialize TextToSpeech.");
-        }
-    }
-    private void language(){
-        float speed=(float)0.8;
-        int result;
-        if(!mode){
-            result = en.setLanguage(Locale.US);//<<<===================================
-
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                System.out.println("EN ERROR");
-            }
-            else{
-                en.setSpeechRate(speed);
-                System.out.println("EN READY");
-            }
-        }
-
-        else {
-            mode=false;
-            result = tw.setLanguage(Locale.CHINESE);//<<<===================================
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                System.out.println("TW ERROR");
-            }
-            else{
-                tw.setSpeechRate(speed);
-                System.out.println("TW READY");
-            }
-        }
-
-    }
-
-    public void sayHello(String hello,int mode) {
-        if(mode==1)
-            tw.speak(hello, TextToSpeech.QUEUE_ADD, null);
-        else
-            en.speak(hello, TextToSpeech.QUEUE_ADD, null);
-    }
 }

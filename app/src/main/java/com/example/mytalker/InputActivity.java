@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,17 +24,17 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.Locale;
 
 import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
-public class InputActivity extends Activity implements TextToSpeech.OnInitListener {
+public class InputActivity extends Activity {
     public static final String IP_SERVER = "192.168.49.1";
     public static int PORT = 8988;
     private DataOutputStream out; //for transfer
     private Socket socket;
 
+    Speaker speaker;
 
     Button btn_send, btn_lv1, btn_load, btn_clear, btn_speech;
     boolean status_speech = false;
@@ -70,6 +69,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             setThreadPolicy(policy);
         }
         //initialize
+        speaker=new Speaker(getApplicationContext());
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
@@ -87,7 +87,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
                 editText.setText(s);
                 editText.setSelection(part1.length()+currentData[position].text.length());
                 current_id = currentData[position].id;
-                setCurrentData(current_id);
+                setCurrentData();
             }
         });
         Data[0]=new InputData();
@@ -122,10 +122,6 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             }
         });
 
-        System.out.println(Locale.getDefault().toString());
-        tw = new TextToSpeech(this,this);
-        en = new TextToSpeech(this,this);
-
         btn_load.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,7 +132,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             @Override
             public void onClick(View v) {
                 current_id = 0;
-                setCurrentData(current_id);
+                setCurrentData();
             }
         });
 
@@ -233,12 +229,12 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         }
         c.close();
         final long avg = (System.currentTimeMillis() - stime);
-        current_id = 0;
         uihandler.post(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
-                setCurrentData(current_id);
+                current_id = 0;
+                setCurrentData();
             }
         });
     }
@@ -261,16 +257,16 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     }
 
     //===============================================================================================
-    private void setCurrentData(int id)
+    private void setCurrentData()
     {
-        int size = next_id[id].length;
-        currentData=new InputData[size];
+        int size = next_id[current_id].length;
         if (size == 0) {
-            current_id = id = 0;
+            current_id = 0;
             size = next_id[0].length;
         }
+        currentData=new InputData[size];//prevent size=0
         for (int i = 0; i < size; i++ ) {
-            int position = map[next_id[id][i]];
+            int position = map[next_id[current_id][i]];
             currentData[i]=Data[position];
         }
         setList();
@@ -281,7 +277,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         String[] lists=new String[size];
         for(int i=0;i<size;i++)
             lists[i]=currentData[i].text;
-        ArrayAdapter<String> listAdapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,lists);
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
         view.setAdapter(listAdapter);
     }
 
@@ -295,7 +291,8 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
             }
         }).start();
         if (status_speech && message.length()>0)
-            sayHello(" "+message);
+            speaker.speak(message);
+            //sayHello(" "+message);
         if (con) {
             try {
                 //傳送資料
@@ -329,7 +326,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     private void clear(){
         editText.setText("");
         current_id=0;
-        setCurrentData(current_id);
+        setCurrentData();
     }
 
     private void terminate() {
@@ -347,15 +344,7 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (tw != null) {
-            tw.stop();
-            tw.shutdown();
-        }
-        if (en != null) {
-            en.stop();
-            en.shutdown();
-        }
-        tw=en=null;
+        speaker.stop();
         terminate();
     }
 
@@ -388,91 +377,5 @@ public class InputActivity extends Activity implements TextToSpeech.OnInitListen
         }
         c.close();
         db.close();
-    }
-
-    //=============================================語音==============================================
-    private TextToSpeech tw,en;
-    private static final String TAG = "SPEAKER";
-    boolean mode=true;
-    // Implements TextToSpeech.OnInitListener.
-    public void onInit(int status) {
-        // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-        if (status == TextToSpeech.SUCCESS) {
-            language();
-        }
-
-        else {
-            Log.e(TAG, "Could not initialize TextToSpeech.");
-        }
-    }
-    private void language(){
-        float speed=(float)0.8;
-        int result;
-        if(!mode){
-            result = en.setLanguage(Locale.US);//<<<===================================
-
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                System.out.println("EN ERROR");
-            }
-            else{
-                en.setSpeechRate(speed);
-                System.out.println("EN READY");
-            }
-        }
-
-        else {
-            mode=false;
-            result = tw.setLanguage(Locale.CHINESE);//<<<===================================
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                System.out.println("TW ERROR");
-            }
-            else{
-                tw.setSpeechRate(speed);
-                System.out.println("TW READY");
-            }
-        }
-
-    }
-
-    public void sayHello(String hello) {
-       //tw.speak(hello,TextToSpeech.QUEUE_ADD,null);
-       String[] msg=new String[50];
-        for(int i=0;i<50;i++)
-            msg[i]="";
-        int previous=0,count=0,speaker=0,current;
-        char first=hello.charAt(0);
-        if(first>='a' && first<='z' || first>='A' && first<='Z')
-            speaker=1;
-        for(int i=0;i<hello.length();i++)
-        {
-            current=0;
-            char ch1=hello.charAt(i);
-            if(Check.check_eng(ch1))
-                current=1;
-            else if(Check.check_sign(ch1))
-                current=previous;
-
-            if(current!=previous)
-            {
-                previous=current;
-                count++;
-            }
-            msg[count]+=String.valueOf(ch1);
-        }
-
-        for(int i=0;i<=count;i++)
-        {
-            System.out.println(msg[i]);
-            if(speaker==0){
-                tw.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
-                speaker++;
-                speaker%=2;
-            }
-            else {
-                en.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
-                speaker++;
-                speaker%=2;
-            }
-        }
     }
 }

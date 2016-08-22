@@ -7,7 +7,7 @@
     android:gravity="left"
     android:paddingLeft="8dip"
     android:singleLine="true"
-    android:textColor="@color/MainText"
+    android:textColor="#000000"
     android:textSize="20sp"
     android:textStyle="bold" >
 </TextView>

@@ -6,7 +6,7 @@
     <string name="connect_peer_button">Connect</string>
     <string name="disconnect_peer_button">Disconnect</string>
     <string name="get_file_button">Launch Gallery</string>
-    <string name="empty"></string>
+    <string name="empty">&#0;</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="client_text">This device will act as a client. Click on Gallery button to pick a local(stored) file</string>
@@ -24,5 +24,7 @@
     <string name="app_count">Count:</string>
     <string name="app_ID1">ID1:</string>
     <string name="app_ID2">ID2:</string>
+    <string name="listenig">Listening&#8230;</string>
+    <string name="connected">Connected</string>
 </resources>
 
