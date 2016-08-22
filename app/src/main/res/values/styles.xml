@@ -6,4 +6,6 @@
     </style>
     <style name="AppBaseTheme" parent="android:Theme.Light">
     </style>
+
+    <style name="CustomButton">Button</style>
 </resources>

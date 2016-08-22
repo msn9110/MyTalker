@@ -48,6 +48,7 @@ public class Speaker implements TextToSpeech.OnInitListener {
             result = tw.setLanguage(Locale.TAIWAN);//<<<===================================
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 System.out.println("TW ERROR");
+                System.out.println(result);
             }
             else{
                 tw.setSpeechRate(speed);

@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -57,7 +59,6 @@ public class InputActivity extends Activity {
 
     CharSequence[] list = new CharSequence[11];
     Spinner spinner;
-    Button btn_sentence;
 
     //=====================================oncreate===================================================
     @Override
@@ -136,32 +137,24 @@ public class InputActivity extends Activity {
             }
         });
 
-        btn_sentence=(Button)findViewById(R.id.Button_sentence);
         spinner=(Spinner)findViewById(R.id.Spinner_sentence);
-        btn_sentence.setOnClickListener(new View.OnClickListener() {
+        editText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                sentence();
-                ArrayAdapter adapter=new ArrayAdapter<CharSequence>(InputActivity.this, R.layout.myspinner, list);
-                adapter.setDropDownViewResource(R.layout.myspinner);
-                spinner.setAdapter(adapter);
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        String _content = parent.getSelectedItem().toString();
-                        //editText.postInvalidate();
-                        if(_content.length()>0){
-                            editText.setText(_content);
-                            editText.setSelection(editText.length());
-                        }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                    }
-
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
             }
-        });
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                setSpinner();
+            }
+        });//text change event
+        setSpinner();
     }
     //===============================================================================================
     String spilt(String s,int start,int end)
@@ -281,6 +274,28 @@ public class InputActivity extends Activity {
         view.setAdapter(listAdapter);
     }
 
+    private void setSpinner(){
+        sentence();
+        ArrayAdapter adapter=new ArrayAdapter<CharSequence>(InputActivity.this, R.layout.myspinner, list);
+        adapter.setDropDownViewResource(R.layout.myspinner);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String _content = parent.getSelectedItem().toString();
+                //editText.postInvalidate();
+                if(_content.length()>0){
+                    editText.setText(_content);
+                    editText.setSelection(editText.length());
+                }
+
+            }
+
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
     private void send() {
         //要傳送的字串
         final String message = editText.getText().toString();
@@ -292,7 +307,6 @@ public class InputActivity extends Activity {
         }).start();
         if (status_speech && message.length()>0)
             speaker.speak(message);
-            //sayHello(" "+message);
         if (con) {
             try {
                 //傳送資料

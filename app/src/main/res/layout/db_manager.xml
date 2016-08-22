@@ -21,14 +21,6 @@
                 android:textSize="60dp"
                 android:layout_gravity="center"
                 android:textColor="@color/MainText"></TextView>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="30dp"
-                android:layout_gravity="center"
-                android:background="@drawable/line"
-                android:textColor="@color/MainText"></TextView>
             <TextView android:id="@+id/Text_db1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Voc:" android:textSize="45dp" android:textColor="@color/MainText"></TextView>
             <Spinner android:id="@+id/Spinner01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/MainText"></Spinner>
             <TableLayout android:id="@+id/TableLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:stretchColumns="1" android:gravity="center">
@@ -46,34 +38,34 @@
                 </TableRow>
             </TableLayout>
             <LinearLayout android:id="@+id/LinearLayout01" android:layout_height="wrap_content" android:layout_width="fill_parent">
-                <Button android:id="@+id/Button01"
+                <Button
+                    android:id="@+id/Button01"
                     android:text="@string/app_add"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button02"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button02"
                     android:text="@string/app_update"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button03"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button03"
                     android:text="@string/app_delete"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button04"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button04"
+                    android:text="@string/app_clear"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"
-                    android:text="@string/app_clear"></Button>
+                    android:textSize="45dp"/>
+
             </LinearLayout>
 
             <TextView android:id="@+id/Text_db_" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
@@ -97,35 +89,35 @@
                     <EditText android:id="@+id/EditText14" android:layout_width="wrap_content" android:layout_height="wrap_content"></EditText>
                 </TableRow>
             </TableLayout>
+
             <LinearLayout android:id="@+id/LinearLayout11" android:layout_height="wrap_content" android:layout_width="fill_parent">
-                <Button android:id="@+id/Button11"
+                <Button
+                    android:id="@+id/Button11"
                     android:text="@string/app_add"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button12"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button12"
                     android:text="@string/app_update"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button13"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button13"
                     android:text="@string/app_delete"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button14"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button14"
                     android:text="@string/app_clear"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
+                    android:textSize="45dp"/>
             </LinearLayout>
 
             <TextView android:id="@+id/Text_db__" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
@@ -145,35 +137,35 @@
                     <EditText android:id="@+id/EditText23" android:layout_width="wrap_content" android:layout_height="wrap_content"></EditText>
                 </TableRow>
             </TableLayout>
+
             <LinearLayout android:id="@+id/LinearLayout21" android:layout_height="wrap_content" android:layout_width="fill_parent">
-                <Button android:id="@+id/Button21"
+                <Button
+                    android:id="@+id/Button21"
                     android:text="@string/app_add"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button22"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button22"
                     android:text="@string/app_update"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button23"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button23"
                     android:text="@string/app_delete"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
-                <Button android:id="@+id/Button24"
+                    android:textSize="45dp"/>
+
+                <Button
+                    android:id="@+id/Button24"
                     android:text="@string/app_clear"
                     android:layout_width="120dp"
                     android:layout_height="90dp"
-                    android:background="@drawable/button"
-                    android:textSize="45dp"
-                    android:textColor="@color/MainText"></Button>
+                    android:textSize="45dp"/>
             </LinearLayout>
 
         </LinearLayout>

@@ -3,9 +3,15 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent" android:background="@color/MainBackground">
 
-    <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
+    <TextView
+        android:layout_weight="0.5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="45dp">
+    </TextView>
 
-    <TextView android:layout_weight="2"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
@@ -13,13 +19,14 @@
         android:layout_gravity="center"
         android:textColor="@color/MainText">
     </TextView>
+
     <ImageView
+        android:layout_weight="0.7"
         android:id="@+id/imageview_welcome"
         android:layout_width="400dp"
         android:layout_height="400dp"
         android:layout_gravity="center"
-        android:src="@drawable/start"
-        />
+        android:src="@drawable/start"/>
 
     <Button
         android:layout_width="400dp"
@@ -28,6 +35,4 @@
         android:id="@+id/btn_goto_start_menu"
         android:textSize="45dp"
         android:layout_gravity="center" />
-
-    <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
 </LinearLayout>

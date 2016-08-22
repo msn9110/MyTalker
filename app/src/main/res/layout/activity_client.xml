@@ -5,29 +5,18 @@
     android:weightSum="1"
     android:background="@color/MainBackground">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-        <Button android:id="@+id/Button_sentence"
-            android:layout_width="wrap_content"
-            android:text="搜尋句子"
-            android:textSize="40dp"
-            android:layout_height="wrap_content">
-        </Button>
-        <Spinner android:id="@+id/Spinner_sentence"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:textColor="@color/MainText">
-        </Spinner>
-    </LinearLayout>
-
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="40dp"
         android:id="@+id/editText"
         android:focusable="true" />
+
+    <Spinner android:id="@+id/Spinner_sentence"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:textColor="@color/MainText">
+    </Spinner>
 
     <Button
         android:layout_width="match_parent"

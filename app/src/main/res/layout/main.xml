@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -11,14 +12,6 @@
         android:text="連線模式"
         android:textSize="60dp"
         android:layout_gravity="center"
-        android:textColor="@color/MainText"></TextView>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="30dp"
-        android:layout_gravity="center"
-        android:background="@drawable/line"
         android:textColor="@color/MainText"></TextView>
     <ScrollView
         android:layout_width="match_parent"
@@ -33,14 +26,16 @@
                 class="com.example.mytalker.DeviceListFragment"
                 android:id="@+id/frag_list"
                 android:layout_width="match_parent"
-                android:layout_height="400dp">
+                android:layout_height="400dp"
+                tools:layout="@layout/device_list">
                 <!-- Preview: layout=@layout/row_devices -->
             </fragment>
             <fragment
                 class="com.example.mytalker.DeviceDetailFragment"
                 android:id="@+id/frag_detail"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                tools:layout="@layout/device_detail">
                 <!-- Preview: layout=@layout/device_detail -->
             </fragment>
         </LinearLayout>

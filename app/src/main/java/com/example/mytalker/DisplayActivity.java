@@ -20,11 +20,9 @@ public class DisplayActivity extends Activity {
 
     //public static final String IP_SERVER = "192.168.49.143";
     public static int PORT = 8988;
-    public static String str="";
-    String[] buf=new String[100];
+    String[] buf=new String[100];//queue for playing tts
     int count=0;
-    TextView tv;
-    TextView test;
+    TextView tvDisplay,tvStatus;
     private  Handler handler;
     private ServerSocket serverSocket=null;
     Speaker speaker;
@@ -41,9 +39,9 @@ public class DisplayActivity extends Activity {
         speaker=new Speaker(getApplicationContext());
         for(int i=0;i<100;i++)
             buf[i]="";
-        tv=(TextView)findViewById(R.id.textView);
-        test=(TextView)findViewById(R.id.textView3);
-        tv.setText(str);
+        tvDisplay=(TextView)findViewById(R.id.textView);
+        tvStatus=(TextView)findViewById(R.id.textView3);
+        tvDisplay.setText(R.string.empty);
     }
     @Override
     protected void onDestroy(){
@@ -103,8 +101,8 @@ public class DisplayActivity extends Activity {
                                 font=50;
                             if(msg2.length()>0 && speaker.isNotSpeaking()) {
                                 lock.lock();
-                                tv.setTextSize(font);
-                                tv.setText(msg2);
+                                tvDisplay.setTextSize(font);
+                                tvDisplay.setText(msg2);
                                 speaker.speak(msg2);
                                 msg2="";
                                 buf[current]="";
@@ -132,13 +130,13 @@ public class DisplayActivity extends Activity {
                 //接收連線
                 handler.post(new Runnable() {
                     public void run() {
-                        test.setText(R.string.listenig);
+                        tvStatus.setText(R.string.listening);
                     }
                 });
                 Socket client = serverSocket.accept();
                 handler.post(new Runnable() {
                     public void run() {
-                        test.setText(R.string.connected);
+                        tvStatus.setText(R.string.connected);
                     }
                 });
                 DataInputStream in = new DataInputStream(client.getInputStream());
@@ -164,7 +162,7 @@ public class DisplayActivity extends Activity {
                 } catch (Exception e) {
                     handler.post(new Runnable() {
                         public void run() {
-                            test.setText("傳送失敗");
+                            tvStatus.setText("傳送失敗");
                         }
                     });
                     in.close();
@@ -175,7 +173,7 @@ public class DisplayActivity extends Activity {
                 final String err="建立socket失敗";
                 handler.post(new Runnable() {
                     public void run() {
-                        test.setText(err);
+                        tvStatus.setText(err);
                     }
                 });
                 end=true;
