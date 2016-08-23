@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">我的專屬代言人T</string>
+    <string name="app_name">我的代言人X</string>
     <string name="enable_p2p_button">P2P On/Off</string>
     <string name="discover_peers_button">Discover</string>
     <string name="connect_peer_button">Connect</string>

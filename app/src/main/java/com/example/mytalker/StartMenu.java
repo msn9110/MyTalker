@@ -4,16 +4,19 @@ package com.example.mytalker;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 
 public class StartMenu extends Activity{
     Button[] mode=new Button[6];
+    LayoutInflater inflater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.start_menu);
+        inflater=getLayoutInflater();
 
         mode[0]=(Button)findViewById(R.id.btn_mode1);
         mode[1]=(Button)findViewById(R.id.btn_mode2);

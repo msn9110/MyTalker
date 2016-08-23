@@ -13,7 +13,6 @@ public class Speaker implements TextToSpeech.OnInitListener {
     private static final String TAG = "SPEAKER";
     boolean mode=true;
     public Speaker(Context context){
-        System.out.println(Locale.getDefault().toString());
         tw=new TextToSpeech(context,this);
         en=new TextToSpeech(context,this);
     }
@@ -48,7 +47,7 @@ public class Speaker implements TextToSpeech.OnInitListener {
             result = tw.setLanguage(Locale.TAIWAN);//<<<===================================
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 System.out.println("TW ERROR");
-                System.out.println(result);
+                //System.out.println(result);
             }
             else{
                 tw.setSpeechRate(speed);

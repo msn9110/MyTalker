@@ -57,7 +57,7 @@ public class InputActivity extends Activity {
     private Handler uihandler = new Handler();
     private ProgressDialog progressDialog = null;
 
-    CharSequence[] list = new CharSequence[11];
+    String[] list = new String[15];
     Spinner spinner;
 
     //=====================================oncreate===================================================
@@ -126,7 +126,7 @@ public class InputActivity extends Activity {
         btn_load.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Update();
+                clear();Update();
             }
         });
         btn_lv1.setOnClickListener(new View.OnClickListener() {
@@ -138,7 +138,21 @@ public class InputActivity extends Activity {
         });
 
         spinner=(Spinner)findViewById(R.id.Spinner_sentence);
+        setSpinner("");
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String _content = list[position];
+                if(_content.length()>0){
+                    editText.setText(_content);
+                }
+            }
+
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         editText.addTextChangedListener(new TextWatcher() {
+
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -151,10 +165,10 @@ public class InputActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                setSpinner();
+                String SEG=editText.getText().toString();
+                sentence(SEG,false);
             }
         });//text change event
-        setSpinner();
     }
     //===============================================================================================
     String spilt(String s,int start,int end)
@@ -274,26 +288,36 @@ public class InputActivity extends Activity {
         view.setAdapter(listAdapter);
     }
 
-    private void setSpinner(){
-        sentence();
-        ArrayAdapter adapter=new ArrayAdapter<CharSequence>(InputActivity.this, R.layout.myspinner, list);
+    private void setSpinner(String frag){
+        sentence(frag,true);
+        ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, list);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String _content = parent.getSelectedItem().toString();
-                //editText.postInvalidate();
-                if(_content.length()>0){
-                    editText.setText(_content);
-                    editText.setSelection(editText.length());
-                }
+    }
 
+    private void sentence (String message, boolean first) {
+        SQLiteDatabase db = helper.getReadableDatabase();
+        String query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
+                    " where content LIKE '%" + message + "%'  ORDER BY " +
+                    DBConnection.SentenceSchema.COUNT + " desc;";
+        if(first)
+            query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
+                    "  ORDER BY " + DBConnection.SentenceSchema.COUNT + " desc;";
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
+        int SIZE = c.getCount();
+        for (int i = 0; i < list.length; i++) {
+            if (i > SIZE) {
+                list[i] = "";
+            } else if (i == 0) {
+                list[i] = message;
+            } else {
+                list[i] = c.getString(0);
+                c.moveToNext();
             }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        }
+        c.close();
+        db.close();
     }
 
     private void send() {
@@ -326,7 +350,6 @@ public class InputActivity extends Activity {
             serverAddr = InetAddress.getByName(IP_SERVER);
             //設定port
             sc_add = new InetSocketAddress(serverAddr, PORT);
-
             socket = new Socket();
             //與Server連線，timeout時間2秒
             socket.connect(sc_add, 2000);
@@ -371,25 +394,5 @@ public class InputActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
-    }
-
-    private void sentence () {
-        String message = editText.getText().toString();
-        SQLiteDatabase db = helper.getWritableDatabase();
-        Cursor c = db.rawQuery("select content from " + DBConnection.SentenceSchema.TABLE_NAME + " where content LIKE '%" + message + "%'  ORDER BY " + DBConnection.SentenceSchema.COUNT + " desc;", null);
-        c.moveToFirst();
-        int SIZE = c.getCount();
-        for (int i = 0; i < 11; i++) {
-            if (i > SIZE) {
-                list[i] = "";
-            } else if (i == 0) {
-                list[i] = message;
-            } else {
-                list[i] = c.getString(0);
-                c.moveToNext();
-            }
-        }
-        c.close();
-        db.close();
     }
 }
