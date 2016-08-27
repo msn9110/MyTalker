@@ -38,7 +38,7 @@ public class Learn {
             SQLiteDatabase db = helper.getWritableDatabase();
             //handle sentence
             if (message.length()>sentece_lenth){
-                message+=" ";
+                //message+=" ";
                 if(!helper.update(false,message,db)){
                     helper.insert(false,message,db);
                 }

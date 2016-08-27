@@ -52,7 +52,7 @@ public class InputActivity extends Activity {
     int current_id = 0;//0 denote main level
 
     DBConnection helper = new DBConnection(this);
-    Learn learn = new Learn(this, helper);
+    Learn learn;
 
     private Handler uihandler = new Handler();
     private ProgressDialog progressDialog = null;
@@ -70,7 +70,7 @@ public class InputActivity extends Activity {
             setThreadPolicy(policy);
         }
         //initialize
-        speaker=new Speaker(getApplicationContext());
+
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
@@ -144,6 +144,7 @@ public class InputActivity extends Activity {
                 String _content = list[position];
                 if(_content.length()>0){
                     editText.setText(_content);
+                    editText.setSelection(_content.length());
                 }
             }
 
@@ -165,6 +166,7 @@ public class InputActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
+
                 String SEG=editText.getText().toString();
                 sentence(SEG,false);
             }
@@ -182,6 +184,20 @@ public class InputActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        btn_send.setEnabled(false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                learn=new Learn(getApplicationContext(),helper);
+                speaker=new Speaker(getApplicationContext());
+                uihandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        btn_send.setEnabled(true);
+                    }
+                });
+            }
+        }).start();
         Update();
         if (con)
             ConnectToDisplay();
@@ -190,11 +206,12 @@ public class InputActivity extends Activity {
     //===============================================================================================
     private void Update() {
         try {
-            progressDialog = ProgressDialog.show(InputActivity.this, "請稍後", "載入資料中...");
+            progressDialog = ProgressDialog.show(InputActivity.this, "請稍後", "載入資料...");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    LoadData(); progressDialog.dismiss();
+                    LoadData();
+                    progressDialog.dismiss();
                 }
             }).start();
         } catch (Exception e) {
@@ -306,16 +323,16 @@ public class InputActivity extends Activity {
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
         int SIZE = c.getCount();
-        for (int i = 0; i < list.length; i++) {
+        list[0]=message;
+        for (int i = 1; i < list.length; i++) {
             if (i > SIZE) {
                 list[i] = "";
-            } else if (i == 0) {
-                list[i] = message;
-            } else {
+            }else {
                 list[i] = c.getString(0);
                 c.moveToNext();
             }
         }
+
         c.close();
         db.close();
     }

@@ -44,7 +44,7 @@ public class DataMove extends Activity {
     private static final String TAG = DataMove.class.getName();
 
     DBConnection helper= new DBConnection(this);
-    Learn learn=new Learn(this,helper);
+    Learn learn;
 
     private Handler uihandler = new Handler();
     private ProgressDialog progressDialog = null;
@@ -113,6 +113,20 @@ public class DataMove extends Activity {
         button_deletein.setOnClickListener(listener_deletein);
         button_learndata = (Button)findViewById(R.id.btn_learndata);
         button_learndata.setOnClickListener(listener_learndata);
+
+        button_learndata.setEnabled(false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                learn=new Learn(getApplicationContext(),helper);
+                uihandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        button_learndata.setEnabled(true);
+                    }
+                });
+            }
+        }).start();
     }
     private void moveFile(String inputPath, String inputFile, String outputPath) {
         InputStream in = null;
