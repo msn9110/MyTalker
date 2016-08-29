@@ -13,6 +13,7 @@ public class Speaker implements TextToSpeech.OnInitListener {
     private static final String TAG = "SPEAKER";
     boolean mode=true;
     public Speaker(Context context){
+
         tw=new TextToSpeech(context,this);
         en=new TextToSpeech(context,this);
     }
@@ -33,7 +34,7 @@ public class Speaker implements TextToSpeech.OnInitListener {
         if(!mode){
             result = en.setLanguage(Locale.US);//<<<===================================
 
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            if (result == TextToSpeech.LANG_MISSING_DATA) { ///|| result == TextToSpeech.LANG_NOT_SUPPORTED
                 System.out.println("EN ERROR");
             }
             else{
@@ -45,9 +46,9 @@ public class Speaker implements TextToSpeech.OnInitListener {
         else {
             mode=false;
             result = tw.setLanguage(Locale.TAIWAN);//<<<===================================
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            if (result == TextToSpeech.LANG_MISSING_DATA ) {//|| result == TextToSpeech.LANG_NOT_SUPPORTED
                 System.out.println("TW ERROR");
-                //System.out.println(result);
+                System.out.println(result);
             }
             else{
                 tw.setSpeechRate(speed);
@@ -58,14 +59,13 @@ public class Speaker implements TextToSpeech.OnInitListener {
     }
 
     public void speak(String hello) {
-        //tw.speak(hello,TextToSpeech.QUEUE_ADD,null);
         hello=" "+hello;
         String[] msg=new String[50];
         for(int i=0;i<50;i++)
             msg[i]="";
         int previous=0,count=0,speaker=0,current;
         char first=hello.charAt(0);
-        if(first>='a' && first<='z' || first>='A' && first<='Z')
+        if(Check.check_eng(first))
             speaker=1;
         for(int i=0;i<hello.length();i++)
         {
@@ -84,19 +84,15 @@ public class Speaker implements TextToSpeech.OnInitListener {
             msg[count]+=String.valueOf(ch1);
         }
 
-        for(int i=0;i<=count;i++)
-        {
+        for(int i=0;i<=count; i++) {
             System.out.println(msg[i]);
             if(speaker==0){
                 tw.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
-                speaker++;
-                speaker%=2;
-            }
-            else {
+            } else {
                 en.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
-                speaker++;
-                speaker%=2;
             }
+            speaker++;
+            speaker%=2;
         }
     }
 

@@ -141,7 +141,7 @@ public class InputActivity extends Activity {
         setSpinner("");
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String _content = list[position];
+                String _content = parent.getSelectedItem().toString();
                 if(_content.length()>0){
                     editText.setText(_content);
                     editText.setSelection(_content.length());

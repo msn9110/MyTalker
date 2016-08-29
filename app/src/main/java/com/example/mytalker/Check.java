@@ -1,8 +1,6 @@
 package com.example.mytalker;
 
-/**
- * Created by HungShiung on 2016/6/2.
- */
+
 public class Check {
     static public boolean check_eng(char ch){
         boolean ret=false;
