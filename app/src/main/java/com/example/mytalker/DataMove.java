@@ -49,7 +49,8 @@ public class DataMove extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.move_menu);
 
-        Path_in=getFilesDir().getParent()+"/databases/";
+        Path_in=getDatabasePath(_DBName).getParent()+"/";
+        //System.out.println(Path_in);
 
         button_moveintoout = (Button)findViewById(R.id.btn_moveintoout);
         button_copyintoout = (Button)findViewById(R.id.btn_copyintoout);
