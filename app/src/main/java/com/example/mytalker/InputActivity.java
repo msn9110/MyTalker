@@ -70,14 +70,15 @@ public class InputActivity extends Activity {
             setThreadPolicy(policy);
         }
         //initialize
-
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
         btn_speech = (Button) findViewById(R.id.btn_speech);
-
         view=(ListView)findViewById(R.id.btnView);
+        editText = (EditText) findViewById(R.id.editText);
+        spinner=(Spinner)findViewById(R.id.Spinner_sentence);
+
         view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -91,7 +92,6 @@ public class InputActivity extends Activity {
                 setCurrentData();
             }
         });
-        Data[0]=new InputData();
 
         if (!con) {
             String text="TALK";
@@ -99,8 +99,6 @@ public class InputActivity extends Activity {
             btn_speech.setVisibility(View.GONE);
         }
         status_speech = !con;
-
-        editText = (EditText) findViewById(R.id.editText);
 
         btn_clear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,7 +109,7 @@ public class InputActivity extends Activity {
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                send();
+                talk();
             }
         });
         btn_speech.setOnClickListener(new View.OnClickListener() {
@@ -137,8 +135,7 @@ public class InputActivity extends Activity {
             }
         });
 
-        spinner=(Spinner)findViewById(R.id.Spinner_sentence);
-        setSpinner("");
+        setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String _content = parent.getSelectedItem().toString();
@@ -166,9 +163,8 @@ public class InputActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-
-                String SEG=editText.getText().toString();
-                sentence(SEG,false);
+                FindSentence(editText.getText().toString());
+                spinner.setSelection(1);
             }
         });//text change event
     }
@@ -305,25 +301,29 @@ public class InputActivity extends Activity {
         view.setAdapter(listAdapter);
     }
 
-    private void setSpinner(String frag){
-        sentence(frag,true);
+    private void setSpinner(){
+        FindSentence("");
         ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, list);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
     }
 
-    private void sentence (String message, boolean first) {
+    private void FindSentence (String keyword) {
         SQLiteDatabase db = helper.getReadableDatabase();
-        String query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
-                    " where content LIKE '%" + message + "%'  ORDER BY " +
-                    DBConnection.SentenceSchema.COUNT + " desc;";
-        if(first)
+        String query;
+        if(keyword.equals("")){
             query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
                     "  ORDER BY " + DBConnection.SentenceSchema.COUNT + " desc;";
+            list[0]="";
+        } else {
+            query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
+                    " where content LIKE '%" + keyword + "%'  ORDER BY " +
+                    DBConnection.SentenceSchema.COUNT + " desc;";
+            list[0]=keyword;
+        }
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
         int SIZE = c.getCount();
-        list[0]=message;
         for (int i = 1; i < list.length; i++) {
             if (i > SIZE) {
                 list[i] = "";
@@ -337,7 +337,7 @@ public class InputActivity extends Activity {
         db.close();
     }
 
-    private void send() {
+    private void talk() {
         //要傳送的字串
         final String message = editText.getText().toString();
         new Thread(new Runnable() {
@@ -360,6 +360,12 @@ public class InputActivity extends Activity {
 
     }
 
+    private void clear(){
+        editText.setText("");
+        current_id=0;
+        setCurrentData();
+    }
+
     private void ConnectToDisplay() {
         try {
             InetAddress serverAddr;
@@ -375,12 +381,6 @@ public class InputActivity extends Activity {
             Toast.makeText(getApplicationContext(), "連線失敗", Toast.LENGTH_SHORT).show();
             this.finish();
         }
-    }
-
-    private void clear(){
-        editText.setText("");
-        current_id=0;
-        setCurrentData();
     }
 
     private void terminate() {
