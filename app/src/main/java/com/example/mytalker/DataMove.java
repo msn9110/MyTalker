@@ -35,19 +35,21 @@ public class DataMove extends Activity {
     Button button_learndata;
 
     String Path_out = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download/";
-    String Path_in = "/data/data/com.example.mytalker/databases/";
+    String Path_in;
     private static final String TAG = DataMove.class.getName();
 
     DBConnection helper= new DBConnection(this);
     Learn learn;
 
-    private Handler uihandler = new Handler();
+    private Handler handler = new Handler();
     private ProgressDialog progressDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.move_menu);
+
+        Path_in=getFilesDir().getParent()+"/databases/";
 
         button_moveintoout = (Button)findViewById(R.id.btn_moveintoout);
         button_copyintoout = (Button)findViewById(R.id.btn_copyintoout);
@@ -108,7 +110,7 @@ public class DataMove extends Activity {
             @Override
             public void run() {
                 learn=new Learn(getApplicationContext(),helper);
-                uihandler.post(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         button_learndata.setEnabled(true);
@@ -202,14 +204,14 @@ public class DataMove extends Activity {
             @Override
             public void run() {
                 if(readFromFile())
-                    uihandler.post(new Runnable() {
+                    handler.post(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(DataMove.this,"Success Learn",Toast.LENGTH_SHORT).show();
                         }
                     });
                 else
-                    uihandler.post(new Runnable() {
+                    handler.post(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(DataMove.this, "Fail Learn", Toast.LENGTH_SHORT).show();
