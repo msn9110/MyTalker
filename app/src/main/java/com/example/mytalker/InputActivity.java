@@ -164,7 +164,7 @@ public class InputActivity extends Activity {
             @Override
             public void afterTextChanged(Editable editable) {
                 FindSentence(editText.getText().toString());
-                spinner.setSelection(1);
+                spinner.setSelection(0);
             }
         });//text change event
     }

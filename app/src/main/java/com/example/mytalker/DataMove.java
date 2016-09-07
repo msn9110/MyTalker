@@ -24,22 +24,17 @@ import java.io.OutputStream;
 
 public class DataMove extends Activity {
     final int REQUEST_CODE=0;
-    static final String _path="/sdcard/Download";
-    public static final String _DBName="Database.db";
-    public static String _LDName=_path+"/LearnData.data";
-    View.OnClickListener listener_moveintoout = null;
-    View.OnClickListener listener_copyintoout = null;
-    View.OnClickListener listener_moveouttoin = null;
-    View.OnClickListener listener_copyouttoin = null;
-    View.OnClickListener listener_deletein = null;
-    View.OnClickListener listener_learndata = null;
+    public static final String _DBName = "Database.db";
+    public static String _LDName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download" + "/LearnData.data";
+
     Button button_moveintoout;
     Button button_copyintoout;
     Button button_moveouttoin;
     Button button_copyouttoin;
     Button button_deletein;
     Button button_learndata;
-    String Path_out = "/sdcard/Download/";
+
+    String Path_out = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download/";
     String Path_in = "/data/data/com.example.mytalker/databases/";
     private static final String TAG = DataMove.class.getName();
 
@@ -54,65 +49,59 @@ public class DataMove extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.move_menu);
 
-        listener_moveintoout = new View.OnClickListener() {
-            public void onClick(View v) {
-                moveFile(Path_in,_DBName,Path_out);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
-            }
-        };
-        //
-        listener_copyintoout = new View.OnClickListener() {
-            public void onClick(View v) {
-                //System.out.println(Path_in);
-                copyFile(Path_in, _DBName, Path_out);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
-            }
-        };
+        button_moveintoout = (Button)findViewById(R.id.btn_moveintoout);
+        button_copyintoout = (Button)findViewById(R.id.btn_copyintoout);
+        button_moveouttoin = (Button)findViewById(R.id.btn_moveouttoin);
+        button_copyouttoin = (Button)findViewById(R.id.btn_copyouttoin);
+        button_deletein = (Button)findViewById(R.id.btn_deletein);
+        button_learndata = (Button)findViewById(R.id.btn_learndata);
 
-        listener_moveouttoin = new View.OnClickListener() {
-            public void onClick(View v) {
-                moveFile(Path_out, _DBName, Path_in);
+        button_moveintoout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                moveFile(Path_in,Path_out,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
-        };
-        //
-        listener_copyouttoin = new View.OnClickListener() {
-            public void onClick(View v) {
-                //System.out.println(Path_in);
-                copyFile(Path_out, _DBName, Path_in);
+        });
+        button_copyintoout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                copyFile(Path_in,Path_out,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
-        };
-        //
-        listener_deletein = new View.OnClickListener() {
-            public void onClick(View v) {
-                deleteFile(Path_in, _DBName);
+        });
+        button_moveouttoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                moveFile(Path_out,Path_in,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
-        };
-        listener_learndata = new View.OnClickListener() {
-            public void onClick(View v) {
+        });
+        button_copyouttoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                copyFile(Path_out, Path_in,_DBName);
+                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+            }
+        });
+        button_deletein.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteFiles(Path_in,_DBName);
+                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+            }
+        });
+        button_learndata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 final String mimeType = "*/*";
                 final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType(mimeType);
                 //startActivityForResult(intent, REQUEST_CODE);
 
-                learnfromfile();
+                LearnFromFile();
             }
-        };
-
-        button_moveintoout = (Button)findViewById(R.id.btn_moveintoout);
-        button_moveintoout.setOnClickListener(listener_moveintoout);
-        button_copyintoout = (Button)findViewById(R.id.btn_copyintoout);
-        button_copyintoout.setOnClickListener(listener_copyintoout);
-        button_moveouttoin = (Button)findViewById(R.id.btn_moveouttoin);
-        button_moveouttoin.setOnClickListener(listener_moveouttoin);
-        button_copyouttoin = (Button)findViewById(R.id.btn_copyouttoin);
-        button_copyouttoin.setOnClickListener(listener_copyouttoin);
-        button_deletein = (Button)findViewById(R.id.btn_deletein);
-        button_deletein.setOnClickListener(listener_deletein);
-        button_learndata = (Button)findViewById(R.id.btn_learndata);
-        button_learndata.setOnClickListener(listener_learndata);
+        });
 
         button_learndata.setEnabled(false);
         new Thread(new Runnable() {
@@ -128,21 +117,40 @@ public class DataMove extends Activity {
             }
         }).start();
     }
-    private void moveFile(String inputPath, String inputFile, String outputPath) {
-        InputStream in = null;
-        OutputStream out = null;
+    private void moveFile(String inputPath, String outputPath, String filename) {
+        copyFile(inputPath,outputPath,filename);
+        deleteFiles(inputPath,filename);
+    }
+
+    private void deleteFiles(String inputPath, String filename) {
+        try {
+            // delete the original file
+            boolean success=new File(inputPath+filename).delete();
+            System.out.println(success);
+        }
+        catch (Exception e) {
+            Log.e("tag", e.getMessage());
+        }
+    }
+
+    private void copyFile(String inputPath, String outputPath, String filename) {
+
+        InputStream in;
+        OutputStream out;
         try {
 
             //create output directory if it doesn't exist
             File dir = new File (outputPath);
             if (!dir.exists())
             {
-                dir.mkdirs();
+                boolean success = dir.mkdir();
+                System.out.println("Make Dir "+success);
             }
 
 
-            in = new FileInputStream(inputPath + inputFile);
-            out = new FileOutputStream(outputPath + inputFile);
+            in = new FileInputStream(inputPath + filename);
+            out = new FileOutputStream(outputPath + filename);
+
 
             byte[] buffer = new byte[1024];
             int read;
@@ -150,91 +158,28 @@ public class DataMove extends Activity {
                 out.write(buffer, 0, read);
             }
             in.close();
-            in = null;
-
             // write the output file
             out.flush();
             out.close();
-            out = null;
 
-            // delete the original file
-            new File(inputPath + inputFile).delete();
-
-
-        }
-
-        catch (FileNotFoundException fnfe1) {
-            Log.e("tag", fnfe1.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("tag", e.getMessage());
         }
-
-    }
-
-    private void deleteFile(String inputPath, String inputFile) {
-        try {
-            // delete the original file
-            new File(inputPath + inputFile).delete();
-        }
-        catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
-    }
-
-    private void copyFile(String inputPath, String inputFile, String outputPath) {
-
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-
-            //create output directory if it doesn't exist
-            File dir = new File (outputPath);
-            if (!dir.exists())
-            {
-                dir.mkdirs();
-            }
-
-
-            in = new FileInputStream(inputPath + inputFile);
-            out = new FileOutputStream(outputPath + inputFile);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            in = null;
-
-            // write the output file (You have now copied the file)
-            out.flush();
-            out.close();
-            out = null;
-
-        }  catch (FileNotFoundException fnfe1) {
-            Log.e("tag", fnfe1.getMessage());
-        }
-        catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
-
     }
     //從File讀取data
     private boolean readFromFile() {
         boolean success=false;
         try {
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            path.mkdir();
+            boolean success2=path.mkdir();
+            System.out.println(success2);
             // create the file in which we will write the contents
             File myFile = new File(_LDName);
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            String aDataRow = "";
-            String aBuffer = "";
+            String aDataRow;
             int row=0;
             while ((aDataRow = myReader.readLine()) != null) {
-                //aBuffer += aDataRow + "\n";
                 learn.Learning(aDataRow);
                 row++;
                 System.out.println(row);
@@ -250,7 +195,7 @@ public class DataMove extends Activity {
         return success;
     }
 
-    private void learnfromfile(){
+    private void LearnFromFile(){
         System.out.println(_LDName);
         progressDialog = ProgressDialog.show(DataMove.this, "請稍後", "學習中...");
         new Thread(new Runnable() {
@@ -278,7 +223,6 @@ public class DataMove extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         System.out.println("6666666666666666666666666666");
-        // TODO Auto-generated method stub
         super.onActivityResult(requestCode, resultCode, data);
         System.out.println("777777777777777777777777");
         // 有選擇檔案
