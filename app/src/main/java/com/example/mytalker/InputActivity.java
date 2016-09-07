@@ -51,12 +51,12 @@ public class InputActivity extends Activity {
     int[][] next_id=new int[1][1];
     int current_id = 0;//0 denote main level
 
-    DBConnection helper = new DBConnection(this);
+    DBConnection helper;
     Learn learn;
 
-    private Handler uihandler = new Handler();
+    private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
-
+    private ProgressDialog progressDialog2 = null;
     String[] list = new String[15];
     Spinner spinner;
 
@@ -70,6 +70,7 @@ public class InputActivity extends Activity {
             setThreadPolicy(policy);
         }
         //initialize
+        helper = new DBConnection(this);
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
@@ -181,12 +182,16 @@ public class InputActivity extends Activity {
     protected void onStart() {
         super.onStart();
         btn_send.setEnabled(false);
+        Update();
+        progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 learn=new Learn(getApplicationContext(),helper);
+                //System.out.println("8888888888888888888888888888888");
                 speaker=new Speaker(getApplicationContext());
-                uihandler.post(new Runnable() {
+                progressDialog2.dismiss();
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
                         btn_send.setEnabled(true);
@@ -194,7 +199,6 @@ public class InputActivity extends Activity {
                 });
             }
         }).start();
-        Update();
         if (con)
             ConnectToDisplay();
     }
@@ -249,7 +253,7 @@ public class InputActivity extends Activity {
         }
         c.close();
         final long avg = (System.currentTimeMillis() - stime);
-        uihandler.post(new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();

@@ -101,22 +101,6 @@ public class DBConnection extends SQLiteOpenHelper {
         return newid;
     }
 
-    public int insert(int id1,int id2,int count, SQLiteDatabase db){
-        int newid=0;
-        ContentValues values=new ContentValues();
-        values.put(RelationSchema.ID1,id1);
-        values.put(RelationSchema.ID2,id2);
-        values.put(RelationSchema.COUNT,count);
-        try{
-            newid=(int)db.insert(RelationSchema.TABLE_NAME,null,values);
-        }catch (Exception e){
-            e.printStackTrace();
-            //System.out.println("Insert Failed");
-        }
-        return newid;
-    }
-
-
     public int getVocID(String content,SQLiteDatabase db){
         int id=0;
         String query="select "+VocSchema.ID+" from "+VocSchema.TABLE_NAME+
