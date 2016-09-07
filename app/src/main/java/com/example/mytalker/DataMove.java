@@ -25,7 +25,7 @@ import java.io.OutputStream;
 public class DataMove extends Activity {
     final int REQUEST_CODE=0;
     public static final String _DBName = "Database.db";
-    public static String _LDName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download" + "/LearnData.data";
+    String _LDName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download" + "/LearnData.data";
 
     Button button_moveintoout;
     Button button_copyintoout;
@@ -97,12 +97,12 @@ public class DataMove extends Activity {
         button_learndata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String mimeType = "*/*";
+                final String mimeType = "text/plain";
                 final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType(mimeType);
-                //startActivityForResult(intent, REQUEST_CODE);
+                startActivityForResult(intent, REQUEST_CODE);
 
-                LearnFromFile();
+                //LearnFromFile();
             }
         });
 
@@ -225,33 +225,26 @@ public class DataMove extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        System.out.println("6666666666666666666666666666");
         super.onActivityResult(requestCode, resultCode, data);
-        System.out.println("777777777777777777777777");
         // 有選擇檔案
         if ( resultCode == RESULT_OK  && requestCode == REQUEST_CODE)
         {
-            System.out.println("8888888888888888888888888");
             // 取得檔案的 Uri
             Uri uri = data.getData();
             if( uri != null )
             {
                 _LDName=uri.getPath();
                 System.out.println(_LDName);
-                //learnfromfile();
+                LearnFromFile();
             }
             else
             {
-                System.out.println("9999999999999999999999");
                 setTitle("無效的檔案路徑 !!");
             }
         }
         else
         {
-            System.out.println("0000000000000000000000000000");
             setTitle("取消選擇檔案 !!");
-            //learnfromfile();
         }
     }
-
 }
