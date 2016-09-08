@@ -56,7 +56,7 @@ public class InputActivity extends Activity {
 
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
-    private ProgressDialog progressDialog2 = null;
+    //private ProgressDialog progressDialog2 = null;
     String[] list = new String[15];
     Spinner spinner;
 
@@ -182,15 +182,13 @@ public class InputActivity extends Activity {
     protected void onStart() {
         super.onStart();
         btn_send.setEnabled(false);
-        Update();
-        progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
+        //progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 learn=new Learn(getApplicationContext(),helper);
-                //System.out.println("8888888888888888888888888888888");
                 speaker=new Speaker(getApplicationContext());
-                progressDialog2.dismiss();
+                //progressDialog2.dismiss();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -199,6 +197,7 @@ public class InputActivity extends Activity {
                 });
             }
         }).start();
+        Update();
         if (con)
             ConnectToDisplay();
     }
@@ -250,17 +249,18 @@ public class InputActivity extends Activity {
                 //==============================
                 c.moveToNext();
             }
+
+            final long avg = (System.currentTimeMillis() - stime);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
+                    current_id = 0;
+                    setCurrentData();
+                }
+            });
         }
         c.close();
-        final long avg = (System.currentTimeMillis() - stime);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
-                current_id = 0;
-                setCurrentData();
-            }
-        });
     }
 
     private void LoadRelation(int id) {

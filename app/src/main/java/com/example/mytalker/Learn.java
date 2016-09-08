@@ -36,9 +36,9 @@ public class Learn {
         try {
             int sentece_lenth=1;
             SQLiteDatabase db = helper.getWritableDatabase();
+
             //handle sentence
             if (message.length()>sentece_lenth){
-                //message+=" ";
                 if(!helper.update(false,message,db)){
                     helper.insert(false,message,db);
                 }
@@ -115,11 +115,11 @@ public class Learn {
     public String SpiltString(String s,SQLiteDatabase db){
         String tmp="";
         int strlen=s.length();
-        int words_length=2;
         //check for content whether in database
         for(int i=0;i<strlen;) {
+            boolean flag = true;
             char ch=s.charAt(i);
-
+            String str = String.valueOf(ch);
             if(Check.check_sign(ch)){
                 tmp+=" ";
                 i++;
@@ -131,32 +131,35 @@ public class Learn {
                 i++;
                 continue;
             }
-            //chinese word preprocess
-            String words = "";
-            Cursor c;
-            boolean flag = true;
-            for(int j=0;j<words_length;j++){
-                if (i + j == strlen) {
-                    flag = false;
-                    break;
-                }
-                //check the vocabulary in combination of current and next character whether is in the database
-                words += String.valueOf(s.charAt(i + j));
+            Cursor c = db.rawQuery("SELECT * FROM "+DBConnection.VocSchema.TABLE_NAME+
+                    " WHERE "+DBConnection.VocSchema.CONTENT+" = '" + str + "';", null);
+            if (c.getCount() > 0) {
+                c.moveToFirst();
+                tmp=tmp+" "+str+" ";
+                i++;
+                continue;
+            }
+            c.close();
+
+            if (i + 1 == strlen)
+                flag = false;
+            //check the vocabulary in combination of current and next character whether is in the database
+            //if yes ,update weight in database, and continue loop
+            if (flag) {
+                str += String.valueOf(s.charAt(i + 1));
                 c = db.rawQuery("SELECT * FROM "+DBConnection.VocSchema.TABLE_NAME+
-                        " WHERE "+DBConnection.VocSchema.CONTENT+" = '" + words + "';", null);
+                        " WHERE "+DBConnection.VocSchema.CONTENT+" = '" + str + "';", null);
                 if (c.getCount() > 0) {
                     c.moveToFirst();
-                    tmp+=" "+words+" ";
-                    i += j + 1;
+                    tmp+=str+" ";
+                    i += 2;
                     c.close();
-                    flag=false;
-                    break;
+                    continue;
                 }
             }
-            if (!flag)
-                continue;
-            words = String.valueOf(s.charAt(i));
-            tmp+=words;
+            c.close();
+            str = String.valueOf(s.charAt(i));
+            tmp+=str;
             i++;
         }
         try {

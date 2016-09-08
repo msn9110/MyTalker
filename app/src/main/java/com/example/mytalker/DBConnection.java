@@ -59,12 +59,13 @@ public class DBConnection extends SQLiteOpenHelper {
                     + SentenceSchema.CONTENT + " text unique not null, "
                     + SentenceSchema.COUNT + " INTEGER not null default 1" + ");";
             db.execSQL(sql3);
+            System.out.println("CREATE NEW DATABASE");
         }catch (Exception e){
             System.out.println(e.toString());
         }
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO Auto-generated method stub
+
     }
 
     public int insert(boolean mode,String content, SQLiteDatabase db){
