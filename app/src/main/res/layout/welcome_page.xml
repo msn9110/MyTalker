@@ -4,18 +4,18 @@
     android:layout_height="match_parent" android:background="@color/MainBackground">
 
     <TextView
-        android:layout_weight="0.5"
+        android:layout_weight="0.2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:textSize="45dp">
+        android:textSize="45sp">
     </TextView>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
-        android:textSize="60dp"
+        android:textSize="60sp"
         android:layout_gravity="center"
         android:textColor="@color/MainText">
     </TextView>
@@ -29,10 +29,11 @@
         android:src="@drawable/start"/>
 
     <Button
+        android:layout_marginBottom="100dp"
         android:layout_width="400dp"
         android:layout_height="90dp"
         android:text="計畫啟動"
         android:id="@+id/btn_goto_start_menu"
-        android:textSize="45dp"
+        android:textSize="45sp"
         android:layout_gravity="center" />
 </LinearLayout>
