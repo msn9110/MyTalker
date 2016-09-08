@@ -10,20 +10,13 @@
         android:text="演講模式"
         android:textSize="60dp"
         android:layout_gravity="center"
-        android:textColor="@color/MainText"></TextView>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="30dp"
-        android:layout_gravity="center"
-        android:background="@drawable/line"
-        android:textColor="@color/MainText"></TextView>
+        android:textColor="@color/MainText">
+    </TextView>
+
 
     <Button
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:background="@drawable/button"
         android:textSize="60dp"
         android:text="Main"
         android:layout_gravity="center"
@@ -35,50 +28,87 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1">
-        <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
+
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="45dp">
+
+        </TextView>
         <Button
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:background="@drawable/button"
             android:textSize="60dp"
             android:text="Sub1"
             android:id="@+id/btn_speech_sub1"
             android:textColor="@color/MainText"/>
-        <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="45dp">
 
+        </TextView>
         <Button
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:background="@drawable/button"
             android:textSize="60dp"
             android:text="Sub2"
             android:id="@+id/btn_speech_sub2"
             android:textColor="@color/MainText"/>
-        <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
-    </LinearLayout>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="45dp">
+
+        </TextView>    </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1">
-        <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="45dp">
+
+        </TextView>
         <Button
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:background="@drawable/button"
             android:textSize="60dp"
             android:text="Sub3"
             android:id="@+id/btn_speech_sub3"
             android:textColor="@color/MainText"/>
-        <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="45dp">
+
+        </TextView>
         <Button
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:background="@drawable/button"
             android:textSize="60dp"
             android:text="Sub4"
             android:id="@+id/btn_speech_sub4"
             android:textColor="@color/MainText"/>
-        <TextView android:layout_weight="1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="45dp"></TextView>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="45dp">
+
+        </TextView>
     </LinearLayout>
 </LinearLayout>

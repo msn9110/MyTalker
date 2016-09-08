@@ -16,15 +16,9 @@
                 android:text="操作說明"
                 android:textSize="60dp"
                 android:layout_gravity="center"
-                android:textColor="@color/MainText"></TextView>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="30dp"
-                android:layout_gravity="center"
-                android:background="@drawable/line"
-                android:textColor="@color/MainText"></TextView>
+                android:textColor="@color/MainText">
+            </TextView>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
