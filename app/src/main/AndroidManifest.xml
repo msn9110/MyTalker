@@ -37,11 +37,6 @@
             android:name=".StartMenu"
             android:configChanges="orientation|keyboardHidden"/>
         <activity
-            android:name=".DBActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:theme="@style/AppBaseTheme" />
-        <activity
             android:name=".InputActivity"
             android:configChanges="orientation|keyboardHidden"
             android:windowSoftInputMode="stateAlwaysHidden"
@@ -60,10 +55,6 @@
             android:theme="@style/AppBaseTheme" />
         <activity
             android:name=".Speech_Mode_Menu"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppBaseTheme" />
-        <activity
-            android:name=".Info"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppBaseTheme" />
         <!-- Used for transferring files  after a successful connection -->
