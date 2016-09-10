@@ -50,6 +50,10 @@
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme" />
         <activity
+            android:name=".SpeechMenu"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/AppBaseTheme" />
+        <activity
             android:name=".SpeechMode"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppBaseTheme" />

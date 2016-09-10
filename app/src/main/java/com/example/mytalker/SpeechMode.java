@@ -37,7 +37,7 @@ import static android.os.StrictMode.setThreadPolicy;
 public class SpeechMode extends ListActivity implements AdapterView.OnItemClickListener {
     public static String path="Default";
     private String parentPath;
-    File _CurrentFilePath;
+    File Selection;
     private DataOutputStream out; //for transfer
     public static boolean con = false;
     public static final String IP_SERVER = "192.168.49.1";
@@ -78,11 +78,11 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
     private ListAdapter createListAdapter() {
         List<String> list = new ArrayList<>();
         File sdDir = Environment.getExternalStorageDirectory();
-        File cwDir = new File(sdDir, "MySpeaker/"+path);
-        mydir.setText(cwDir.getPath());
-        this.parentPath = cwDir.getPath();
+        File Dir = new File(sdDir, "MySpeaker/"+path);
+        mydir.setText(Dir.getPath());
+        this.parentPath = Dir.getPath();
         Log.d(TAG, "根目錄：" + this.parentPath);
-        File[] files = cwDir.listFiles();
+        File[] files = Dir.listFiles();
         if(files.length==0)
             empty.setVisibility(View.VISIBLE);
         for (File f : files) {
@@ -97,7 +97,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        _CurrentFilePath=new File(this.parentPath,((TextView) view).getText().toString());
+        Selection=new File(this.parentPath,((TextView) view).getText().toString());
         new Thread(SpeakFile).start();
     }
 
@@ -143,7 +143,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
         public void run() {
             Looper.prepare();
             try {
-                File myFile = _CurrentFilePath;
+                File myFile = Selection;
                 FileInputStream fIn = new FileInputStream(myFile);
                 BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
                 String aDataRow;

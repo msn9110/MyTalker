@@ -19,9 +19,8 @@ public class WelcomePage extends Activity{
         setContentView(R.layout.welcome_page);
         goto_startmenu=(Button)findViewById(R.id.btn_goto_start_menu);
         File sdDir = Environment.getExternalStorageDirectory();
-        File buildmain = new File(sdDir, "MySpeaker/Default");
-        isExist(buildmain.toString());
-
+        File buildDir = new File(sdDir, "MySpeaker/Default");
+        isExist(buildDir);
 
         goto_startmenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,11 +33,10 @@ public class WelcomePage extends Activity{
         });
     }
 
-    public void isExist(String path) {
-        File file = new File(path);
+    public void isExist(File dir) {
         //判斷文件夾是否存在,如果不存在則建立文件夾
-        if (!file.exists()) {
-            boolean success=file.mkdirs();
+        if (!dir.exists()) {
+            boolean success=dir.mkdirs();
             if(!success)
                 System.out.println("MakeDir : Fail");
         }
