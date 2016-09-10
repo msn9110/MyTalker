@@ -64,7 +64,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             setThreadPolicy(policy);
         }
-
+//kkkkkkkk
         speaker=new Speaker(getApplicationContext());
 
         mydir=(TextView)findViewById(R.id.mydir);
