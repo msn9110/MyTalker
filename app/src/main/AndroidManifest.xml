@@ -53,10 +53,6 @@
             android:name=".SpeechMode"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppBaseTheme" />
-        <activity
-            android:name=".Speech_Mode_Menu"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppBaseTheme" />
         <!-- Used for transferring files  after a successful connection -->
 
     </application>
