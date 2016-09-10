@@ -129,7 +129,8 @@ public class DataMove extends Activity {
         try {
             // delete the original file
             boolean success=new File(inputPath+filename).delete();
-            System.out.println(success);
+            if(!success)
+                System.out.println("Delete : Fail");
         }
         catch (Exception e) {
             Log.e("tag", e.getMessage());
@@ -146,8 +147,9 @@ public class DataMove extends Activity {
             File dir = new File (outputPath);
             if (!dir.exists())
             {
-                boolean success = dir.mkdir();
-                System.out.println("Make Dir "+success);
+                boolean success = dir.mkdirs();
+                if(!success)
+                    System.out.println("MakeDir : Fail");
             }
 
 

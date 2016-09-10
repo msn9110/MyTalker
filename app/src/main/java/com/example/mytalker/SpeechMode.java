@@ -35,7 +35,7 @@ import static android.os.StrictMode.setThreadPolicy;
 
 
 public class SpeechMode extends ListActivity implements AdapterView.OnItemClickListener {
-    public static String path="Main";
+    public static String path="Default";
     private String parentPath;
     File _CurrentFilePath;
     private DataOutputStream out; //for transfer
@@ -44,6 +44,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
     public static int PORT = 8988;
     private Socket socket;
     static final String TAG="SpeechMode";
+    TextView mydir,empty;
     //Handler handler=new Handler();
     //ProgressDialog dialog;
     Speaker speaker;
@@ -66,18 +67,24 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
 
         speaker=new Speaker(getApplicationContext());
 
+        mydir=(TextView)findViewById(R.id.mydir);
+        empty=(TextView)findViewById(R.id.nofile);
+
         this.setListAdapter(this.createListAdapter());
         ListView lv = (ListView) this.findViewById(android.R.id.list);
         lv.setOnItemClickListener(this);
     }
 
     private ListAdapter createListAdapter() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         File sdDir = Environment.getExternalStorageDirectory();
         File cwDir = new File(sdDir, "MySpeaker/"+path);
+        mydir.setText(cwDir.getPath());
         this.parentPath = cwDir.getPath();
         Log.d(TAG, "根目錄：" + this.parentPath);
         File[] files = cwDir.listFiles();
+        if(files.length==0)
+            empty.setVisibility(View.VISIBLE);
         for (File f : files) {
             if (f.isDirectory()) {
                 continue;
