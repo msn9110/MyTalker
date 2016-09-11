@@ -45,16 +45,9 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
     private Socket socket;
     static final String TAG="SpeechMode";
     TextView mydir,empty;
-    //Handler handler=new Handler();
-    //ProgressDialog dialog;
+    Handler handler=new Handler();
+    ProgressDialog dialog;
     Speaker speaker;
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        speaker.stop();
-        terminate();
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,8 +57,6 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             setThreadPolicy(policy);
         }
-
-        speaker=new Speaker(getApplicationContext());
 
         mydir=(TextView)findViewById(R.id.mydir);
         empty=(TextView)findViewById(R.id.nofile);
@@ -104,8 +95,33 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
     @Override
     protected void onStart() {
         super.onStart();
+        dialog=ProgressDialog.show(SpeechMode.this,"請稍後","正在載入語音模組");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                speaker=new Speaker(getApplicationContext());
+                try {
+                    Thread.sleep(2000);
+                }catch (Exception e){
+                    Log.e(TAG,e.toString());
+                }
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                    }
+                });
+            }
+        }).start();
         if (con)
             ConnectToDisplay();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        speaker.stop();
+        terminate();
     }
 
     private void ConnectToDisplay() {
@@ -143,7 +159,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
         public void run() {
             Looper.prepare();
             try {
-                File myFile = Selection;
+                File myFile = MyFile.getFile(Selection);
                 FileInputStream fIn = new FileInputStream(myFile);
                 BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
                 String aDataRow;

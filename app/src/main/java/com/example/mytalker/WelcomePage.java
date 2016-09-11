@@ -36,8 +36,7 @@ public class WelcomePage extends Activity{
     public void isExist(File dir) {
         //判斷文件夾是否存在,如果不存在則建立文件夾
         if (!dir.exists()) {
-            boolean success=dir.mkdirs();
-            if(!success)
+            if(!dir.mkdirs())
                 System.out.println("MakeDir : Fail");
         }
     }

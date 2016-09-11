@@ -128,8 +128,7 @@ public class DataMove extends Activity {
     private void deleteFiles(String inputPath, String filename) {
         try {
             // delete the original file
-            boolean success=new File(inputPath+filename).delete();
-            if(!success)
+            if(!new File(inputPath+filename).delete())
                 System.out.println("Delete : Fail");
         }
         catch (Exception e) {
@@ -147,8 +146,7 @@ public class DataMove extends Activity {
             File dir = new File (outputPath);
             if (!dir.exists())
             {
-                boolean success = dir.mkdirs();
-                if(!success)
+                if(!dir.mkdirs())
                     System.out.println("MakeDir : Fail");
             }
 
@@ -175,11 +173,14 @@ public class DataMove extends Activity {
     private boolean readFromFile() {
         boolean success=false;
         try {
-            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            boolean success2=path.mkdir();
-            System.out.println(success2);
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (!dir.exists())
+            {
+                if(!dir.mkdirs())
+                    System.out.println("MakeDir : Fail");
+            }
             // create the file in which we will write the contents
-            File myFile = new File(_LDName);
+            File myFile = MyFile.getFile(new File(_LDName));
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
             String aDataRow;
