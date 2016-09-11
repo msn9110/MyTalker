@@ -1,7 +1,7 @@
 package com.example.mytalker;
 
 
-import android.os.Environment;
+
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,13 +15,12 @@ import java.nio.charset.Charset;
 
 public class MyFile {
     static public File getFile(File inputFile){
-        File myDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");
-        if(!myDir.exists()){
-            boolean success=myDir.mkdirs();
-            if(!success)
-                System.out.println("Make Dir : Fail");
-        }
-        String filename="UTF8-"+inputFile.getName();
+        File myDir=inputFile.getParentFile();
+        String name=inputFile.getName();
+        String prefix="UTF8-";
+        if(name.startsWith(prefix))
+            return inputFile;
+        String filename=prefix+name;
         File myFile=new File(myDir,filename);
         if (!myFile.exists()){
             try{
