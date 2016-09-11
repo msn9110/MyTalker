@@ -100,7 +100,7 @@ public class MyFile {
             Log.e("tag", e.getMessage());
         }
     }
-
+    //no construct
     private MyFile(){
 
     }
