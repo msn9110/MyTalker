@@ -100,4 +100,8 @@ public class MyFile {
             Log.e("tag", e.getMessage());
         }
     }
+
+    private MyFile(){
+
+    }
 }
