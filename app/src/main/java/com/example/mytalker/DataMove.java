@@ -16,11 +16,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 
 public class DataMove extends Activity {
     final int REQUEST_CODE=0;
@@ -62,35 +59,35 @@ public class DataMove extends Activity {
         button_moveintoout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                moveFile(Path_in,Path_out,_DBName);
+                MyFile.moveFile(Path_in,Path_out,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_copyintoout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                copyFile(Path_in,Path_out,_DBName);
+                MyFile.copyFile(Path_in,Path_out,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_moveouttoin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                moveFile(Path_out,Path_in,_DBName);
+                MyFile.moveFile(Path_out,Path_in,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_copyouttoin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                copyFile(Path_out, Path_in,_DBName);
+                MyFile.copyFile(Path_out, Path_in,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_deletein.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                deleteFiles(Path_in,_DBName);
+                MyFile.deleteFiles(Path_in,_DBName);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
@@ -120,65 +117,13 @@ public class DataMove extends Activity {
             }
         }).start();
     }
-    private void moveFile(String inputPath, String outputPath, String filename) {
-        copyFile(inputPath,outputPath,filename);
-        deleteFiles(inputPath,filename);
-    }
 
-    private void deleteFiles(String inputPath, String filename) {
-        try {
-            // delete the original file
-            if(!new File(inputPath+filename).delete())
-                System.out.println("Delete : Fail");
-        }
-        catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
-    }
-
-    private void copyFile(String inputPath, String outputPath, String filename) {
-
-        InputStream in;
-        OutputStream out;
-        try {
-
-            //create output directory if it doesn't exist
-            File dir = new File (outputPath);
-            if (!dir.exists())
-            {
-                if(!dir.mkdirs())
-                    System.out.println("MakeDir : Fail");
-            }
-
-
-            in = new FileInputStream(inputPath + filename);
-            out = new FileOutputStream(outputPath + filename);
-
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            // write the output file
-            out.flush();
-            out.close();
-
-        } catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
-    }
     //從File讀取data
     private boolean readFromFile() {
         boolean success=false;
         try {
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            if (!dir.exists())
-            {
-                if(!dir.mkdirs())
-                    System.out.println("MakeDir : Fail");
-            }
+            MyFile.mkdirs(dir);
             // create the file in which we will write the contents
             File myFile = MyFile.getFile(new File(_LDName));
             FileInputStream fIn = new FileInputStream(myFile);
@@ -192,8 +137,7 @@ public class DataMove extends Activity {
             }
             success=true;
             myReader.close();
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             Log.e(TAG, "File not found: " + e.toString());
         } catch (IOException e) {
             Log.e(TAG, "Can not read file: " + e.toString());
