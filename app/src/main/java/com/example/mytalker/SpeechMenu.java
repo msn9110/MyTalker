@@ -35,7 +35,7 @@ public class SpeechMenu extends Activity implements AdapterView.OnItemClickListe
     private ListAdapter createListAdapter() {
         List<String> list = new ArrayList<>();
         File sdDir = Environment.getExternalStorageDirectory();
-        File Dir = new File(sdDir, "MySpeaker/");
+        File Dir = new File(sdDir, "MyTalker/");
         this.parentPath = Dir.getPath();
         Log.d(TAG, "根目錄：" + this.parentPath);
         File[] files = Dir.listFiles();

@@ -19,7 +19,7 @@ public class WelcomePage extends Activity{
         setContentView(R.layout.welcome_page);
         goto_startmenu=(Button)findViewById(R.id.btn_goto_start_menu);
 
-        File buildDir = new File(Environment.getExternalStorageDirectory(), "MySpeaker/Default");
+        File buildDir = new File(Environment.getExternalStorageDirectory(), "MyTalker/Default");
         MyFile.mkdirs(buildDir);
 
         goto_startmenu.setOnClickListener(new View.OnClickListener() {

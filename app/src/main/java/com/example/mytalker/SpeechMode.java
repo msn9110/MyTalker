@@ -69,7 +69,7 @@ public class SpeechMode extends ListActivity implements AdapterView.OnItemClickL
     private ListAdapter createListAdapter() {
         List<String> list = new ArrayList<>();
         File sdDir = Environment.getExternalStorageDirectory();
-        File Dir = new File(sdDir, "MySpeaker/"+path);
+        File Dir = new File(sdDir, "MyTalker/"+path);
         mydir.setText(Dir.getPath());
         this.parentPath = Dir.getPath();
         Log.d(TAG, "根目錄：" + this.parentPath);
