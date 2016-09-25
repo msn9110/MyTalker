@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,12 +21,18 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
@@ -60,6 +67,8 @@ public class InputActivity extends Activity {
     String[] list = new String[15];
     Spinner spinner;
 
+    ArrayList<String> myList=new ArrayList<>();
+
     //=====================================oncreate===================================================
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -71,12 +80,17 @@ public class InputActivity extends Activity {
         }
         //initialize
         helper = new DBConnection(this);
+
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
         btn_speech = (Button) findViewById(R.id.btn_speech);
+
         dbList=(ListView)findViewById(R.id.dbList);
+        mainList=(ListView)findViewById(R.id.mainList);
+        speechList=(ListView)findViewById(R.id.speechList);
+
         editText = (EditText) findViewById(R.id.editText);
         spinner=(Spinner)findViewById(R.id.Spinner_sentence);
 
@@ -86,6 +100,14 @@ public class InputActivity extends Activity {
                 setText(currentData[position].text);
                 current_id = currentData[position].id;
                 setCurrentData();
+            }
+        });
+
+        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String word=myList.get(position);
+                setText(word);
             }
         });
 
@@ -130,6 +152,8 @@ public class InputActivity extends Activity {
                 setCurrentData();
             }
         });
+
+        setMainList();
 
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -301,6 +325,31 @@ public class InputActivity extends Activity {
             lists[i]=currentData[i].text;
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
         dbList.setAdapter(listAdapter);
+    }
+
+    private void setMainList(){
+        File dir=new File(Environment.getExternalStorageDirectory(),"MyTalker");
+        MyFile.mkdirs(dir);
+        File file=new File(dir,"words.txt");
+        if(file.exists()){
+
+            try{
+                File ufile=MyFile.getFile(file);
+                FileInputStream in = new FileInputStream(ufile);
+                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+                String line;
+                while ((line=myReader.readLine())!=null){
+                    myList.add(line);
+                }
+                myReader.close();
+                ArrayAdapter<String> listAdapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,myList);
+                mainList.setAdapter(listAdapter);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
     private void setSpinner(){
