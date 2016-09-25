@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -33,6 +34,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
@@ -64,10 +66,14 @@ public class InputActivity extends Activity {
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
     //private ProgressDialog progressDialog2 = null;
-    String[] list = new String[15];
+    String[] sentence = new String[15];
     Spinner spinner;
 
     ArrayList<String> myList=new ArrayList<>();
+    ArrayList<String> dirLIst=new ArrayList<>();
+    ArrayList<String> fileList=new ArrayList<>();
+    boolean dirMode=true;
+    String parentPath;
 
     //=====================================oncreate===================================================
     @Override
@@ -294,6 +300,21 @@ public class InputActivity extends Activity {
     }
 
     //===============================================================================================
+    private ListAdapter createListAdapter() {
+        List<String> list = new ArrayList<>();
+        File sdDir = Environment.getExternalStorageDirectory();
+        File Dir = new File(sdDir, "MyTalker/");
+        this.parentPath = Dir.getPath();
+        File[] files = Dir.listFiles();
+        for (File f : files) {
+            if (f.isFile()) {
+                continue;
+            }
+            list.add(f.getName());
+        }
+        return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
+    }
+    //===============================================================================================
     private void setText(String text){
         String s = editText.getText().toString();
         int index=editText.getSelectionStart();
@@ -354,7 +375,7 @@ public class InputActivity extends Activity {
 
     private void setSpinner(){
         FindSentence("");
-        ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, list);
+        ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, sentence);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
     }
@@ -365,21 +386,21 @@ public class InputActivity extends Activity {
         if(keyword.equals("")){
             query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
                     "  ORDER BY " + DBConnection.SentenceSchema.COUNT + " desc;";
-            list[0]="";
+            sentence[0]="";
         } else {
             query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
                     " where content LIKE '%" + keyword + "%'  ORDER BY " +
                     DBConnection.SentenceSchema.COUNT + " desc;";
-            list[0]=keyword;
+            sentence[0]=keyword;
         }
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
         int SIZE = c.getCount();
-        for (int i = 1; i < list.length; i++) {
+        for (int i = 1; i < sentence.length; i++) {
             if (i > SIZE) {
-                list[i] = "";
+                sentence[i] = "";
             }else {
-                list[i] = c.getString(0);
+                sentence[i] = c.getString(0);
                 c.moveToNext();
             }
         }
