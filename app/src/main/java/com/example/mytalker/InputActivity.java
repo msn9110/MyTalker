@@ -83,12 +83,7 @@ public class InputActivity extends Activity {
         dbList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s = editText.getText().toString();
-                int index=editText.getSelectionStart();
-                String part1=spilt(s,0,index),part2=spilt(s,index,s.length());
-                s=part1+currentData[position].text+part2;
-                editText.setText(s);
-                editText.setSelection(part1.length()+currentData[position].text.length());
+                setText(currentData[position].text);
                 current_id = currentData[position].id;
                 setCurrentData();
             }
@@ -170,13 +165,7 @@ public class InputActivity extends Activity {
         });//text change event
     }
     //===============================================================================================
-    String spilt(String s,int start,int end)
-    {
-        String tmp="";
-        for(int i=start;i<end;i++)
-            tmp+=String.valueOf(s.charAt(i));
-        return tmp;
-    }
+
     //===================================onstart======================================================
     @Override
     protected void onStart() {
@@ -281,6 +270,15 @@ public class InputActivity extends Activity {
     }
 
     //===============================================================================================
+    private void setText(String text){
+        String s = editText.getText().toString();
+        int index=editText.getSelectionStart();
+        String part1=s.substring(0,index),part2=s.substring(index,s.length());
+        s=part1+text+part2;
+        editText.setText(s);
+        editText.setSelection(part1.length()+text.length());
+    }
+
     private void setCurrentData()
     {
         int size = next_id[current_id].length;
