@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -70,10 +71,9 @@ public class InputActivity extends Activity {
     Spinner spinner;
 
     ArrayList<String> myList=new ArrayList<>();
-    ArrayList<String> dirLIst=new ArrayList<>();
-    ArrayList<String> fileList=new ArrayList<>();
     boolean dirMode=true;
     String parentPath;
+    String appDirPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/";
 
     //=====================================oncreate===================================================
     @Override
@@ -114,6 +114,25 @@ public class InputActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String word=myList.get(position);
                 setText(word);
+            }
+        });
+
+        speechList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if(dirMode){
+                    dirMode=false;
+                    File Selected=new File(parentPath,((TextView) view).getText().toString());
+                    speechList.setAdapter(createListAdapter(dirMode,Selected.getPath()));
+                }
+
+                else {
+                    String select=((TextView) view).getText().toString();
+                    if(select.startsWith("..")){
+                        dirMode=true;
+                        speechList.setAdapter(createListAdapter(dirMode,appDirPath));
+                    }
+                }
             }
         });
 
@@ -160,7 +179,7 @@ public class InputActivity extends Activity {
         });
 
         setMainList();
-
+        speechList.setAdapter(this.createListAdapter(dirMode,appDirPath));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -300,16 +319,18 @@ public class InputActivity extends Activity {
     }
 
     //===============================================================================================
-    private ListAdapter createListAdapter() {
+    private ListAdapter createListAdapter(boolean dir_mode,String path) {
         List<String> list = new ArrayList<>();
-        File sdDir = Environment.getExternalStorageDirectory();
-        File Dir = new File(sdDir, "MyTalker/");
-        this.parentPath = Dir.getPath();
-        File[] files = Dir.listFiles();
+        if(!dir_mode)
+            list.add("..(回上一頁)");
+        File dir = new File(path);
+        this.parentPath = dir.getPath();
+        File[] files = dir.listFiles();
         for (File f : files) {
-            if (f.isFile()) {
+            if (f.isFile() && dir_mode)
                 continue;
-            }
+            else if(f.isDirectory() && !dir_mode)
+                continue;
             list.add(f.getName());
         }
         return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
