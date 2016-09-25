@@ -40,7 +40,7 @@ public class InputActivity extends Activity {
 
     Button btn_send, btn_lv1, btn_load, btn_clear, btn_speech;
     boolean status_speech = false;
-    ListView view;
+    ListView dbList,mainList,speechList;
     EditText editText;
     public static boolean con = false;
 
@@ -76,11 +76,11 @@ public class InputActivity extends Activity {
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
         btn_speech = (Button) findViewById(R.id.btn_speech);
-        view=(ListView)findViewById(R.id.btnView);
+        dbList=(ListView)findViewById(R.id.dbList);
         editText = (EditText) findViewById(R.id.editText);
         spinner=(Spinner)findViewById(R.id.Spinner_sentence);
 
-        view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        dbList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String s = editText.getText().toString();
@@ -302,7 +302,7 @@ public class InputActivity extends Activity {
         for(int i=0;i<size;i++)
             lists[i]=currentData[i].text;
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
-        view.setAdapter(listAdapter);
+        dbList.setAdapter(listAdapter);
     }
 
     private void setSpinner(){
