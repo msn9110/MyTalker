@@ -21,7 +21,7 @@ public class StartMenu extends Activity{
         mode[0]=(Button)findViewById(R.id.btn_mode1);
         mode[1]=(Button)findViewById(R.id.btn_mode2);
         mode[2]=(Button)findViewById(R.id.btn_mode3);
-        mode[3]=(Button)findViewById(R.id.btn_mode4);
+        //mode[3]=(Button)findViewById(R.id.btn_mode4);
 
         mode[0].setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,26 +38,16 @@ public class StartMenu extends Activity{
         mode[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SpeechMode.con=false;
-                Intent intent = new Intent();
-                intent.setClass(getApplicationContext(), SpeechMenu.class);
-                startActivity(intent);
-            }
-        });
-
-        mode[2].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
                 InputActivity.con=true;
-                SpeechMode.con=true;
                 Intent intent =new Intent();
                 intent.setClass(getApplicationContext(),WiFiDirectActivity.class);
                 startActivity(intent);
                 StartMenu.this.finish();
+
             }
         });
 
-        mode[3].setOnClickListener(new View.OnClickListener() {
+        mode[2].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -65,5 +55,12 @@ public class StartMenu extends Activity{
                 startActivity(intent);
             }
         });
+
+        /*mode[3].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });*/
     }
 }

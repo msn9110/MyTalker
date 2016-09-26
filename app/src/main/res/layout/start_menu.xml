@@ -17,6 +17,16 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="連線模式"
+            android:textSize="45sp"
+            android:textColor="@color/MainText"
+            android:layout_row="1"
+            android:layout_column="2"/>
+
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="100dp"
@@ -39,7 +49,7 @@
             android:layout_height="180dp"
             android:text=""
             android:id="@+id/btn_mode2"
-            android:background="@drawable/speech"
+            android:background="@drawable/com"
             android:layout_gravity="center"
             android:layout_row="0"
             android:layout_column="2" />
@@ -54,45 +64,15 @@
             android:layout_row="1"
             android:layout_column="0"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="演講模式"
-            android:textSize="45sp"
-            android:textColor="@color/MainText"
-            android:layout_row="1"
-            android:layout_column="2"/>
-
         <Button
             android:layout_width="180dp"
             android:layout_height="180dp"
             android:text=""
             android:id="@+id/btn_mode3"
-            android:background="@drawable/com"
-            android:layout_gravity="center"
-            android:layout_row="3"
-            android:layout_column="0" />
-
-        <Button
-            android:layout_width="180dp"
-            android:layout_height="180dp"
-            android:text=""
-            android:id="@+id/btn_mode4"
             android:background="@drawable/fmove"
             android:layout_gravity="center"
             android:layout_row="3"
-            android:layout_column="2" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="連線模式"
-            android:textSize="45sp"
-            android:textColor="@color/MainText"
-            android:layout_row="4"
-            android:layout_column="0"/>
+            android:layout_column="0" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -101,7 +81,7 @@
             android:textSize="45sp"
             android:textColor="@color/MainText"
             android:layout_row="4"
-            android:layout_column="2"/>
+            android:layout_column="0"/>
 
     </GridLayout>
 
