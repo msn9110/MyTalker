@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="交談模式"
+            android:text="本機模式"
             android:textSize="45sp"
             android:textColor="@color/MainText"
             android:layout_row="1"

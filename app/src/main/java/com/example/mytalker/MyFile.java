@@ -16,6 +16,9 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
 public class MyFile {
+
+    static  public String charset="BIG5";
+
     static public File getFile(File inputFile){
         File myDir=inputFile.getParentFile();
         String name=inputFile.getName();
@@ -28,7 +31,7 @@ public class MyFile {
             try{
 
                 FileInputStream in = new FileInputStream(inputFile);
-                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName("BIG5")));
+                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
                 FileOutputStream out=new FileOutputStream(myDir.getPath()+"/"+filename);
                 BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName("UTF-8")));
 

@@ -99,61 +99,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                         startActivity(intent);
                     }
                 });
-        mContentView.findViewById(R.id.btn_start_speech).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Main";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs1).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub1";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs2).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub2";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs3).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub3";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs4).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub4";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
         return mContentView;
     }
 
