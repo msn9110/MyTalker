@@ -135,11 +135,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             mContentView.findViewById(R.id.btn_start_client).setVisibility(View.VISIBLE);
             ((TextView) mContentView.findViewById(R.id.status_text)).setText(getResources()
                     .getString(R.string.client_text));
-            mContentView.findViewById(R.id.btn_start_speech).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs1).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs2).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs3).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs4).setVisibility(View.VISIBLE);
+
         }
 
         // hide the connect button
@@ -175,11 +171,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         view = (TextView) mContentView.findViewById(R.id.status_text);
         view.setText(R.string.empty);
         mContentView.findViewById(R.id.btn_start_client).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speech).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs1).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs2).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs3).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs4).setVisibility(View.GONE);
         this.getView().setVisibility(View.GONE);
     }
 
