@@ -83,11 +83,28 @@
             android:id="@+id/dbList">
         </ListView>
 
-        <ListView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/speechList">
-        </ListView>
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="無資料"
+                android:id="@+id/txt_no_data"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"/>
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/speechList">
+            </ListView>
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

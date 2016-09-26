@@ -363,10 +363,12 @@ public class InputActivity extends Activity {
     private ListAdapter createListAdapter(File dir) {
         List<String> list = new ArrayList<>();
         boolean dir_mode=dir.equals(appDir);
-        if(!dir_mode)
-            list.add("..(回上一頁)");
         this.parentPath = dir.getPath();
         File[] files = dir.listFiles();
+        if(!dir_mode)
+            list.add("..(回上一頁)");
+        else
+            findViewById(R.id.txt_no_data).setVisibility(View.GONE);
         for (File f : files) {
             if (f.isFile() && dir_mode)
                 continue;
@@ -374,6 +376,8 @@ public class InputActivity extends Activity {
                 continue;
             list.add(f.getName());
         }
+        if(!dir_mode&&list.size()==1)
+            findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
         return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
     }
     //===============================================================================================
