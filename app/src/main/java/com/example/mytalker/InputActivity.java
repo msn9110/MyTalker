@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -27,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -35,6 +37,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.os.StrictMode.ThreadPolicy;
@@ -71,9 +74,9 @@ public class InputActivity extends Activity {
     Spinner spinner;
 
     ArrayList<String> myList=new ArrayList<>();
-    boolean dirMode=true;
     String parentPath;
-    String appDirPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/";
+    File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");
+    static final String TAG="SpeechList";
 
     //=====================================oncreate===================================================
     @Override
@@ -120,17 +123,55 @@ public class InputActivity extends Activity {
         speechList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if(dirMode){
-                    dirMode=false;
-                    File Selected=new File(parentPath,((TextView) view).getText().toString());
-                    speechList.setAdapter(createListAdapter(dirMode,Selected.getPath()));
+
+                if(parentPath.equals(appDir.getPath())){
+                    File dir=new File(parentPath,((TextView) view).getText().toString());
+                    speechList.setAdapter(createListAdapter(dir));
                 }
 
                 else {
                     String select=((TextView) view).getText().toString();
                     if(select.startsWith("..")){
-                        dirMode=true;
-                        speechList.setAdapter(createListAdapter(dirMode,appDirPath));
+                        speechList.setAdapter(createListAdapter(appDir));
+                    }
+                    else {
+                        final File Selection=new File(parentPath+"/"+select);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //speaker.stop();
+                                Looper.prepare();
+                                try {
+                                    File myFile = MyFile.getFile(Selection);
+                                    FileInputStream fIn = new FileInputStream(myFile);
+                                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                                    String aDataRow;
+                                    while ((aDataRow = myReader.readLine()) != null) {
+                                        if(aDataRow.length()==0)
+                                            continue;
+                                        if (con) {
+                                            try {
+                                                //傳送資料
+                                                out.writeUTF(aDataRow);
+                                                Toast.makeText(getApplicationContext(), "成功傳送!", Toast.LENGTH_SHORT).show();
+                                            } catch (IOException e) {
+                                                Toast.makeText(getApplicationContext(), "傳送失敗", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                        else{
+                                            speaker.speak(aDataRow);
+                                        }
+
+                                    }
+                                    myReader.close();
+                                } catch (FileNotFoundException e) {
+                                    Log.e(TAG, "File not found: " + e.toString());
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Can not read file: " + e.toString());
+                                }
+                                Looper.loop();
+                            }
+                        }).start();
                     }
                 }
             }
@@ -179,7 +220,7 @@ public class InputActivity extends Activity {
         });
 
         setMainList();
-        speechList.setAdapter(this.createListAdapter(dirMode,appDirPath));
+        speechList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -319,11 +360,11 @@ public class InputActivity extends Activity {
     }
 
     //===============================================================================================
-    private ListAdapter createListAdapter(boolean dir_mode,String path) {
+    private ListAdapter createListAdapter(File dir) {
         List<String> list = new ArrayList<>();
+        boolean dir_mode=dir.equals(appDir);
         if(!dir_mode)
             list.add("..(回上一頁)");
-        File dir = new File(path);
         this.parentPath = dir.getPath();
         File[] files = dir.listFiles();
         for (File f : files) {
@@ -392,6 +433,13 @@ public class InputActivity extends Activity {
 
         }
 
+        else {
+            String[] words=new String[]{"不","好","要","是","對","用","有","沒"};
+            myList.addAll(Arrays.asList(words));
+            ArrayAdapter<String> listAdapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,myList);
+            mainList.setAdapter(listAdapter);
+        }
+
     }
 
     private void setSpinner(){
@@ -439,8 +487,10 @@ public class InputActivity extends Activity {
                 learn.Learning(message);
             }
         }).start();
-        if (status_speech && message.length()>0)
+        if (status_speech && message.length()>0){
+            //speaker.stop();
             speaker.speak(message);
+        }
         if (con) {
             try {
                 //傳送資料
