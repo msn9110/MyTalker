@@ -376,7 +376,7 @@ public class InputActivity extends Activity {
                 continue;
             list.add(f.getName());
         }
-        if(!dir_mode&&list.size()==1)
+        if(!dir_mode && list.size()==1)
             findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
         return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
     }

@@ -60,15 +60,15 @@ public class MyFile {
         }
     }
 
-    static public void moveFile(String inputPath, String outputPath, String filename) {
-        copyFile(inputPath,outputPath,filename);
-        deleteFiles(inputPath,filename);
+    static public void moveFile(File source, File target) {
+        copyFile(source,target);
+        deleteFiles(source);
     }
 
-    static public void deleteFiles(String inputPath, String filename) {
+    static public void deleteFiles(File file) {
         try {
             // delete the original file
-            if(!new File(inputPath+filename).delete())
+            if(!file.delete())
                 System.out.println("Delete : Fail");
         }
         catch (Exception e) {
@@ -76,18 +76,18 @@ public class MyFile {
         }
     }
 
-    static public void copyFile(String inputPath, String outputPath, String filename) {
+    static public void copyFile(File source, File target) {
 
         InputStream in;
         OutputStream out;
         try {
 
             //create output directory if it doesn't exist
-            File dir = new File (outputPath);
+            File dir = new File (target.getParent());
             mkdirs(dir);
 
-            in = new FileInputStream(inputPath + filename);
-            out = new FileOutputStream(outputPath + filename);
+            in = new FileInputStream(source.getPath());
+            out = new FileOutputStream(target.getPath());
 
             byte[] buffer = new byte[1024];
             int read;

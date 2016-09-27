@@ -23,6 +23,8 @@ public class DataMove extends Activity {
     final int REQUEST_CODE=0;
     public static final String _DBName = "Database.db";
     String _LDName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download" + "/LearnData.data";
+    final int REQUEST_DBCODE=1100;
+    boolean outMode=true;//true to copy out, false to move out
 
     Button button_moveintoout;
     Button button_copyintoout;
@@ -31,8 +33,8 @@ public class DataMove extends Activity {
     Button button_deletein;
     Button button_learndata;
 
-    String Path_out = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download/";
-    String Path_in;
+    File out=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),_DBName);
+    File in;
     private static final String TAG = DataMove.class.getName();
 
     DBConnection helper= new DBConnection(this);
@@ -46,7 +48,7 @@ public class DataMove extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.move_menu);
 
-        Path_in=getDatabasePath(_DBName).getParent()+"/";
+        in=getDatabasePath(_DBName);
         //System.out.println(Path_in);
 
         button_moveintoout = (Button)findViewById(R.id.btn_moveintoout);
@@ -59,35 +61,41 @@ public class DataMove extends Activity {
         button_moveintoout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MyFile.moveFile(Path_in,Path_out,_DBName);
+                MyFile.moveFile(in,out);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_copyintoout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MyFile.copyFile(Path_in,Path_out,_DBName);
+                MyFile.copyFile(in,out);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_moveouttoin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MyFile.moveFile(Path_out,Path_in,_DBName);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+                outMode=false;
+                final String mimeType = "*/*";
+                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType(mimeType);
+                startActivityForResult(intent, REQUEST_DBCODE);
             }
         });
         button_copyouttoin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MyFile.copyFile(Path_out, Path_in,_DBName);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+                outMode=true;
+                final String mimeType = "*/*";
+                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType(mimeType);
+                startActivityForResult(intent, REQUEST_DBCODE);
             }
         });
         button_deletein.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MyFile.deleteFiles(Path_in,_DBName);
+                MyFile.deleteFiles(in);
                 Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
             }
         });
@@ -98,8 +106,6 @@ public class DataMove extends Activity {
                 final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType(mimeType);
                 startActivityForResult(intent, REQUEST_CODE);
-
-                //LearnFromFile();
             }
         });
 
@@ -118,6 +124,15 @@ public class DataMove extends Activity {
         }).start();
     }
 
+    private void OutToIn(File source,boolean mode){
+        if(mode){
+            MyFile.copyFile(source,in);
+            Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+        } else{
+            MyFile.moveFile(source,in);
+            Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+        }
+    }
     //從File讀取data
     private boolean readFromFile() {
         boolean success=false;
@@ -174,24 +189,40 @@ public class DataMove extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // 有選擇檔案
-        if ( resultCode == RESULT_OK  && requestCode == REQUEST_CODE)
+        if ( resultCode == RESULT_OK)
         {
-            // 取得檔案的 Uri
-            Uri uri = data.getData();
-            if( uri != null )
-            {
-                _LDName=uri.getPath();
-                System.out.println(_LDName);
-                LearnFromFile();
-            }
-            else
-            {
-                setTitle("無效的檔案路徑 !!");
+            Uri uri;
+            switch (requestCode){
+
+                case REQUEST_CODE:
+                    // 取得檔案的 Uri
+                    uri = data.getData();
+                    if( uri != null )
+                    {
+                        _LDName=uri.getPath();
+                        LearnFromFile();
+                    }
+                    else
+                        setTitle("無效的檔案路徑 !!");
+                    break;
+
+                case REQUEST_DBCODE:
+                    // 取得檔案的 Uri
+                    uri = data.getData();
+                    if( uri != null )
+                    {
+                        File MyDB=new File(uri.getPath());
+                        OutToIn(MyDB,outMode);
+                    }
+                    else
+                        setTitle("無效的檔案路徑 !!");
+                    break;
+
+                default:
+                    break;
             }
         }
         else
-        {
             setTitle("取消選擇檔案 !!");
-        }
     }
 }
