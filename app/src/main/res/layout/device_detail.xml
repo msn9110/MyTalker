@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <Button
+                style="?android:attr/buttonStyleSmall"
                 android:id="@+id/btn_connect"
                 android:layout_width="180dp"
                 android:layout_height="90dp"
@@ -26,6 +27,7 @@
                 android:gravity="center"
                 />
             <Button
+                style="?android:attr/buttonStyleSmall"
                 android:id="@+id/btn_disconnect"
                 android:layout_width="180dp"
                 android:layout_height="90dp"
@@ -35,6 +37,7 @@
                 android:gravity="center"
                 />
             <Button
+                style="?android:attr/buttonStyleSmall"
                 android:id="@+id/btn_start_client"
                 android:layout_width="180dp"
                 android:layout_height="90dp"

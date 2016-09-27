@@ -26,5 +26,15 @@
     <string name="app_ID2">ID2:</string>
     <string name="listening">Listening&#8230;</string>
     <string name="connected">Connected</string>
+
+    <string name="move_menu_title">資料轉移</string>
+    <string name="move_menu_item1">搬動IN</string>
+    <string name="move_menu_item2">複製IN</string>
+    <string name="move_menu_item3">搬動EX</string>
+    <string name="move_menu_item4">複製EX</string>
+    <string name="move_menu_item5">刪除IN</string>
+    <string name="move_menu_item6">學習</string>
+
+    <string name="connect_mode_title">連線模式</string>
 </resources>
 
