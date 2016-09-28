@@ -21,7 +21,7 @@ public class StartMenu extends Activity{
         mode[0]=(Button)findViewById(R.id.btn_mode1);
         mode[1]=(Button)findViewById(R.id.btn_mode2);
         mode[2]=(Button)findViewById(R.id.btn_mode3);
-        //mode[3]=(Button)findViewById(R.id.btn_mode4);
+        mode[3]=(Button)findViewById(R.id.btn_mode4);
 
         mode[0].setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,11 +56,11 @@ public class StartMenu extends Activity{
             }
         });
 
-        /*mode[3].setOnClickListener(new View.OnClickListener() {
+        mode[3].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
-        });*/
+        });
     }
 }
