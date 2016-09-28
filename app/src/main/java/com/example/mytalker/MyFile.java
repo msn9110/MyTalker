@@ -27,27 +27,24 @@ public class MyFile {
             return inputFile;
         String filename=prefix+name;
         File myFile=new File(myDir,filename);
-        if (!myFile.exists()){
-            try{
+        try{
 
-                FileInputStream in = new FileInputStream(inputFile);
-                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
-                FileOutputStream out=new FileOutputStream(myDir.getPath()+"/"+filename);
-                BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName("UTF-8")));
+            FileInputStream in = new FileInputStream(inputFile);
+            BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
+            FileOutputStream out=new FileOutputStream(myDir.getPath()+"/"+filename);
+            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName("UTF-8")));
 
-                char[] buffer = new char[1024];
-                int read;
-                while ((read = myReader.read(buffer)) != -1) {
-                    myWriter.write(buffer,0,read);
-                }
-                myReader.close();
-                // write the output file
-                myWriter.flush();
-                myWriter.close();
-            }catch (Exception ex){
-                Log.e("MyFile",ex.toString());
+            char[] buffer = new char[1024];
+            int read;
+            while ((read = myReader.read(buffer)) != -1) {
+                myWriter.write(buffer,0,read);
             }
-
+            myReader.close();
+            // write the output file
+            myWriter.flush();
+            myWriter.close();
+        }catch (Exception ex){
+            Log.e("MyFile",ex.toString());
         }
         return myFile;
     }

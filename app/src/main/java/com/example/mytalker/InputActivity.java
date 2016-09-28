@@ -418,12 +418,12 @@ public class InputActivity extends Activity {
         File dir=new File(Environment.getExternalStorageDirectory(),"MyTalker");
         MyFile.mkdirs(dir);
         File file=new File(dir,"words.txt");
+        String charset="UTF-8";
         if(file.exists()){
-
+            File myFile=MyFile.getFile(file);
             try{
-                File ufile=MyFile.getFile(file);
-                FileInputStream in = new FileInputStream(ufile);
-                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+                FileInputStream in = new FileInputStream(myFile);
+                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
                 String line;
                 while ((line=myReader.readLine())!=null){
                     myList.add(line);
