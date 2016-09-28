@@ -75,7 +75,7 @@ public class InputActivity extends Activity {
 
     ArrayList<String> myList=new ArrayList<>();
     String parentPath;
-    File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");
+    File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
     static final String TAG="SpeechList";
 
     //=====================================oncreate===================================================
@@ -88,6 +88,8 @@ public class InputActivity extends Activity {
             setThreadPolicy(policy);
         }
         //initialize
+        MyFile.mkdirs(appDir);
+
         helper = new DBConnection(this);
 
         btn_send = (Button) findViewById(R.id.btn_send);
@@ -125,8 +127,11 @@ public class InputActivity extends Activity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 if(parentPath.equals(appDir.getPath())){
-                    File dir=new File(parentPath,((TextView) view).getText().toString());
-                    speechList.setAdapter(createListAdapter(dir));
+                    File file=new File(parentPath,((TextView) view).getText().toString());
+                    if(file.isDirectory())
+                        speechList.setAdapter(createListAdapter(file));
+                    else
+                        setMainList(file);
                 }
 
                 else {
@@ -219,7 +224,7 @@ public class InputActivity extends Activity {
             }
         });
 
-        setMainList();
+        setMainList(new File(appDir,"words.txt"));
         speechList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -370,9 +375,7 @@ public class InputActivity extends Activity {
         else
             findViewById(R.id.txt_no_data).setVisibility(View.GONE);
         for (File f : files) {
-            if (f.isFile() && dir_mode)
-                continue;
-            else if(f.isDirectory() && !dir_mode)
+            if(f.isDirectory() && !dir_mode)
                 continue;
             list.add(f.getName());
         }
@@ -414,10 +417,8 @@ public class InputActivity extends Activity {
         dbList.setAdapter(listAdapter);
     }
 
-    private void setMainList(){
-        File dir=new File(Environment.getExternalStorageDirectory(),"MyTalker");
-        MyFile.mkdirs(dir);
-        File file=new File(dir,"words.txt");
+    private void setMainList(File file){
+        myList.clear();
         String charset="UTF-8";
         if(file.exists()){
             File myFile=MyFile.getFile(file);
