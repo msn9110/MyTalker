@@ -369,16 +369,28 @@ public class InputActivity extends Activity {
         List<String> list = new ArrayList<>();
         boolean dir_mode=dir.equals(appDir);
         this.parentPath = dir.getPath();
-        File[] files = dir.listFiles();
-        if(!dir_mode)
+        File[] myfiles = dir.listFiles();
+        List<String> dirs = new ArrayList<>();
+        List<String> files = new ArrayList<>();
+        if(!dir_mode){
             list.add("..(回上一頁)");
-        else
+            for (File f : myfiles) {
+                if(f.isDirectory())
+                    continue;
+                list.add(f.getName());
+            }
+        } else{
             findViewById(R.id.txt_no_data).setVisibility(View.GONE);
-        for (File f : files) {
-            if(f.isDirectory() && !dir_mode)
-                continue;
-            list.add(f.getName());
+            for (File f : myfiles) {
+                if(f.isDirectory())
+                    dirs.add(f.getName());
+                else
+                    files.add(f.getName());
+            }
+            list.addAll(dirs);
+            list.addAll(files);
         }
+
         if(!dir_mode && list.size()==1)
             findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
         return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
