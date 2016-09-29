@@ -67,6 +67,29 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:text="立即語音"
+            android:id="@+id/sw_immediate"
+            android:layout_row="0"
+            android:layout_column="0" />
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:text="演講模式"
+            android:id="@+id/sw_speech"
+            android:layout_row="0"
+            android:layout_column="2" />
+    </GridLayout>
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
