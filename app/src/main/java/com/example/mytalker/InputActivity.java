@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -16,10 +15,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,8 +52,9 @@ public class InputActivity extends Activity {
 
     Speaker speaker;
 
-    Button btn_send, btn_lv1, btn_load, btn_clear, btn_speech;
-    boolean status_speech = false;
+    Switch sw_immediate,sw_voice,sw_speech;
+    Button btn_send, btn_lv1, btn_load, btn_clear;
+    boolean status_speech = false,immediate=false,speechMode=false;
     ListView dbList,mainList,speechList;
     EditText editText;
     public static boolean con = false;
@@ -92,11 +94,14 @@ public class InputActivity extends Activity {
 
         helper = new DBConnection(this);
 
+        sw_immediate=(Switch)findViewById(R.id.sw_immediate);
+        sw_voice=(Switch)findViewById(R.id.sw_voice);
+        sw_speech=(Switch)findViewById(R.id.sw_speech);
+
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
-        btn_speech = (Button) findViewById(R.id.btn_speech);
 
         dbList=(ListView)findViewById(R.id.dbList);
         mainList=(ListView)findViewById(R.id.mainList);
@@ -117,8 +122,11 @@ public class InputActivity extends Activity {
         mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String word=myList.get(position);
-                setText(word);
+                String msg=myList.get(position);
+                if(immediate)
+                    talk(msg,false);
+                else
+                    setText(msg);
             }
         });
 
@@ -126,57 +134,38 @@ public class InputActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                if(parentPath.equals(appDir.getPath())){
-                    File file=new File(parentPath,((TextView) view).getText().toString());
-                    if(file.isDirectory())
-                        speechList.setAdapter(createListAdapter(file));
-                    else
-                        setMainList(file);
+                String select=((TextView) view).getText().toString();
+                File file=new File(parentPath,select);
+                if(select.startsWith("..")){
+                    speechList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
                 }
 
-                else {
-                    String select=((TextView) view).getText().toString();
-                    if(select.startsWith("..")){
-                        speechList.setAdapter(createListAdapter(appDir));
-                    }
-                    else {
-                        final File Selection=new File(parentPath+"/"+select);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //speaker.stop();
-                                Looper.prepare();
-                                try {
-                                    File myFile = MyFile.getFile(Selection);
-                                    FileInputStream fIn = new FileInputStream(myFile);
-                                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                                    String aDataRow;
-                                    while ((aDataRow = myReader.readLine()) != null) {
-                                        if(aDataRow.length()==0)
-                                            continue;
-                                        if (con) {
-                                            try {
-                                                //傳送資料
-                                                out.writeUTF(aDataRow);
-                                                Toast.makeText(getApplicationContext(), "成功傳送!", Toast.LENGTH_SHORT).show();
-                                            } catch (IOException e) {
-                                                Toast.makeText(getApplicationContext(), "傳送失敗", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                        else{
-                                            speaker.speak(aDataRow);
-                                        }
 
-                                    }
-                                    myReader.close();
-                                } catch (FileNotFoundException e) {
-                                    Log.e(TAG, "File not found: " + e.toString());
-                                } catch (IOException e) {
-                                    Log.e(TAG, "Can not read file: " + e.toString());
+                else {
+                    if(file.isDirectory())
+                        speechList.setAdapter(createListAdapter(file));
+                    else{
+                        if(!speechMode)
+                            setMainList(file);
+                        else {
+                            final File Selection=new File(parentPath,select);
+                            try {
+                                File myFile = MyFile.getFile(Selection);
+                                FileInputStream fIn = new FileInputStream(myFile);
+                                BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                                String line;
+                                while ((line = myReader.readLine()) != null) {
+                                    if(line.length()==0)
+                                        continue;
+                                    talk(line,false);
                                 }
-                                Looper.loop();
+                                myReader.close();
+                            } catch (FileNotFoundException e) {
+                                Log.e(TAG, "File not found: " + e.toString());
+                            } catch (IOException e) {
+                                Log.e(TAG, "Can not read file: " + e.toString());
                             }
-                        }).start();
+                        }
                     }
                 }
             }
@@ -185,9 +174,28 @@ public class InputActivity extends Activity {
         if (!con) {
             String text="TALK";
             btn_send.setText(text);
-            btn_speech.setVisibility(View.GONE);
+            sw_voice.setChecked(true);
+            sw_voice.setEnabled(false);
         }
         status_speech = !con;
+        sw_voice.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                status_speech=b;
+            }
+        });
+        sw_immediate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                immediate=b;
+            }
+        });
+        sw_speech.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                speechMode=b;
+            }
+        });
 
         btn_clear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -198,15 +206,7 @@ public class InputActivity extends Activity {
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                talk();
-            }
-        });
-        btn_speech.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text=(status_speech?"關閉語音":"開啟語音");
-                btn_speech.setText(text);
-                status_speech = !status_speech;
+                talk(editText.getText().toString(),true);
             }
         });
 
@@ -367,32 +367,28 @@ public class InputActivity extends Activity {
     //===============================================================================================
     private ListAdapter createListAdapter(File dir) {
         List<String> list = new ArrayList<>();
-        boolean dir_mode=dir.equals(appDir);
+        boolean APPDir=dir.equals(appDir);
         this.parentPath = dir.getPath();
         File[] myfiles = dir.listFiles();
         List<String> dirs = new ArrayList<>();
         List<String> files = new ArrayList<>();
-        if(!dir_mode){
+        if(!APPDir){
             list.add("..(回上一頁)");
-            for (File f : myfiles) {
-                if(f.isDirectory())
-                    continue;
-                list.add(f.getName());
-            }
-        } else{
-            findViewById(R.id.txt_no_data).setVisibility(View.GONE);
-            for (File f : myfiles) {
-                if(f.isDirectory())
-                    dirs.add(f.getName());
-                else
-                    files.add(f.getName());
-            }
-            list.addAll(dirs);
-            list.addAll(files);
         }
 
-        if(!dir_mode && list.size()==1)
+        for (File f : myfiles) {
+            if(f.isDirectory())
+                dirs.add(f.getName());
+            else
+                files.add(f.getName());
+        }
+        list.addAll(dirs);
+        list.addAll(files);
+
+        if(dirs.size() + files.size()==0)
             findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
+        else
+            findViewById(R.id.txt_no_data).setVisibility(View.GONE);
         return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
     }
     //===============================================================================================
@@ -495,10 +491,10 @@ public class InputActivity extends Activity {
         db.close();
     }
 
-    private void talk() {
+    private void talk(final String message,boolean learning) {
         //要傳送的字串
-        final String message = editText.getText().toString();
-        new Thread(new Runnable() {
+        if(learning)
+            new Thread(new Runnable() {
             @Override
             public void run() {
                 learn.Learning(message);
