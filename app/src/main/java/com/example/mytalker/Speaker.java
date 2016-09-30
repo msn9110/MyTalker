@@ -97,17 +97,20 @@ public class Speaker implements TextToSpeech.OnInitListener {
     }
 
     public void stop(){
-        if (tw != null) {
+        if (tw != null)
             tw.stop();
-            tw.shutdown();
-        }
-        if (en != null) {
+        if (en != null)
             en.stop();
-            en.shutdown();
-        }
-        tw=en=null;
     }
 
+    public void shutdown(){
+        this.stop();
+        if (tw != null)
+            tw.shutdown();
+        if (en != null)
+            en.shutdown();
+        tw=en=null;
+    }
     public boolean isNotSpeaking(){
         return (!tw.isSpeaking() || !en.isSpeaking());
     }

@@ -525,6 +525,7 @@ public class InputActivity extends Activity {
         setCurrentData();
     }
 
+    //===============================connection=======================================================
     private void ConnectToDisplay() {
         try {
             InetAddress serverAddr;
@@ -552,12 +553,13 @@ public class InputActivity extends Activity {
             }
         }
     }
+    //===============================================================================================
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        speaker.stop();
+        speaker.shutdown();
         terminate();
     }
 

@@ -46,7 +46,7 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        speaker.stop();
+        speaker.shutdown();
         try {
             serverSocket.close();
         }catch (IOException e){
