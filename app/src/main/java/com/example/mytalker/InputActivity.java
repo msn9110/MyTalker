@@ -52,18 +52,21 @@ public class InputActivity extends Activity {
 
     Speaker speaker;
 
-    Switch sw_immediate,sw_voice,sw_speech;
+    Switch sw_immediate,sw_voice,sw_speech;//to control three status of app
     Button btn_send, btn_lv1, btn_load, btn_clear;
-    boolean status_speech = false,immediate=false,speechMode=false;
+    boolean localVoice = false,immediate = false,speechMode = false;
+    //localVoice to control whether local Machine is enabled voice, when running in local mode, it is forced to enable
+    //when immediate is true, ie can speak the text which you select in main list
+    //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
     ListView dbList,mainList,speechList;
     EditText editText;
     public static boolean con = false;
 
     //for data variable
     InputData[] Data=new InputData[1], currentData;
-    int[] map=new int[1];
+    int[] map=new int[1];//to map vocabulary id to the position in Data array
     //SQLiteDatabase db;
-    int[][] next_id=new int[1][1];
+    int[][] next_id=new int[1][1];//level 0 indicates the all vocabularies in database
     int current_id = 0;//0 denote main level
 
     DBConnection helper;
@@ -177,11 +180,11 @@ public class InputActivity extends Activity {
             sw_voice.setChecked(true);
             sw_voice.setEnabled(false);
         }
-        status_speech = !con;
+        localVoice = !con;
         sw_voice.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                status_speech=b;
+                localVoice=b;
             }
         });
         sw_immediate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -500,7 +503,7 @@ public class InputActivity extends Activity {
                 learn.Learning(message);
             }
         }).start();
-        if (status_speech && message.length()>0){
+        if (localVoice && message.length()>0){
             //speaker.stop();
             speaker.speak(message);
         }
