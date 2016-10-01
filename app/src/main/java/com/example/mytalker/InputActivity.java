@@ -74,7 +74,7 @@ public class InputActivity extends Activity {
 
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
-    //private ProgressDialog progressDialog2 = null;
+    private ProgressDialog progressDialog2 = null;
     String[] sentence = new String[15];
     Spinner spinner;
 
@@ -269,19 +269,25 @@ public class InputActivity extends Activity {
     protected void onStart() {
         super.onStart();
         btn_send.setEnabled(false);
-        //progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
+        progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 learn=new Learn(getApplicationContext(),helper);
                 speaker=new Speaker(getApplicationContext());
-                //progressDialog2.dismiss();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         btn_send.setEnabled(true);
                     }
                 });
+                //speaker.speak("");//prevent first lag
+                try {
+                    Thread.sleep(1250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                progressDialog2.dismiss();
             }
         }).start();
         Update();
