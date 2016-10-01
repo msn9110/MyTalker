@@ -22,22 +22,25 @@ import java.util.Calendar;
 public class MyFile {
 
     static public String charset="BIG5";
-    static String prefix="UTF8-";
+    static public String charset_target="UTF-8";
+    static public String prefix="("+charset_target+")";
 
     static public File getFile(File inputFile){
-        File myDir=inputFile.getParentFile();
+        File myDir=new File(Environment.getExternalStorageDirectory()+"/MyTalker/"+prefix);
+        mkdirs(myDir);
         String name=inputFile.getName();
+        String origin_name=name;
         name=name.toUpperCase();
-        if(name.startsWith(prefix))
+        if(name.contains(charset_target))
             return inputFile;
-        String filename=prefix+name;
+        String filename=prefix+origin_name;
         File myFile=new File(myDir,filename);
         try{
 
             FileInputStream in = new FileInputStream(inputFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
-            FileOutputStream out=new FileOutputStream(myDir.getPath()+"/"+filename);
-            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName("UTF-8")));
+            FileOutputStream out=new FileOutputStream(new File(myDir,filename));
+            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName(charset_target)));
 
             char[] buffer = new char[1024];
             int read;
@@ -114,7 +117,7 @@ public class MyFile {
         File file=new File(dir,filename);
         try{
             FileOutputStream out=new FileOutputStream(file,true);
-            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName("UTF-8")));
+            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName(charset_target)));
             //myWriter.newLine();
             myWriter.write(sentence+"\n");
             myWriter.flush();

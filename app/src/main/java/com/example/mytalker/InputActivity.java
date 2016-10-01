@@ -380,6 +380,8 @@ public class InputActivity extends Activity {
         }
 
         for (File f : myfiles) {
+            if(MyFile.prefix.equals(f.getName()))
+                continue;
             if(f.isDirectory())
                 dirs.add(f.getName());
             else
@@ -430,7 +432,7 @@ public class InputActivity extends Activity {
 
     private void setMainList(File file){
         myList.clear();
-        String charset="UTF-8";
+        String charset=MyFile.charset_target;
         if(file.exists()){
             File myFile=MyFile.getFile(file);
             try{
