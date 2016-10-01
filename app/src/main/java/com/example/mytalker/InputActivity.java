@@ -496,6 +496,7 @@ public class InputActivity extends Activity {
 
     private void talk(final String message,boolean learning) {
         //要傳送的字串
+        MyFile.log(message);
         if(learning)
             new Thread(new Runnable() {
             @Override

@@ -49,6 +49,10 @@
             android:name=".DataMove"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ConnectionInterface"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/AppTheme" />
         <!-- Used for transferring files  after a successful connection -->
 
     </application>

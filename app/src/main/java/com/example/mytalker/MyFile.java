@@ -2,6 +2,7 @@ package com.example.mytalker;
 
 
 
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -14,15 +15,19 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class MyFile {
 
-    static  public String charset="BIG5";
+    static public String charset="BIG5";
+    static String prefix="UTF8-";
 
     static public File getFile(File inputFile){
         File myDir=inputFile.getParentFile();
         String name=inputFile.getName();
-        String prefix="UTF8-";
+        name=name.toUpperCase();
         if(name.startsWith(prefix))
             return inputFile;
         String filename=prefix+name;
@@ -99,6 +104,25 @@ public class MyFile {
         } catch (Exception e) {
             Log.e("tag", e.getMessage());
         }
+    }
+
+    static public void log(String sentence){
+        File dir=new File(Environment.getExternalStorageDirectory().getPath()+"/MyTalker/紀錄");
+        mkdirs(dir);
+        DateFormat format=new SimpleDateFormat("yyyy-MM-dd");
+        String filename= prefix+format.format(Calendar.getInstance().getTime())+".txt";
+        File file=new File(dir,filename);
+        try{
+            FileOutputStream out=new FileOutputStream(file,true);
+            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName("UTF-8")));
+            //myWriter.newLine();
+            myWriter.write(sentence+"\n");
+            myWriter.flush();
+            myWriter.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
     //no construct
     private MyFile(){
