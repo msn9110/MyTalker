@@ -74,7 +74,6 @@ public class InputActivity extends Activity {
 
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
-    private ProgressDialog progressDialog2 = null;
     String[] sentence = new String[15];
     Spinner spinner;
 
@@ -261,6 +260,19 @@ public class InputActivity extends Activity {
                 spinner.setSelection(0);
             }
         });//text change event
+
+        btn_send.setEnabled(false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                speaker=new Speaker(getApplicationContext());
+                try {
+                    Thread.sleep(1250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
     //===============================================================================================
 
@@ -268,26 +280,22 @@ public class InputActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        btn_send.setEnabled(false);
-        progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
         new Thread(new Runnable() {
             @Override
             public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        btn_send.setEnabled(false);
+                    }
+                });
                 learn=new Learn(getApplicationContext(),helper);
-                speaker=new Speaker(getApplicationContext());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         btn_send.setEnabled(true);
                     }
                 });
-                //speaker.speak("");//prevent first lag
-                try {
-                    Thread.sleep(1250);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                progressDialog2.dismiss();
             }
         }).start();
         Update();
@@ -564,14 +572,6 @@ public class InputActivity extends Activity {
     }
     //===============================================================================================
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        speaker.shutdown();
-        terminate();
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -581,5 +581,11 @@ public class InputActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        speaker.shutdown();
     }
 }
