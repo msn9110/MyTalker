@@ -27,7 +27,7 @@
 
     <HorizontalScrollView
         android:layout_width="fill_parent"
-        android:layout_height="60dp"
+        android:layout_height="match_parent"
         android:id="@+id/horizontalScrollView" >
 
         <LinearLayout
@@ -35,100 +35,95 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="200dp"
-                android:layout_height="60dp"
-                android:text="清除"
-                android:id="@+id/btn_clear"/>
+                android:layout_height="match_parent">
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="清除"
+                    android:id="@+id/btn_clear"/>
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:text="即時語音"
+                    android:id="@+id/sw_immediate" />
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/mainList">
+                </ListView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="200dp"
-                android:layout_height="60dp"
-                android:text="主層"
-                android:id="@+id/btn_lv1"/>
+                android:layout_height="match_parent">
 
-            <Button
-                style="?android:attr/buttonStyleSmall"
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="主層"
+                    android:id="@+id/btn_lv1"/>
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:text="本地語音"
+                    android:id="@+id/sw_voice" />
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/dbList">
+                </ListView>
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="200dp"
-                android:layout_height="60dp"
-                android:text="載入資料"
-                android:id="@+id/btn_load"/>
+                android:layout_height="match_parent">
 
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="載入資料"
+                    android:id="@+id/btn_load"/>
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:text="演講模式"
+                    android:id="@+id/sw_speech" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="無資料"
+                    android:id="@+id/txt_no_data"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone"/>
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/speechList">
+                </ListView>
+            </LinearLayout>
         </LinearLayout>
     </HorizontalScrollView>
-
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="17sp"
-            android:text="即時語音"
-            android:id="@+id/sw_immediate"
-            android:layout_row="0"
-            android:layout_column="0" />
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="17sp"
-            android:text="本地語音"
-            android:id="@+id/sw_voice"
-            android:layout_row="0"
-            android:layout_column="1" />
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="17sp"
-            android:text="演講模式"
-            android:id="@+id/sw_speech"
-            android:layout_row="0"
-            android:layout_column="2" />
-    </GridLayout>
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ListView
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/mainList">
-        </ListView>
-
-        <ListView
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/dbList">
-        </ListView>
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="無資料"
-                android:id="@+id/txt_no_data"
-                android:layout_gravity="center_horizontal"
-                android:visibility="gone"/>
-
-            <ListView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/speechList">
-            </ListView>
-        </LinearLayout>
-
-    </LinearLayout>
-
 </LinearLayout>
