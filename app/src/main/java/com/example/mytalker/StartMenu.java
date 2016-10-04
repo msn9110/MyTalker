@@ -31,7 +31,6 @@ public class StartMenu extends Activity{
                 Intent intent =new Intent();
                 intent.setClass(getApplicationContext(),InputActivity.class);
                 startActivity(intent);
-                //StartMenu.this.finish();
             }
         });
 
@@ -40,7 +39,7 @@ public class StartMenu extends Activity{
             public void onClick(View v) {
                 InputActivity.con=true;
                 Intent intent =new Intent();
-                intent.setClass(getApplicationContext(),WiFiDirectActivity.class);
+                intent.setClass(getApplicationContext(),ConnectionInterface.class);
                 startActivity(intent);
                 StartMenu.this.finish();
 

@@ -25,6 +25,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.session.AppKeyPair;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -82,6 +86,13 @@ public class InputActivity extends Activity {
     File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
     static final String TAG="SpeechList";
 
+    //dropbox
+    final static private String APP_KEY = "INSERT_APP_KEY";
+    final static private String APP_SECRET = "INSERT_APP_SECRET";
+    // In the class declaration section:
+    private DropboxAPI<AndroidAuthSession> mDBApi;
+    String dropbox="(Dropbox)";
+
     //=====================================oncreate===================================================
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -92,6 +103,11 @@ public class InputActivity extends Activity {
             setThreadPolicy(policy);
         }
         //initialize
+        // And later in some initialization function:
+        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
+        AndroidAuthSession session = new AndroidAuthSession(appKeys);
+        mDBApi = new DropboxAPI<>(session);
+
         MyFile.mkdirs(appDir);
 
         helper = new DBConnection(this);
@@ -144,28 +160,32 @@ public class InputActivity extends Activity {
 
 
                 else {
-                    if(file.isDirectory())
-                        speechList.setAdapter(createListAdapter(file));
-                    else{
-                        if(!speechMode)
-                            setMainList(file);
-                        else {
-                            final File Selection=new File(parentPath,select);
-                            try {
-                                File myFile = MyFile.getFile(Selection);
-                                FileInputStream fIn = new FileInputStream(myFile);
-                                BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                                String line;
-                                while ((line = myReader.readLine()) != null) {
-                                    if(line.length()==0)
-                                        continue;
-                                    talk(line,false);
+                    if(dropbox.equals(select)){
+                        mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
+                    }else {
+                        if(file.isDirectory())
+                            speechList.setAdapter(createListAdapter(file));
+                        else{
+                            if(!speechMode)
+                                setMainList(file);
+                            else {
+                                final File Selection=new File(parentPath,select);
+                                try {
+                                    File myFile = MyFile.getFile(Selection);
+                                    FileInputStream fIn = new FileInputStream(myFile);
+                                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                                    String line;
+                                    while ((line = myReader.readLine()) != null) {
+                                        if(line.length()==0)
+                                            continue;
+                                        talk(line,false);
+                                    }
+                                    myReader.close();
+                                } catch (FileNotFoundException e) {
+                                    Log.e(TAG, "File not found: " + e.toString());
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Can not read file: " + e.toString());
                                 }
-                                myReader.close();
-                            } catch (FileNotFoundException e) {
-                                Log.e(TAG, "File not found: " + e.toString());
-                            } catch (IOException e) {
-                                Log.e(TAG, "Can not read file: " + e.toString());
                             }
                         }
                     }
@@ -391,6 +411,8 @@ public class InputActivity extends Activity {
         List<String> files = new ArrayList<>();
         if(!APPDir){
             list.add("..(回上一頁)");
+        }else {
+            list.add(dropbox);
         }
 
         for (File f : myfiles) {
@@ -571,6 +593,22 @@ public class InputActivity extends Activity {
         }
     }
     //===============================================================================================
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mDBApi.getSession().authenticationSuccessful()) {
+            try {
+                // Required to complete auth, sets the access token on the session
+                mDBApi.getSession().finishAuthentication();
+
+                //String accessToken = mDBApi.getSession().getOAuth2AccessToken();
+            } catch (IllegalStateException e) {
+                Log.i("DbAuthLog", "Error authenticating", e);
+            }
+        }
+    }
 
     @Override
     protected void onPause() {

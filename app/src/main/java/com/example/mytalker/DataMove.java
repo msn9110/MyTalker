@@ -1,6 +1,7 @@
 package com.example.mytalker;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -211,8 +212,16 @@ public class DataMove extends Activity {
                     uri = data.getData();
                     if( uri != null )
                     {
+                        String ext=".db";
                         File MyDB=new File(uri.getPath());
-                        OutToIn(MyDB,outMode);
+                        if(MyDB.getName().endsWith(ext))
+                            OutToIn(MyDB,outMode);
+                        else{
+                            AlertDialog.Builder MyAlertDialog = new AlertDialog.Builder(this);
+                            MyAlertDialog.setTitle("選擇類型錯誤");
+                            MyAlertDialog.setMessage("請選擇db檔(*.db)");
+                            MyAlertDialog.show();
+                        }
                     }
                     else
                         setTitle("無效的檔案路徑 !!");
