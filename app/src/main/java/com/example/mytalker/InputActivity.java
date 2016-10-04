@@ -417,7 +417,7 @@ public class InputActivity extends Activity {
         if(!APPDir){
             list.add("..(回上一頁)");
         }else {
-            //list.add(dropbox);
+            list.add(dropbox);
         }
 
         for (File f : myfiles) {
