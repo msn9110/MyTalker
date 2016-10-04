@@ -92,7 +92,7 @@ public class InputActivity extends Activity {
     final static private String APP_SECRET = "x9i4k97k4ac5ilk";
     // In the class declaration section:
     private DropboxAPI<AndroidAuthSession> mDBApi;
-    String dropbox="(Dropbox)";
+    String dropbox_auth="-->Dropbox";
 
     //=====================================oncreate===================================================
     @Override
@@ -164,7 +164,7 @@ public class InputActivity extends Activity {
                     if(select.equals(fileEncoding)){
                         MyFile.setCharset();
                         Toast.makeText(InputActivity.this,MyFile.charset,Toast.LENGTH_SHORT).show();
-                    }else if(select.equals(dropbox)){
+                    }else if(select.equals(dropbox_auth)){
                         mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
                     }else {
                         if(file.isDirectory())
@@ -417,7 +417,7 @@ public class InputActivity extends Activity {
         if(!APPDir){
             list.add("..(回上一頁)");
         }else {
-            list.add(dropbox);
+            list.add(dropbox_auth);
         }
 
         for (File f : myfiles) {
