@@ -21,10 +21,17 @@ import java.util.Calendar;
 
 public class MyFile {
 
+    static private String[] MyCharset=new String[]{"BIG5","UTF-8"};
+    static private int next=0;
     static public String charset="BIG5";
     static public String charset_target="UTF-8";
     static public String prefix="("+charset_target+")";
 
+    static public void setCharset(){
+        int size=MyCharset.length;
+        next=(next+1)%size;
+        charset=MyCharset[next];
+    }
     static public File getFile(File inputFile){
         File myDir=new File(Environment.getExternalStorageDirectory()+"/MyTalker/"+prefix);
         mkdirs(myDir);

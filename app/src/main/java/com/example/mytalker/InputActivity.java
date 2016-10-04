@@ -84,11 +84,12 @@ public class InputActivity extends Activity {
     ArrayList<String> myList=new ArrayList<>();
     String parentPath;
     File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
+    final String fileEncoding="-->更改文件編碼";
     static final String TAG="SpeechList";
 
     //dropbox
-    final static private String APP_KEY = "INSERT_APP_KEY";
-    final static private String APP_SECRET = "INSERT_APP_SECRET";
+    final static private String APP_KEY = "admwgo2fp9n1bli";
+    final static private String APP_SECRET = "x9i4k97k4ac5ilk";
     // In the class declaration section:
     private DropboxAPI<AndroidAuthSession> mDBApi;
     String dropbox="(Dropbox)";
@@ -160,7 +161,10 @@ public class InputActivity extends Activity {
 
 
                 else {
-                    if(dropbox.equals(select)){
+                    if(select.equals(fileEncoding)){
+                        MyFile.setCharset();
+                        Toast.makeText(InputActivity.this,MyFile.charset,Toast.LENGTH_SHORT).show();
+                    }else if(select.equals(dropbox)){
                         mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
                     }else {
                         if(file.isDirectory())
@@ -409,10 +413,11 @@ public class InputActivity extends Activity {
         File[] myfiles = dir.listFiles();
         List<String> dirs = new ArrayList<>();
         List<String> files = new ArrayList<>();
+        list.add(fileEncoding);
         if(!APPDir){
             list.add("..(回上一頁)");
         }else {
-            list.add(dropbox);
+            //list.add(dropbox);
         }
 
         for (File f : myfiles) {
