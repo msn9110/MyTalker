@@ -5,7 +5,10 @@
         <!-- Customize your theme here. -->
     </style>
     <style name="AppBaseTheme" parent="@android:style/Theme.NoTitleBar">
+        
     </style>
 
     <style name="CustomButton">Button</style>
+
+    <style name="MyTheme" parent="Theme.AppCompat.NoActionBar" />
 </resources>

@@ -11,6 +11,9 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -85,6 +88,7 @@ public class InputActivity extends Activity {
     String parentPath;
     File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
     final String fileEncoding="-->更改文件編碼";
+    final String BACK="..(回上一頁)";
     static final String TAG="SpeechList";
 
     //dropbox
@@ -92,7 +96,7 @@ public class InputActivity extends Activity {
     final static private String APP_SECRET = "x9i4k97k4ac5ilk";
     // In the class declaration section:
     private DropboxAPI<AndroidAuthSession> mDBApi;
-    String dropbox_auth="-->Dropbox";
+    String dropbox="(Dropbox)";
 
     //=====================================oncreate===================================================
     @Override
@@ -155,18 +159,18 @@ public class InputActivity extends Activity {
 
                 String select=((TextView) view).getText().toString();
                 File file=new File(parentPath,select);
-                if(select.startsWith("..")){
-                    speechList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
-                }
 
+                switch (select){
+                    case BACK:
+                        speechList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
+                        break;
 
-                else {
-                    if(select.equals(fileEncoding)){
+                    case fileEncoding:
                         MyFile.setCharset();
                         Toast.makeText(InputActivity.this,MyFile.charset,Toast.LENGTH_SHORT).show();
-                    }else if(select.equals(dropbox_auth)){
-                        mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
-                    }else {
+                        break;
+
+                    default:
                         if(file.isDirectory())
                             speechList.setAdapter(createListAdapter(file));
                         else{
@@ -192,7 +196,7 @@ public class InputActivity extends Activity {
                                 }
                             }
                         }
-                    }
+                        break;
                 }
             }
         });
@@ -299,7 +303,11 @@ public class InputActivity extends Activity {
         }).start();
     }
     //===============================================================================================
-
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_input_activity, menu);
+        return true;
+    }
     //===================================onstart======================================================
     @Override
     protected void onStart() {
@@ -415,9 +423,9 @@ public class InputActivity extends Activity {
         List<String> files = new ArrayList<>();
         list.add(fileEncoding);
         if(!APPDir){
-            list.add("..(回上一頁)");
+            list.add(BACK);
         }else {
-            list.add(dropbox_auth);
+            list.add(dropbox);
         }
 
         for (File f : myfiles) {
@@ -599,6 +607,16 @@ public class InputActivity extends Activity {
     }
     //===============================================================================================
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.dropbox_auth:
+                mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();
