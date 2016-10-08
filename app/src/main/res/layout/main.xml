@@ -15,6 +15,28 @@
         android:textColor="@color/MainText">
 
     </TextView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/hostpot">
+
+        <Button
+        android:layout_width="200dp"
+        android:layout_height="70dp"
+        android:text="啟動顯示器"
+        android:textSize="25sp"
+        android:id="@+id/btn_display" />
+
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="70dp"
+            android:text="啟動代言人"
+            android:textSize="25sp"
+            android:id="@+id/btn_input" />
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,11 +46,12 @@
             android:id="@+id/linearLayout1"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <fragment
                 class="com.example.mytalker.DeviceListFragment"
                 android:id="@+id/frag_list"
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_height="296dp"
                 tools:layout="@layout/device_list">
                 <!-- Preview: layout=@layout/row_devices -->
             </fragment>

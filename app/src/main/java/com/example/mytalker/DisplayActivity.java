@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,8 +19,9 @@ import static android.os.StrictMode.setThreadPolicy;
 
 public class DisplayActivity extends Activity {
 
-    //public static final String IP_SERVER = "192.168.49.143";
-    public static int PORT = 8988;
+    public static final String IP_SERVER = "192.168.49.1";
+    public static final int BACKLOG=1;
+    public static final int PORT = 8988;
     String[] buf=new String[100];//queue for playing tts
     int count=0;
     TextView tvDisplay,tvStatus;
@@ -47,11 +49,6 @@ public class DisplayActivity extends Activity {
     protected void onDestroy(){
         super.onDestroy();
         speaker.shutdown();
-        try {
-            serverSocket.close();
-        }catch (IOException e){
-            Log.d(WiFiDirectActivity.TAG,e.toString());
-        }
         this.finish();
     }
 
@@ -63,7 +60,6 @@ public class DisplayActivity extends Activity {
         }catch (IOException e){
             Log.d(WiFiDirectActivity.TAG,e.toString());
         }
-        this.finish();
     }
     int current=0;
     @Override
@@ -72,9 +68,9 @@ public class DisplayActivity extends Activity {
         handler=new Handler();
 
         //建立Thread
-        Thread fst = new Thread(socket_server);
+        Thread server = new Thread(socket_server);
         //啟動Thread
-        fst.start();
+        server.start();
     }
     boolean end=false;
     ReentrantLock lock=new ReentrantLock();

@@ -33,16 +33,11 @@ import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,12 +47,8 @@ import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
 public class InputActivity extends Activity {
-    public static final String IP_SERVER = "192.168.49.1";
-    public static int PORT = 8988;
-    private DataOutputStream out; //for transfer
-    private Socket socket;
-
     Speaker speaker;
+    Connection connection;
 
     Switch sw_immediate,sw_voice,sw_speech;//to control three status of app
     Button btn_send, btn_lv1, btn_load, btn_clear;
@@ -115,6 +106,7 @@ public class InputActivity extends Activity {
 
         MyFile.mkdirs(appDir);
 
+        connection=new Connection(this);
         helper = new DBConnection(this);
 
         sw_immediate=(Switch)findViewById(R.id.sw_immediate);
@@ -331,8 +323,8 @@ public class InputActivity extends Activity {
             }
         }).start();
         Update();
-        if (con)
-            ConnectToDisplay();
+       if (con)
+            connection.ConnectToDisplay();
     }
 
     //===============================================================================================
@@ -560,13 +552,7 @@ public class InputActivity extends Activity {
             speaker.speak(message);
         }
         if (con) {
-            try {
-                //傳送資料
-                out.writeUTF(message);
-                Toast.makeText(this, "成功傳送!", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "傳送失敗", Toast.LENGTH_SHORT).show();
-            }
+            connection.Send(message);
         }
 
     }
@@ -577,34 +563,6 @@ public class InputActivity extends Activity {
         setCurrentData();
     }
 
-    //===============================connection=======================================================
-    private void ConnectToDisplay() {
-        try {
-            InetAddress serverAddr;
-            SocketAddress sc_add;            //設定Server IP位置
-            serverAddr = InetAddress.getByName(IP_SERVER);
-            //設定port
-            sc_add = new InetSocketAddress(serverAddr, PORT);
-            socket = new Socket();
-            //與Server連線，timeout時間2秒
-            socket.connect(sc_add, 2000);
-            out = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "連線失敗", Toast.LENGTH_SHORT).show();
-            this.finish();
-        }
-    }
-
-    private void terminate() {
-        if (con) {
-            try {
-                out.close();
-                socket.close();
-            } catch (Exception e) {
-                Log.e("terminate",e.toString());
-            }
-        }
-    }
     //===============================================================================================
 
     @Override
@@ -636,7 +594,7 @@ public class InputActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        terminate();
+        connection.terminate(con);
     }
 
     @Override

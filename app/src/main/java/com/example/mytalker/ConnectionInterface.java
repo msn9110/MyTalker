@@ -23,5 +23,16 @@ public class ConnectionInterface extends Activity{
                 ConnectionInterface.this.finish();
             }
         });
+
+        Button bt=(Button)findViewById(R.id.btn_bt);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent();
+                intent.setClass(getApplicationContext(),InputActivity.class);
+                startActivity(intent);
+                ConnectionInterface.this.finish();
+            }
+        });
     }
 }
