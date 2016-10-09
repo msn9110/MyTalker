@@ -3,25 +3,22 @@ package com.example.mytalker;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.StrictMode;
 import android.util.Log;
 import android.widget.TextView;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static android.os.StrictMode.setThreadPolicy;
 
 
 public class DisplayActivity extends Activity {
 
-    public static final String IP_SERVER = "192.168.49.1";
-    public static final int BACKLOG=1;
+    public static final String END="!!!@@@###";
     public static final int PORT = 8988;
+    public boolean terminal=true;
     String[] buf=new String[100];//queue for playing tts
     int count=0;
     TextView tvDisplay,tvStatus;
@@ -33,10 +30,6 @@ public class DisplayActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            setThreadPolicy(policy);
-        }
         //initialize
         speaker=new Speaker(getApplicationContext());
         for(int i=0;i<100;i++)
@@ -74,7 +67,7 @@ public class DisplayActivity extends Activity {
     }
     boolean end=false;
     ReentrantLock lock=new ReentrantLock();
-    String msg2="";
+    String message="";
     Thread display=new Thread(new Runnable() {
         @Override
         public void run() {
@@ -82,12 +75,12 @@ public class DisplayActivity extends Activity {
             while (!end){
 
                 if(count>0 && speaker.isNotSpeaking()){
-                    msg2=buf[current];
+                    message=buf[current];
                     System.out.println("CURRENT : "+current);
                     System.out.println("COUNT : "+count);
                     handler.post(new Runnable() {
                         public void run() {
-                            int size=msg2.length();
+                            int size=message.length();
                             float font=120;
                             if(size>30)
                                 font=100;
@@ -95,12 +88,12 @@ public class DisplayActivity extends Activity {
                                 font=75;
                             else if(size>120)
                                 font=50;
-                            if(msg2.length()>0 && speaker.isNotSpeaking()) {
+                            if(message.length()>0 && speaker.isNotSpeaking()) {
                                 lock.lock();
                                 tvDisplay.setTextSize(font);
-                                tvDisplay.setText(msg2);
-                                speaker.speak(msg2);
-                                msg2="";
+                                tvDisplay.setText(message);
+                                speaker.speak(message);
+                                message="";
                                 buf[current]="";
                                 current++;
                                 current%=100;
@@ -153,8 +146,8 @@ public class DisplayActivity extends Activity {
                             count++;
                             lock.unlock();
                         }
-                    }while (line!=null);
-                    System.out.println("END");
+                    }while (!line.equals(END));
+                    terminal=true;
                 } catch (Exception e) {
                     handler.post(new Runnable() {
                         public void run() {
@@ -163,6 +156,7 @@ public class DisplayActivity extends Activity {
                     });
                     in.close();
                     end=true;
+                    terminal=false;
                     DisplayActivity.this.finish();
                 }
             }catch(IOException e) {
@@ -173,6 +167,7 @@ public class DisplayActivity extends Activity {
                     }
                 });
                 end=true;
+                terminal=false;
                 DisplayActivity.this.finish();
             }
         }

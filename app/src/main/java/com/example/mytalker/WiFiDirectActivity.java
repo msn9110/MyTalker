@@ -71,6 +71,16 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         setContentView(R.layout.main);
         mContext=this;
         // add necessary intent values to be matched.
+        Button btn_connect=(Button)findViewById(R.id.btn_connect2);
+        btn_connect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                WifiAdmin wifiAdmin = new WifiAdmin(mContext);
+                wifiAdmin.openWifi();
+                wifiAdmin.addNetwork(wifiAdmin.CreateWifiInfo("MyDisplay", "mydisplay", 3));
+            }
+        });
+
         Button btn_display=(Button)findViewById(R.id.btn_display);
         Button btn_input=(Button)findViewById(R.id.btn_input);
         btn_display.setOnClickListener(new View.OnClickListener() {
@@ -82,14 +92,9 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
             }
         });
 
-        //WifiAdmin wifiAdmin=new WifiAdmin(mContext);
-        //wifiAdmin.IsExsits("MyDisplay");
         btn_input.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //WifiAdmin wifiAdmin = new WifiAdmin(mContext);
-                //wifiAdmin.openWifi();
-                //wifiAdmin.addNetwork(wifiAdmin.CreateWifiInfo("MyDisplay", "mydisplay", 1));
                 Intent intent=new Intent();
                 intent.setClass(WiFiDirectActivity.this,InputActivity.class);
                 startActivity(intent);

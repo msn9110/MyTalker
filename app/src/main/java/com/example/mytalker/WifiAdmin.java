@@ -64,7 +64,7 @@ public class WifiAdmin {
     }
 
     // 创建一个WifiLock
-    public void creatWifiLock() {
+    public void createWifiLock() {
         mWifiLock = mWifiManager.createWifiLock("Test");
     }
 
@@ -80,8 +80,7 @@ public class WifiAdmin {
             return;
         }
         // 连接配置好的指定ID的网络
-        mWifiManager.enableNetwork(mWifiConfiguration.get(index).networkId,
-                true);
+        mWifiManager.enableNetwork(mWifiConfiguration.get(index).networkId,true);
     }
 
     public void startScan() {
@@ -137,11 +136,14 @@ public class WifiAdmin {
 
     // 添加一个网络并连接
     public void addNetwork(WifiConfiguration wcg) {
-        int wcgID = mWifiManager.addNetwork(wcg);
-        mWifiManager.saveConfiguration();
-        mWifiManager.enableNetwork(wcgID, true);
-        boolean b =  mWifiManager.reconnect();
-        System.out.println("b--" + b);
+        int netId = mWifiManager.addNetwork(wcg);
+        System.out.println(netId + "," + wcg.networkId);
+        boolean ok =  mWifiManager.enableNetwork(netId,true);
+        System.out.println("ENABLE : " + ok);
+        ok =  mWifiManager.saveConfiguration();
+        System.out.println("SAVE : " + ok);
+        ok = mWifiManager.reconnect();
+        System.out.println("RECONNECT : " + ok);
     }
 
     // 断开指定ID的网络
@@ -161,7 +163,6 @@ public class WifiAdmin {
         config.allowedPairwiseCiphers.clear();
         config.allowedProtocols.clear();
         config.SSID = "\"" + SSID + "\"";
-        System.out.println(config);
 
         WifiConfiguration tempConfig = this.IsExsits(SSID);
         if(tempConfig != null) {
@@ -209,7 +210,7 @@ public class WifiAdmin {
         {
             if (existingConfig.SSID.equals("\""+SSID+"\""))
             {
-                System.out.println(existingConfig);
+                //System.out.println(existingConfig);
                 return existingConfig;
             }
         }
