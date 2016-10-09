@@ -35,6 +35,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.mytalker.DeviceListFragment.DeviceActionListener;
@@ -71,6 +73,17 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
         setContentView(R.layout.main);
         mContext=this;
         // add necessary intent values to be matched.
+        //===========================================================================================
+        Switch sw_hostpot=(Switch)findViewById(R.id.sw_hostpot);
+        sw_hostpot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b)
+                    findViewById(R.id.hostpot).setVisibility(View.VISIBLE);
+                else
+                    findViewById(R.id.hostpot).setVisibility(View.GONE);
+            }
+        });
         Button btn_connect=(Button)findViewById(R.id.btn_connect2);
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +113,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
                 startActivity(intent);
             }
         });
-
+        //===========================================================================================
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);

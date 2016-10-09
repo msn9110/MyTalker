@@ -66,15 +66,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     progressDialog.dismiss();
                 }
                 progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
-                        "Connecting to :" + device.deviceAddress, true, true
-//                        new DialogInterface.OnCancelListener() {
-//
-//                            @Override
-//                            public void onCancel(DialogInterface dialog) {
-//                                ((DeviceActionListener) getActivity()).cancelDisconnect();
-//                            }
-//                        }
-                );
+                        "Connecting to :" + device.deviceAddress, true, true);
                 ((DeviceListFragment.DeviceActionListener) getActivity()).connect(config);
 
             }
@@ -112,14 +104,17 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         this.getView().setVisibility(View.VISIBLE);
 
         // The owner IP is now known.
+        String text;
         TextView view = (TextView) mContentView.findViewById(R.id.group_owner);
-        view.setText(getResources().getString(R.string.group_owner_text)
-                + ((info.isGroupOwner == true) ? getResources().getString(R.string.yes)
-                : getResources().getString(R.string.no)));
+        text=getResources().getString(R.string.group_owner_text)
+                + ((info.isGroupOwner) ? getResources().getString(R.string.yes)
+                : getResources().getString(R.string.no));
+        view.setText(text);
 
         // InetAddress from WifiP2pInfo struct.
         view = (TextView) mContentView.findViewById(R.id.device_info);
-        view.setText("Group Owner IP - " + info.groupOwnerAddress.getHostAddress());
+        text="Group Owner IP - " + info.groupOwnerAddress.getHostAddress();
+        view.setText(text);
 
         // After the group negotiation, we assign the group owner as the file
         // server. The file server is single threaded, single connection server
