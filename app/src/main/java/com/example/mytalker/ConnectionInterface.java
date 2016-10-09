@@ -17,6 +17,7 @@ public class ConnectionInterface extends Activity{
         widi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DisplayActivity.WifiMode=Connection.WifiMode=true;
                 Intent intent=new Intent();
                 intent.setClass(getApplicationContext(),WiFiDirectActivity.class);
                 startActivity(intent);
@@ -28,6 +29,7 @@ public class ConnectionInterface extends Activity{
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DisplayActivity.WifiMode=Connection.WifiMode=false;
                 Intent intent=new Intent();
                 intent.setClass(getApplicationContext(),InputActivity.class);
                 startActivity(intent);
