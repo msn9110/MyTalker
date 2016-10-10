@@ -1,6 +1,10 @@
 package com.example.mytalker;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -10,6 +14,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 
@@ -25,6 +30,7 @@ public class DisplayActivity extends Activity {
     TextView tvDisplay,tvStatus;
     private  Handler handler=new Handler();
     private ServerSocket serverSocket=null;
+    private BluetoothServerSocket BTSocket=null;
     Speaker speaker;
 
     @Override
@@ -44,9 +50,7 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onStart(){
         super.onStart();
-        if(WifiMode)
-            new Thread(socket_server).start();
-
+        new Thread(socket_server).start();
     }
 
     ReentrantLock lock=new ReentrantLock();
@@ -89,51 +93,45 @@ public class DisplayActivity extends Activity {
     });
     private Runnable socket_server = new Runnable(){
         public void run(){
+
             try{
-                //建立serverSocket
-                serverSocket = new ServerSocket(PORT);
-                //接收連線
-                handler.post(new Runnable() {
-                    public void run() {
-                        tvStatus.setText(R.string.listening);
-                    }
-                });
-                Socket client = serverSocket.accept();
-                handler.post(new Runnable() {
-                    public void run() {
-                        tvStatus.setText(R.string.connected);
-                    }
-                });
-                DataInputStream in = new DataInputStream(client.getInputStream());
-                try {
-                    int i=0;
-                    display.start();
-                    //接收資料
-                    String line;
-                    do{
-                        line = in.readUTF();
-                        if(line.length()>0){
-                            System.out.println("COUNT : "+count);
-                            buf[i]=line;
-                            System.out.println("Receive "+i+" : "+buf[i]);
-                            i=(i+1) % buf.length;
-                            lock.lock();
-                            count++;
-                            lock.unlock();
-                        }
-                    }while (!line.equals(END));
-                    terminal=true;
-                } catch (Exception e) {
+                DataInputStream inputStream;
+                if(WifiMode){
+                    //建立serverSocket
+                    serverSocket = new ServerSocket(PORT);
+                    //接收連線
                     handler.post(new Runnable() {
                         public void run() {
-                            tvStatus.setText("傳送失敗");
+                            tvStatus.setText(R.string.listening);
                         }
                     });
-                    in.close();
-                    EndDisplay=true;
-                    terminal=false;
-                    DisplayActivity.this.finish();
+                    Socket client = serverSocket.accept();
+                    handler.post(new Runnable() {
+                        public void run() {
+                            tvStatus.setText(R.string.connected);
+                        }
+                    });
+                    inputStream=new DataInputStream(client.getInputStream());
+                } else {
+                    BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
+                    //建立serverSocket
+                    BTSocket=adapter.listenUsingRfcommWithServiceRecord("MyDisplay",UUID.fromString("0001101-0000-1000-8000-00805F9B34FB"));
+                    //接收連線
+                    handler.post(new Runnable() {
+                        public void run() {
+                            tvStatus.setText(R.string.listening);
+                        }
+                    });
+                    BluetoothSocket client = BTSocket.accept();
+                    handler.post(new Runnable() {
+                        public void run() {
+                            tvStatus.setText(R.string.connected);
+                        }
+                    });
+                    inputStream=new DataInputStream(client.getInputStream());
                 }
+
+                receive(inputStream);
             }catch(IOException e) {
                 final String err="建立socket失敗";
                 handler.post(new Runnable() {
@@ -148,6 +146,38 @@ public class DisplayActivity extends Activity {
         }
     };
 
+    private void receive(DataInputStream in){
+        try {
+            int i=0;
+            display.start();
+            //接收資料
+            String line;
+            do{
+                line = in.readUTF();
+                if(line.length()>0){
+                    System.out.println("COUNT : "+count);
+                    buf[i]=line;
+                    System.out.println("Receive "+i+" : "+buf[i]);
+                    i=(i+1) % buf.length;
+                    lock.lock();
+                    count++;
+                    lock.unlock();
+                }
+            }while (!line.equals(END));
+            terminal=true;
+        } catch (Exception e) {
+            handler.post(new Runnable() {
+                public void run() {
+                    tvStatus.setText("傳送失敗");
+                }
+            });
+            //in.close();
+            EndDisplay=true;
+            terminal=false;
+            DisplayActivity.this.finish();
+        }
+    }
+
     @Override
     protected void onDestroy(){
         super.onDestroy();
@@ -161,6 +191,8 @@ public class DisplayActivity extends Activity {
         try {
             if (WifiMode)
                 serverSocket.close();
+            else
+                BTSocket.close();
         }catch (IOException e){
             Log.d(WiFiDirectActivity.TAG,e.toString());
         }

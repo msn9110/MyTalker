@@ -1,6 +1,8 @@
 package com.example.mytalker;
 
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,11 +14,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 public class Connection {
     public static boolean WifiMode=true;
     public String IP_SERVER;
     public static int PORT = 8988;
+    private static final UUID MY_UUID = UUID.fromString("0001101-0000-1000-8000-00805F9B34FB");
     private DataOutputStream out; //for transfer
     private Socket socket;
     private Context context;
@@ -46,6 +50,13 @@ public class Connection {
                 socket.connect(sc_addr, 2000);
                 out = new DataOutputStream(socket.getOutputStream());
             } catch (IOException e) {
+                Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+            }
+        }else {
+            try {
+                BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
+
+            } catch (Exception e) {
                 Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
             }
         }

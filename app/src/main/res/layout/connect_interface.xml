@@ -8,7 +8,8 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:id="@+id/btn_bt"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -16,7 +17,8 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Bluetooth"
         android:textSize="40sp"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
 
     <Button
         android:layout_width="200dp"
