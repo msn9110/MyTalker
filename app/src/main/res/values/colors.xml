@@ -8,4 +8,5 @@
     <color name="MainBackground">#000000</color>
     <color name="MainButton">#FFFFFF</color>
     <color name="MainText">#FFFFFF</color>
+    <color name="legacy_primary">#000000</color>
 </resources>

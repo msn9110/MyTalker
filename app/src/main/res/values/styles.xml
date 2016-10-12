@@ -4,7 +4,7 @@
     <style name="AppTheme" parent="@android:style/Theme.Holo">
         <!-- Customize your theme here. -->
     </style>
-    <style name="AppBaseTheme" parent="@android:style/Theme.NoTitleBar">
+    <style name="AppBaseTheme" parent="@android:style/Theme.WithActionBar">
         
     </style>
 
