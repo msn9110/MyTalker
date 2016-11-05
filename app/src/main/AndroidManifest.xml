@@ -39,24 +39,20 @@
         <activity
             android:name=".InputActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:theme="@style/AppBaseTheme" />
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".DisplayActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppBaseTheme" />
         <activity
             android:name=".DataMove"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppTheme" />
+            android:configChanges="orientation|keyboardHidden" />
         <activity
             android:name=".ConnectionInterface"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppTheme" />
+            android:configChanges="orientation|keyboardHidden" />
         <activity
             android:name=".BTActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppTheme" />
+            android:configChanges="orientation|keyboardHidden" />
         <!-- Used for transferring files  after a successful connection -->
         <activity
             android:name="com.dropbox.client2.android.AuthActivity"

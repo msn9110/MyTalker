@@ -5,4 +5,15 @@
 
         <item name="android:colorPrimary">@color/legacy_primary</item>
     </style>
+    <!-- 应用于程序或者活动的主题 -->
+    <style name="CustomActionBarTheme"
+        parent="@android:style/Theme.WithActionBar">
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+    </style>
+
+    <!-- ActionBar 样式 -->
+    <style name="MyActionBar"
+        parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/colorPrimaryDark</item>
+    </style>
 </resources>
