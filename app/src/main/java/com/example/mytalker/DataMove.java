@@ -23,7 +23,6 @@ import java.io.InputStreamReader;
 public class DataMove extends Activity {
     final int REQUEST_CODE=0;
     public static final String _DBName = "Database.db";
-    String _LDName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download" + "/LearnData.data";
     final int REQUEST_DBCODE=1100;
     boolean outMode=true;//true to copy out, false to move out
 
@@ -135,13 +134,13 @@ public class DataMove extends Activity {
         }
     }
     //從File讀取data
-    private boolean readFromFile() {
+    private boolean readFromFile(String path) {
         boolean success=false;
         try {
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             MyFile.mkdirs(dir);
             // create the file in which we will write the contents
-            File myFile = MyFile.getFile(new File(_LDName));
+            File myFile = MyFile.getFile(new File(path));
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
             String aDataRow;
@@ -161,13 +160,13 @@ public class DataMove extends Activity {
         return success;
     }
 
-    private void LearnFromFile(){
-        System.out.println(_LDName);
+    private void LearnFromFile(final String path){
+        System.out.println(path);
         progressDialog = ProgressDialog.show(DataMove.this, "請稍後", "學習中...");
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(readFromFile())
+                if(readFromFile(path))
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -192,28 +191,25 @@ public class DataMove extends Activity {
         // 有選擇檔案
         if ( resultCode == RESULT_OK)
         {
-            Uri uri;
-            switch (requestCode){
+            // 取得檔案的 Uri
+            Uri uri= data.getData();
+            String path;
+            if( uri != null )
+            {
+                path=uri.getPath();
+                if (path.startsWith("/file")){
+                    path=path.replaceFirst("/file","");
+                }
 
-                case REQUEST_CODE:
-                    // 取得檔案的 Uri
-                    uri = data.getData();
-                    if( uri != null )
-                    {
-                        _LDName=uri.getPath();
-                        LearnFromFile();
-                    }
-                    else
-                        setTitle("無效的檔案路徑 !!");
-                    break;
+                switch (requestCode){
 
-                case REQUEST_DBCODE:
-                    // 取得檔案的 Uri
-                    uri = data.getData();
-                    if( uri != null )
-                    {
+                    case REQUEST_CODE:
+                        LearnFromFile(path);
+                        break;
+
+                    case REQUEST_DBCODE:
                         String ext=".db";
-                        File MyDB=new File(uri.getPath());
+                        File MyDB=new File(path);
                         if(MyDB.getName().endsWith(ext))
                             OutToIn(MyDB,outMode);
                         else{
@@ -222,14 +218,14 @@ public class DataMove extends Activity {
                             MyAlertDialog.setMessage("請選擇db檔(*.db)");
                             MyAlertDialog.show();
                         }
-                    }
-                    else
-                        setTitle("無效的檔案路徑 !!");
-                    break;
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
+            else
+                setTitle("無效的檔案路徑 !!");
         }
         else
             setTitle("取消選擇檔案 !!");
