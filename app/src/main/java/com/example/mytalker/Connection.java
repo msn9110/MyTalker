@@ -17,6 +17,8 @@ import java.net.UnknownHostException;
 import java.util.UUID;
 
 public class Connection {
+    int reconnect=0;
+    static final int threshold=10;
     public static boolean WifiMode=true;
     public String IP_SERVER;
     public static int PORT = 8988;
@@ -66,8 +68,15 @@ public class Connection {
     public void Send(String msg){
         try {
             out.writeUTF(msg);
+            reconnect=0;
+            Toast.makeText(context,"成功傳送",Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
+            if(reconnect<threshold){
+                reconnect++;
+                ConnectToDisplay();
+                Send(msg);
+            }
         }
     }
 

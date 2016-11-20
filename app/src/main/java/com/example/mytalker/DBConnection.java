@@ -3,12 +3,15 @@ package com.example.mytalker;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 
 public class DBConnection extends SQLiteOpenHelper {
 
+    static final String TAG="DBConnection";
     public static final int _DBVersion = 1; //<-- 版本
     public static final String _DBName="Database.db";
 
@@ -74,7 +77,7 @@ public class DBConnection extends SQLiteOpenHelper {
         String table_name=(mode?VocSchema.TABLE_NAME:SentenceSchema.TABLE_NAME);
         String out=(mode?"VOC":"SENTENCE");
 
-        int newid=0;
+        int newid=-1;
         ContentValues values=new ContentValues();
         values.put(content_name,content);
         try{
@@ -82,13 +85,14 @@ public class DBConnection extends SQLiteOpenHelper {
             //System.out.println("Insert SUCCESS "+out);
         }catch (Exception e){
             e.printStackTrace();
+            Log.e(TAG,"Insert "+content+" into "+table_name);
             System.out.println("Insert Failed " + out);
         }
         return newid;
     }
 
     public int insert(int id1,int id2, SQLiteDatabase db){
-        int newid=0;
+        int newid=-1;
         ContentValues values=new ContentValues();
         values.put(RelationSchema.ID1,id1);
         values.put(RelationSchema.ID2,id2);
@@ -140,6 +144,7 @@ public class DBConnection extends SQLiteOpenHelper {
                 //System.out.println("UPDATE SUCCESS "+out);
             }catch (Exception e){
                 e.printStackTrace();
+                Log.e(TAG,"Update "+content+" into "+table_name);
                 System.out.println("UPDATE FAIL "+out);
             }
         }

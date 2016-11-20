@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -112,26 +113,9 @@ public class DisplayActivity extends Activity {
                         }
                     });
                     inputStream=new DataInputStream(client.getInputStream());
-                } else {
-                    BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
-                    //建立serverSocket
-                    BTSocket=adapter.listenUsingRfcommWithServiceRecord("MyDisplay",UUID.fromString("0001101-0000-1000-8000-00805F9B34FB"));
-                    //接收連線
-                    handler.post(new Runnable() {
-                        public void run() {
-                            tvStatus.setText(R.string.listening);
-                        }
-                    });
-                    BluetoothSocket client = BTSocket.accept();
-                    handler.post(new Runnable() {
-                        public void run() {
-                            tvStatus.setText(R.string.connected);
-                        }
-                    });
-                    inputStream=new DataInputStream(client.getInputStream());
+                    receive(inputStream);//<<<========================================start receive
                 }
 
-                receive(inputStream);
             }catch(IOException e) {
                 final String err="建立socket失敗";
                 handler.post(new Runnable() {
@@ -139,16 +123,21 @@ public class DisplayActivity extends Activity {
                         tvStatus.setText(err);
                     }
                 });
-                EndDisplay=true;
-                terminal=false;
-                DisplayActivity.this.finish();
+                restartDisplay();
             }
         }
     };
 
+    private void restartDisplay(){
+        EndDisplay=true;
+        terminal=false;
+        close();
+        new Thread(socket_server).start();
+    }
     private void receive(DataInputStream in){
         try {
             int i=0;
+            EndDisplay=false;
             display.start();
             //接收資料
             String line;
@@ -172,22 +161,11 @@ public class DisplayActivity extends Activity {
                 }
             });
             //in.close();
-            EndDisplay=true;
-            terminal=false;
-            DisplayActivity.this.finish();
+            restartDisplay();
         }
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        speaker.shutdown();
-        this.finish();
-    }
-
-    @Override
-    protected void onPause(){
-        super.onPause();
+    private void close(){
         try {
             if (WifiMode)
                 serverSocket.close();
@@ -196,5 +174,18 @@ public class DisplayActivity extends Activity {
         }catch (IOException e){
             Log.d(WiFiDirectActivity.TAG,e.toString());
         }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        speaker.shutdown();
+        close();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+
     }
 }

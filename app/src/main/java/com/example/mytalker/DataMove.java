@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -163,10 +164,13 @@ public class DataMove extends Activity {
     private void LearnFromFile(final String path){
         System.out.println(path);
         progressDialog = ProgressDialog.show(DataMove.this, "請稍後", "學習中...");
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(readFromFile(path))
+                Looper.prepare();
+                boolean success=readFromFile(path);
+                if(success)
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -181,6 +185,7 @@ public class DataMove extends Activity {
                         }
                     });
                 progressDialog.dismiss();
+                Looper.loop();
             }
         }).start();
     }
