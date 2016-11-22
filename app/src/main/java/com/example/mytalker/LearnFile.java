@@ -82,7 +82,8 @@ public class LearnFile extends AsyncTask<Void,Integer,Integer> {
     protected void onPostExecute(Integer result) {
         super.onPostExecute(result);
         mDialog.dismiss();
-        if (result==mFileLen) {
+        float success=(float)result/mFileLen;
+        if (success>=0.98) {
             Toast.makeText(mContext,"學習成功!!!",Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(mContext,"學習失敗 : 成功率 : "+result+" / "+mFileLen,Toast.LENGTH_LONG).show();

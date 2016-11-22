@@ -464,9 +464,13 @@ public class InputActivity extends Activity {
 
     private void setList(){
         int size=currentData.length;
-        String[] lists=new String[size];
-        for(int i=0;i<size;i++)
-            lists[i]=currentData[i].text;
+        ArrayList<String> lists=new ArrayList<>();
+        for(int i=0;i<size;i++){
+            String word=currentData[i].text;
+            //if(word.equals("#"))
+             //   continue;
+            lists.add(word);
+        }
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
         dbList.setAdapter(listAdapter);
     }
