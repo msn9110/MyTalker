@@ -47,7 +47,8 @@
             android:theme="@style/AppBaseTheme" />
         <activity
             android:name=".DataMove"
-            android:configChanges="orientation|keyboardHidden" />
+            android:configChanges="orientation|keyboardHidden" >
+        </activity>
         <activity
             android:name=".ConnectionInterface"
             android:configChanges="orientation|keyboardHidden" />

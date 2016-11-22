@@ -131,8 +131,9 @@ public class DisplayActivity extends Activity {
     private void restartDisplay(){
         EndDisplay=true;
         terminal=false;
-        close();
-        new Thread(socket_server).start();
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
     private void receive(DataInputStream in){
         try {

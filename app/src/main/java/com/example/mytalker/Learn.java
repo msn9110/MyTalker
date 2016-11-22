@@ -44,7 +44,7 @@ public class Learn {
 
             try {
             String msg=SpiltString(message, helper.getWritableDatabase());
-            System.out.println(msg);
+            //System.out.println(msg);
 
             //handle vocabulary
             for(int i = 0 ; i < pointer_storewordspilt ; i++){

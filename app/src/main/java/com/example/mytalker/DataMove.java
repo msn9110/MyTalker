@@ -2,28 +2,21 @@ package com.example.mytalker;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class DataMove extends Activity {
     final int REQUEST_CODE=0;
     public static final String _DBName = "Database.db";
+    String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
     final int REQUEST_DBCODE=1100;
     boolean outMode=true;//true to copy out, false to move out
 
@@ -36,13 +29,11 @@ public class DataMove extends Activity {
 
     File out=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),_DBName);
     File in;
-    private static final String TAG = DataMove.class.getName();
 
     DBConnection helper= new DBConnection(this);
     Learn learn;
 
     private Handler handler = new Handler();
-    private ProgressDialog progressDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,13 +94,14 @@ public class DataMove extends Activity {
         button_learndata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //new LearnFile(DataMove.this,LPath,learn).execute();
                 final String mimeType = "text/plain";
                 final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType(mimeType);
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
-
+//thread無法直接access ui
         button_learndata.setEnabled(false);
         new Thread(new Runnable() {
             @Override
@@ -120,9 +112,9 @@ public class DataMove extends Activity {
                     public void run() {
                         button_learndata.setEnabled(true);
                     }
-                });
+            });
             }
-        }).start();
+        }).start();//學習模組初始化
     }
 
     private void OutToIn(File source,boolean mode){
@@ -133,61 +125,6 @@ public class DataMove extends Activity {
             MyFile.moveFile(source,in);
             Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
         }
-    }
-    //從File讀取data
-    private boolean readFromFile(String path) {
-        boolean success=false;
-        try {
-            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            MyFile.mkdirs(dir);
-            // create the file in which we will write the contents
-            File myFile = MyFile.getFile(new File(path));
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            String aDataRow;
-            int row=0;
-            while ((aDataRow = myReader.readLine()) != null) {
-                learn.Learning(aDataRow);
-                row++;
-                System.out.println(row);
-            }
-            success=true;
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e(TAG, "Can not read file: " + e.toString());
-        }
-        return success;
-    }
-
-    private void LearnFromFile(final String path){
-        System.out.println(path);
-        progressDialog = ProgressDialog.show(DataMove.this, "請稍後", "學習中...");
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                boolean success=readFromFile(path);
-                if(success)
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(DataMove.this,"Success Learn",Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                else
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(DataMove.this, "Fail Learn", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                progressDialog.dismiss();
-                Looper.loop();
-            }
-        }).start();
     }
 
     @Override
@@ -209,7 +146,14 @@ public class DataMove extends Activity {
                 switch (requestCode){
 
                     case REQUEST_CODE:
-                        LearnFromFile(path);
+                        final String arg=path;
+                        System.out.println(path);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                new LearnFile(DataMove.this,arg,learn).execute();
+                            }
+                        });
                         break;
 
                     case REQUEST_DBCODE:
