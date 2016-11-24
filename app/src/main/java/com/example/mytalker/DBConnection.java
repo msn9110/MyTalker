@@ -63,69 +63,69 @@ public class DBConnection extends SQLiteOpenHelper {
         }
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO Auto-generated method stub
+
     }
 
     public int insert(boolean mode,String content, SQLiteDatabase db){
 
         String content_name=(mode?VocSchema.CONTENT:SentenceSchema.CONTENT);
         String table_name=(mode?VocSchema.TABLE_NAME:SentenceSchema.TABLE_NAME);
-        String out=(mode?"VOC":"SENTENCE");
 
         int newid=0;
-        ContentValues values=new ContentValues();
-        values.put(content_name,content);
         try{
-            newid=(int)db.insert(table_name,null,values);
-            //System.out.println("Insert SUCCESS "+out);
-        }catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Insert Failed " + out);
+            ContentValues values=new ContentValues();
+            values.put(content_name,content);
+            try{
+                newid=(int)db.insert(table_name,null,values);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        } catch (Exception ex){
+            ex.printStackTrace();
+        } finally {
+            db.close();
         }
+
         return newid;
     }
 
     public int insert(int id1,int id2, SQLiteDatabase db){
         int newid=0;
-        ContentValues values=new ContentValues();
-        values.put(RelationSchema.ID1,id1);
-        values.put(RelationSchema.ID2,id2);
         try{
-            newid=(int)db.insert(RelationSchema.TABLE_NAME,null,values);
-            //System.out.println("Insert SUCCESS RELATION1");
-        }catch (Exception e){
-            e.printStackTrace();
-            //System.out.println("Insert Failed RELATION1");
+            ContentValues values=new ContentValues();
+            values.put(RelationSchema.ID1,id1);
+            values.put(RelationSchema.ID2,id2);
+            try{
+                newid=(int)db.insert(RelationSchema.TABLE_NAME,null,values);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        } catch (Exception ex){
+            ex.printStackTrace();
+        } finally {
+            db.close();
         }
+
         return newid;
     }
-
-    public int insert(int id1,int id2,int count, SQLiteDatabase db){
-        int newid=0;
-        ContentValues values=new ContentValues();
-        values.put(RelationSchema.ID1,id1);
-        values.put(RelationSchema.ID2,id2);
-        values.put(RelationSchema.COUNT,count);
-        try{
-            newid=(int)db.insert(RelationSchema.TABLE_NAME,null,values);
-        }catch (Exception e){
-            e.printStackTrace();
-            //System.out.println("Insert Failed");
-        }
-        return newid;
-    }
-
 
     public int getVocID(String content,SQLiteDatabase db){
         int id=0;
-        String query="select "+VocSchema.ID+" from "+VocSchema.TABLE_NAME+
-                " where "+VocSchema.CONTENT+" = '"+content+"';";
-        Cursor c=db.rawQuery(query,null);
-        if(c.getCount()>0){
-            c.moveToFirst();
-            id=c.getInt(c.getColumnIndex(VocSchema.ID));
+        try{
+            String query="select "+VocSchema.ID+" from "+VocSchema.TABLE_NAME+
+                    " where "+VocSchema.CONTENT+" = '"+content+"';";
+            Cursor c=db.rawQuery(query,null);
+            if(c.getCount()>0){
+                c.moveToFirst();
+                id=c.getInt(c.getColumnIndex(VocSchema.ID));
+            }
+            c.close();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        } finally {
+            db.close();
         }
-        c.close();
+
         return id;
     }
 
@@ -135,54 +135,63 @@ public class DBConnection extends SQLiteOpenHelper {
         String count_name=(mode?VocSchema.COUNT:SentenceSchema.COUNT);
         String table_name=(mode?VocSchema.TABLE_NAME:SentenceSchema.TABLE_NAME);
         String id_name=(mode?VocSchema.ID:SentenceSchema.ID);
-        String out=(mode?"VOC":"SENTENCE");
 
         boolean ret=false;
-        String query="select * from "+table_name+" where "
-                +content_name+" = '"+content+"';";
-        Cursor c=db.rawQuery(query,null);
-        if(c.getCount()>0){
-            c.moveToFirst();
-            int id=c.getInt(c.getColumnIndex(id_name));
-            int count=c.getInt(c.getColumnIndex(count_name))+1;
-            ContentValues values=new ContentValues();
-            values.put(count_name,count);
-            String where=id_name+ " = "+id;
-            try {
-                db.update(table_name,values,where,null);
-                ret=true;
-                //System.out.println("UPDATE SUCCESS "+out);
-            }catch (Exception e){
-                e.printStackTrace();
-                System.out.println("UPDATE FAIL "+out);
+        try{
+            String query="select * from "+table_name+" where "
+                    +content_name+" = '"+content+"';";
+            Cursor c=db.rawQuery(query,null);
+            if(c.getCount()>0){
+                c.moveToFirst();
+                int id=c.getInt(c.getColumnIndex(id_name));
+                int count=c.getInt(c.getColumnIndex(count_name))+1;
+                ContentValues values=new ContentValues();
+                values.put(count_name,count);
+                String where=id_name+ " = "+id;
+                try {
+                    db.update(table_name,values,where,null);
+                    ret=true;
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
+            c.close();
+        } catch (Exception ex){
+            ex.printStackTrace();
+        } finally {
+            db.close();
         }
-        c.close();
+
         return ret;
     }
 
     public boolean update(int id1,int id2, SQLiteDatabase db){
         boolean ret=false;
-        String query="select * from "+RelationSchema.TABLE_NAME+" where "
-                +RelationSchema.ID1+" = '"+id1+"' and "+RelationSchema.ID2+" = '"+id2+"';";
-        Cursor c=db.rawQuery(query,null);
-        if(c.getCount()>0){
-            c.moveToFirst();
-            int id=c.getInt(c.getColumnIndex(RelationSchema.ID));
-            int count=c.getInt(c.getColumnIndex(RelationSchema.COUNT))+1;
-            ContentValues values=new ContentValues();
-            values.put(RelationSchema.COUNT,count);
-            String where=RelationSchema.ID+ " = "+id;
-            try {
-                db.update(RelationSchema.TABLE_NAME,values,where,null);
-                ret=true;
-                //System.out.println("UPDATE SUCCESS RELATION");
-            }catch (Exception e){
-                e.printStackTrace();
-                System.out.println("UPDATE FAIL RELATION");
+        try{
+            String query="select * from "+RelationSchema.TABLE_NAME+" where "
+                    +RelationSchema.ID1+" = '"+id1+"' and "+RelationSchema.ID2+" = '"+id2+"';";
+            Cursor c=db.rawQuery(query,null);
+            if(c.getCount()>0){
+                c.moveToFirst();
+                int id=c.getInt(c.getColumnIndex(RelationSchema.ID));
+                int count=c.getInt(c.getColumnIndex(RelationSchema.COUNT))+1;
+                ContentValues values=new ContentValues();
+                values.put(RelationSchema.COUNT,count);
+                String where=RelationSchema.ID+ " = "+id;
+                try {
+                    db.update(RelationSchema.TABLE_NAME,values,where,null);
+                    ret=true;
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                c.close();
             }
+        } catch (Exception ex){
+            ex.printStackTrace();
+        } finally {
+            db.close();
         }
-        c.close();
+
         return ret;
     }
 }

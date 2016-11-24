@@ -38,40 +38,33 @@ public class Learn {
         synchronized (lock){
             try {
                 int sentece_lenth=1;
-                SQLiteDatabase db = helper.getWritableDatabase();
                 //handle sentence
                 if (message.length()>sentece_lenth){
-                    if(!helper.update(false,message,db)){
-                        helper.insert(false,message,db);
+                    if(!helper.update(false,message,helper.getWritableDatabase())){
+                        helper.insert(false,message,helper.getWritableDatabase());
                     }
                 }
 
-                String msg=SpiltString(message, db);
+                String msg=SpiltString(message, helper.getWritableDatabase());
                 //System.out.println(msg);
 
                 //handle vocabulary
-                for(int i = 0 ; i < pointer_storewordspilt+1 ; i++){
-                    String tem_word=((i==pointer_storewordspilt)?"#":storewordspilt[i]);
-
-                    //System.out.println(tem_word);
-                    if(!helper.update(true,tem_word,db)){
-                        helper.insert(true,tem_word,db);
+                for(int i = 0 ; i < pointer_storewordspilt ; i++){
+                    String word=((i==pointer_storewordspilt)?"#":storewordspilt[i]);
+                    if(!helper.update(true,word,helper.getWritableDatabase())){
+                        helper.insert(true,word,helper.getWritableDatabase());
                     }
                 }
                 //handle relation
-                for(int i = 0 ; i < pointer_storewordspilt ; i++){
-                    String tem_secondword=((i==pointer_storewordspilt-1)?"#":storewordspilt[i+1]);
-                    int id1=helper.getVocID(storewordspilt[i],db);
-                    int id2=helper.getVocID(tem_secondword,db);
-                    //System.out.println(tem_secondword);
-                    if(!helper.update(id1,id2,db)){
-                        helper.insert(id1,id2,db);
+                for(int i = 0 ; i < pointer_storewordspilt-1 ; i++){
+                    int id1=helper.getVocID(storewordspilt[i],helper.getWritableDatabase());
+                    int id2=helper.getVocID(storewordspilt[i+1],helper.getWritableDatabase());
+                    if(!helper.update(id1,id2,helper.getWritableDatabase())){
+                        helper.insert(id1,id2,helper.getWritableDatabase());
                     }
 
                 }
                 clear_storeword_spilt();
-
-                db.close();
             }
             catch (Exception e){
                 Toast.makeText(context, "斷字失敗", Toast.LENGTH_SHORT).show();
@@ -166,6 +159,8 @@ public class Learn {
             tmp+=str;
             i++;
         }
+
+        db.close();
         try {
             return spilt(tmp);
         } catch (IOException e) {
