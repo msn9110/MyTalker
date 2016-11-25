@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class MyFile {
 
@@ -119,7 +120,7 @@ public class MyFile {
     static public void log(String sentence){
         File dir=new File(Environment.getExternalStorageDirectory().getPath()+"/MyTalker/紀錄");
         mkdirs(dir);
-        DateFormat format=new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat format=new SimpleDateFormat("yyyy-MM-dd", Locale.TAIWAN);
         String filename= prefix+format.format(Calendar.getInstance().getTime())+".txt";
         File file=new File(dir,filename);
         try{

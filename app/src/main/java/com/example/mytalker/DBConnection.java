@@ -39,7 +39,7 @@ public class DBConnection extends SQLiteOpenHelper {
         try {
             String sql = "CREATE TABLE " + VocSchema.TABLE_NAME + " ("
                     + VocSchema.ID  + " INTEGER unique primary key autoincrement not null, "
-                    + VocSchema.CONTENT + " text unique not null, "
+                    + VocSchema.CONTENT + " ntext unique not null, "
                     + VocSchema.COUNT + " INTEGER not null default 1" + ");";
             db.execSQL(sql);
 
@@ -54,8 +54,8 @@ public class DBConnection extends SQLiteOpenHelper {
             db.execSQL(sql2);
 
             String sql3 = "CREATE TABLE " + SentenceSchema.TABLE_NAME + " ("
-                    + SentenceSchema.ID  + " INTEGER unique primary key autoincrement, "
-                    + SentenceSchema.CONTENT + " text unique not null, "
+                    + SentenceSchema.ID  + " INTEGER unique primary key autoincrement not null, "
+                    + SentenceSchema.CONTENT + " ntext unique not null, "
                     + SentenceSchema.COUNT + " INTEGER not null default 1" + ");";
             db.execSQL(sql3);
         }catch (Exception e){
@@ -79,8 +79,6 @@ public class DBConnection extends SQLiteOpenHelper {
                 newid=(int)db.insert(table_name,null,values);
             }catch (Exception e){
                 e.printStackTrace();
-                if(!mode)
-                System.out.println("Insert ERROR<<<============================================");
             }
         } catch (Exception ex){
             ex.printStackTrace();

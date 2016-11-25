@@ -278,6 +278,7 @@ public class InputActivity extends Activity {
             public void afterTextChanged(Editable editable) {
                 FindSentence(editText.getText().toString());
                 spinner.setSelection(0);
+                System.out.println(spinner.getSelectedItem().toString());
             }
         });//text change event
 
@@ -463,12 +464,9 @@ public class InputActivity extends Activity {
     }
 
     private void setList(){
-        int size=currentData.length;
         ArrayList<String> lists=new ArrayList<>();
-        for(int i=0;i<size;i++){
-            String word=currentData[i].text;
-            //if(word.equals("#"))
-             //   continue;
+        for(InputData data:currentData){
+            String word=data.text;
             lists.add(word);
         }
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
