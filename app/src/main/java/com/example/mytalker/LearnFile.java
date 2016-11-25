@@ -47,26 +47,18 @@ public class LearnFile extends AsyncTask<Void,Integer,Integer> {
 
     @Override
     protected Integer doInBackground(Void... voids) {
-        List<String> buffer;
         int count=0;
         publishProgress(0);
-        int packageSize=100;
-        for(int i=0;i<mFileLen;i+=packageSize){
-            int endIndex=i+packageSize;
-            if(endIndex>mFileLen)
-                endIndex=mFileLen;
-            buffer=Data.subList(i,endIndex-1);
-            for(int j=0;j<buffer.size();j++){
-                String line=buffer.get(j);
-                int current=i+j+1;
-                publishProgress(current);
-                try{
-                    mLearn.Learning(line);
-                    count++;
-                }catch (Exception e){
-                    e.printStackTrace();
-                    System.out.println("Fail "+current+" : "+line);
-                }
+        for(int i=0;i<mFileLen;i++){
+            String line=Data.get(i);
+            int index=i+1;
+            publishProgress(index);
+            try{
+                mLearn.Learning(line);
+                count++;
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Fail "+index+" : "+line);
             }
         }
         return count;

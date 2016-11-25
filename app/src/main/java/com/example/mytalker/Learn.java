@@ -45,12 +45,12 @@ public class Learn {
                     }
                 }
 
-                String msg=SpiltString(message, helper.getWritableDatabase());
+                SpiltString(message, helper.getWritableDatabase());
                 //System.out.println(msg);
 
                 //handle vocabulary
                 for(int i = 0 ; i < pointer_storewordspilt ; i++){
-                    String word=((i==pointer_storewordspilt)?"#":storewordspilt[i]);
+                    String word=storewordspilt[i];//((i==pointer_storewordspilt)?"#":storewordspilt[i]);
                     if(!helper.update(true,word,helper.getWritableDatabase())){
                         helper.insert(true,word,helper.getWritableDatabase());
                     }

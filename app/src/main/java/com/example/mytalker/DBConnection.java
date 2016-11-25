@@ -54,7 +54,7 @@ public class DBConnection extends SQLiteOpenHelper {
             db.execSQL(sql2);
 
             String sql3 = "CREATE TABLE " + SentenceSchema.TABLE_NAME + " ("
-                    + SentenceSchema.ID  + " INTEGER primary key autoincrement, "
+                    + SentenceSchema.ID  + " INTEGER unique primary key autoincrement, "
                     + SentenceSchema.CONTENT + " text unique not null, "
                     + SentenceSchema.COUNT + " INTEGER not null default 1" + ");";
             db.execSQL(sql3);
@@ -79,6 +79,8 @@ public class DBConnection extends SQLiteOpenHelper {
                 newid=(int)db.insert(table_name,null,values);
             }catch (Exception e){
                 e.printStackTrace();
+                if(!mode)
+                System.out.println("Insert ERROR<<<============================================");
             }
         } catch (Exception ex){
             ex.printStackTrace();
