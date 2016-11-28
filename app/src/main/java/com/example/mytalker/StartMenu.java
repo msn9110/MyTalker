@@ -31,38 +31,34 @@ public class StartMenu extends Activity{
                 Intent intent =new Intent();
                 intent.setClass(getApplicationContext(),InputActivity.class);
                 startActivity(intent);
-                //StartMenu.this.finish();
             }
         });
 
         mode[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SpeechMode.con=false;
-                Intent intent = new Intent();
-                intent.setClass(getApplicationContext(), SpeechMenu.class);
+                InputActivity.con=true;
+                Intent intent =new Intent();
+                intent.setClass(getApplicationContext(),WiFiDirectActivity.class);
                 startActivity(intent);
+                StartMenu.this.finish();
+
             }
         });
 
         mode[2].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputActivity.con=true;
-                SpeechMode.con=true;
-                Intent intent =new Intent();
-                intent.setClass(getApplicationContext(),WiFiDirectActivity.class);
+                Intent intent = new Intent();
+                intent.setClass(getApplicationContext(), DataMove.class);
                 startActivity(intent);
-                StartMenu.this.finish();
             }
         });
 
         mode[3].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setClass(getApplicationContext(), DataMove.class);
-                startActivity(intent);
+
             }
         });
     }

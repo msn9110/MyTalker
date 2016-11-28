@@ -1,9 +1,13 @@
 package com.example.mytalker;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.StrictMode;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -11,30 +15,29 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static android.os.StrictMode.setThreadPolicy;
 
 
 public class DisplayActivity extends Activity {
 
-    //public static final String IP_SERVER = "192.168.49.143";
-    public static int PORT = 8988;
+    public static final String END="!!!@@@###";
+    public static final int PORT = 8988;
+    public boolean terminal=true;
+    public static boolean WifiMode=true;
     String[] buf=new String[100];//queue for playing tts
     int count=0;
     TextView tvDisplay,tvStatus;
-    private  Handler handler;
+    private  Handler handler=new Handler();
     private ServerSocket serverSocket=null;
+    private BluetoothServerSocket BTSocket=null;
     Speaker speaker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            setThreadPolicy(policy);
-        }
         //initialize
         speaker=new Speaker(getApplicationContext());
         for(int i=0;i<100;i++)
@@ -43,71 +46,38 @@ public class DisplayActivity extends Activity {
         tvStatus=(TextView)findViewById(R.id.textView3);
         tvDisplay.setText(R.string.empty);
     }
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        speaker.stop();
-        try {
-            serverSocket.close();
-        }catch (IOException e){
-            Log.d(WiFiDirectActivity.TAG,e.toString());
-        }
-        this.finish();
-    }
 
-    @Override
-    protected void onPause(){
-        super.onPause();
-        try {
-            serverSocket.close();
-        }catch (IOException e){
-            Log.d(WiFiDirectActivity.TAG,e.toString());
-        }
-        this.finish();
-    }
-    int current=0;
+
     @Override
     protected void onStart(){
         super.onStart();
-        handler=new Handler();
-
-        //建立Thread
-        Thread fst = new Thread(socket_server);
-        //啟動Thread
-        fst.start();
+        new Thread(socket_server).start();
     }
-    boolean end=false;
+
     ReentrantLock lock=new ReentrantLock();
-    String msg2="";
+    int current=0;
+    boolean EndDisplay=false;
+    String message="";
     Thread display=new Thread(new Runnable() {
         @Override
         public void run() {
 
-            while (!end){
+            while (!EndDisplay){
 
                 if(count>0 && speaker.isNotSpeaking()){
-                    msg2=buf[current];
+                    message=buf[current];
                     System.out.println("CURRENT : "+current);
                     System.out.println("COUNT : "+count);
                     handler.post(new Runnable() {
                         public void run() {
-                            int size=msg2.length();
-                            float font=120;
-                            if(size>30)
-                                font=100;
-                            else if(size>80)
-                                font=75;
-                            else if(size>120)
-                                font=50;
-                            if(msg2.length()>0 && speaker.isNotSpeaking()) {
+                            if(message.length()>0 && speaker.isNotSpeaking()) {
                                 lock.lock();
-                                tvDisplay.setTextSize(font);
-                                tvDisplay.setText(msg2);
-                                speaker.speak(msg2);
-                                msg2="";
-                                buf[current]="";
-                                current++;
-                                current%=100;
+                                int font=6000/(message.length()+40);
+                                tvDisplay.setTextSize((float)font);
+                                tvDisplay.setText(message);
+                                speaker.speak(message);
+                                message=buf[current]="";
+                                current=(current+1) % buf.length;
                                 count--;
                                 lock.unlock();
                             }
@@ -124,51 +94,28 @@ public class DisplayActivity extends Activity {
     });
     private Runnable socket_server = new Runnable(){
         public void run(){
+
             try{
-                //建立serverSocket
-                serverSocket = new ServerSocket(PORT);
-                //接收連線
-                handler.post(new Runnable() {
-                    public void run() {
-                        tvStatus.setText(R.string.listening);
-                    }
-                });
-                Socket client = serverSocket.accept();
-                handler.post(new Runnable() {
-                    public void run() {
-                        tvStatus.setText(R.string.connected);
-                    }
-                });
-                DataInputStream in = new DataInputStream(client.getInputStream());
-                try {
-                    int i=0;
-                    display.start();
-                    //接收資料
-                    String line;
-                    do{
-                        line = in.readUTF();
-                        if(line.length()>0){
-                            System.out.println("COUNT : "+count);
-                            buf[i]=line;
-                            System.out.println("Receive "+i+" : "+buf[i]);
-                            i++;
-                            i%=100;
-                            lock.lock();
-                            count++;
-                            lock.unlock();
-                        }
-                    }while (line!=null);
-                    System.out.println("END");
-                } catch (Exception e) {
+                DataInputStream inputStream;
+                if(WifiMode){
+                    //建立serverSocket
+                    serverSocket = new ServerSocket(PORT);
+                    //接收連線
                     handler.post(new Runnable() {
                         public void run() {
-                            tvStatus.setText("傳送失敗");
+                            tvStatus.setText(R.string.listening);
                         }
                     });
-                    in.close();
-                    end=true;
-                    DisplayActivity.this.finish();
+                    Socket client = serverSocket.accept();
+                    handler.post(new Runnable() {
+                        public void run() {
+                            tvStatus.setText(R.string.connected);
+                        }
+                    });
+                    inputStream=new DataInputStream(client.getInputStream());
+                    receive(inputStream);//<<<========================================start receive
                 }
+
             }catch(IOException e) {
                 final String err="建立socket失敗";
                 handler.post(new Runnable() {
@@ -176,9 +123,70 @@ public class DisplayActivity extends Activity {
                         tvStatus.setText(err);
                     }
                 });
-                end=true;
-                DisplayActivity.this.finish();
+                restartDisplay();
             }
         }
     };
+
+    private void restartDisplay(){
+        EndDisplay=true;
+        terminal=false;
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+    }
+    private void receive(DataInputStream in){
+        try {
+            int i=0;
+            EndDisplay=false;
+            display.start();
+            //接收資料
+            String line;
+            do{
+                line = in.readUTF();
+                if(line.length()>0){
+                    System.out.println("COUNT : "+count);
+                    buf[i]=line;
+                    System.out.println("Receive "+i+" : "+buf[i]);
+                    i=(i+1) % buf.length;
+                    lock.lock();
+                    count++;
+                    lock.unlock();
+                }
+            }while (!line.equals(END));
+            terminal=true;
+        } catch (Exception e) {
+            handler.post(new Runnable() {
+                public void run() {
+                    tvStatus.setText("傳送失敗");
+                }
+            });
+            //in.close();
+            restartDisplay();
+        }
+    }
+
+    private void close(){
+        try {
+            if (WifiMode)
+                serverSocket.close();
+            else
+                BTSocket.close();
+        }catch (IOException e){
+            Log.d(WiFiDirectActivity.TAG,e.toString());
+        }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        speaker.shutdown();
+        close();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+
+    }
 }

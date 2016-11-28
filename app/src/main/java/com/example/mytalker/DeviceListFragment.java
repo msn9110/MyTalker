@@ -102,13 +102,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
         private List<WifiP2pDevice> items;
 
-        /**
-         * @param context
-         * @param textViewResourceId
-         * @param objects
-         */
-        public WiFiPeerListAdapter(Context context, int textViewResourceId,
-                List<WifiP2pDevice> objects) {
+        public WiFiPeerListAdapter(Context context, int textViewResourceId, List<WifiP2pDevice> objects) {
             super(context, textViewResourceId, objects);
             items = objects;
 

@@ -6,49 +6,65 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
-import java.io.DataOutputStream;
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.session.AppKeyPair;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
 public class InputActivity extends Activity {
-    public static final String IP_SERVER = "192.168.49.1";
-    public static int PORT = 8988;
-    private DataOutputStream out; //for transfer
-    private Socket socket;
-
     Speaker speaker;
+    Connection connection;
 
-    Button btn_send, btn_lv1, btn_load, btn_clear, btn_speech;
-    boolean status_speech = false;
-    ListView view;
+    Switch sw_immediate,sw_voice,sw_speech;//to control three status of app
+    Button btn_send, btn_lv1, btn_load, btn_clear;
+    boolean localVoice = false,immediate = false,speechMode = false;
+    //localVoice to control whether local Machine is enabled voice, when running in local mode, it is forced to enable
+    //when immediate is true, ie can speak the text which you select in main list
+    //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
+    ListView dbList,mainList,speechList;
     EditText editText;
     public static boolean con = false;
 
     //for data variable
     InputData[] Data=new InputData[1], currentData;
-    int[] map=new int[1];
+    int[] map=new int[1];//to map vocabulary id to the position in Data array
     //SQLiteDatabase db;
-    int[][] next_id=new int[1][1];
+    int[][] next_id=new int[1][1];//level 0 indicates the all vocabularies in database
     int current_id = 0;//0 denote main level
 
     DBConnection helper;
@@ -56,9 +72,22 @@ public class InputActivity extends Activity {
 
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
-    //private ProgressDialog progressDialog2 = null;
-    String[] list = new String[15];
+    String[] sentence = new String[15];
     Spinner spinner;
+
+    ArrayList<String> myList=new ArrayList<>();
+    String parentPath;
+    File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
+    final String fileEncoding="-->更改文件編碼";
+    final String BACK="..(回上一頁)";
+    static final String TAG="SpeechList";
+
+    //dropbox
+    final static private String APP_KEY = "admwgo2fp9n1bli";
+    final static private String APP_SECRET = "x9i4k97k4ac5ilk";
+    // In the class declaration section:
+    private DropboxAPI<AndroidAuthSession> mDBApi;
+    String dropbox="(Dropbox)";
 
     //=====================================oncreate===================================================
     @Override
@@ -70,36 +99,125 @@ public class InputActivity extends Activity {
             setThreadPolicy(policy);
         }
         //initialize
+        // And later in some initialization function:
+        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
+        AndroidAuthSession session = new AndroidAuthSession(appKeys);
+        mDBApi = new DropboxAPI<>(session);
+
+        MyFile.mkdirs(appDir);
+
+        connection=new Connection(this);
         helper = new DBConnection(this);
+
+        sw_immediate=(Switch)findViewById(R.id.sw_immediate);
+        sw_voice=(Switch)findViewById(R.id.sw_voice);
+        sw_speech=(Switch)findViewById(R.id.sw_speech);
+
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
-        btn_speech = (Button) findViewById(R.id.btn_speech);
-        view=(ListView)findViewById(R.id.btnView);
+
+        dbList=(ListView)findViewById(R.id.dbList);
+        mainList=(ListView)findViewById(R.id.mainList);
+        speechList=(ListView)findViewById(R.id.speechList);
+
         editText = (EditText) findViewById(R.id.editText);
         spinner=(Spinner)findViewById(R.id.Spinner_sentence);
 
-        view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        dbList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s = editText.getText().toString();
-                int index=editText.getSelectionStart();
-                String part1=spilt(s,0,index),part2=spilt(s,index,s.length());
-                s=part1+currentData[position].text+part2;
-                editText.setText(s);
-                editText.setSelection(part1.length()+currentData[position].text.length());
+                setText(currentData[position].text);
                 current_id = currentData[position].id;
                 setCurrentData();
+            }
+        });
+
+        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String msg=myList.get(position);
+                if(immediate)
+                    talk(msg,false);
+                else
+                    setText(msg);
+            }
+        });
+
+        speechList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                String select=((TextView) view).getText().toString();
+                File file=new File(parentPath,select);
+
+                switch (select){
+                    case BACK:
+                        speechList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
+                        break;
+
+                    case fileEncoding:
+                        MyFile.setCharset();
+                        Toast.makeText(InputActivity.this,MyFile.charset,Toast.LENGTH_SHORT).show();
+                        break;
+
+                    default:
+                        if(file.isDirectory())
+                            speechList.setAdapter(createListAdapter(file));
+                        else{
+                            if(!speechMode)
+                                setMainList(file);
+                            else {
+                                final File Selection=new File(parentPath,select);
+                                try {
+                                    File myFile = MyFile.getFile(Selection);
+                                    FileInputStream fIn = new FileInputStream(myFile);
+                                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                                    String line;
+                                    while ((line = myReader.readLine()) != null) {
+                                        if(line.length()==0)
+                                            continue;
+                                        talk(line,false);
+                                    }
+                                    myReader.close();
+                                } catch (FileNotFoundException e) {
+                                    Log.e(TAG, "File not found: " + e.toString());
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Can not read file: " + e.toString());
+                                }
+                            }
+                        }
+                        break;
+                }
             }
         });
 
         if (!con) {
             String text="TALK";
             btn_send.setText(text);
-            btn_speech.setVisibility(View.GONE);
+            sw_voice.setChecked(true);
+            sw_voice.setEnabled(false);
         }
-        status_speech = !con;
+        localVoice = !con;
+        sw_voice.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                localVoice=b;
+            }
+        });
+        sw_immediate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                immediate=b;
+            }
+        });
+        sw_speech.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                speechMode=b;
+            }
+        });
 
         btn_clear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,15 +228,7 @@ public class InputActivity extends Activity {
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                talk();
-            }
-        });
-        btn_speech.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text=(status_speech?"關閉語音":"開啟語音");
-                btn_speech.setText(text);
-                status_speech = !status_speech;
+                talk(editText.getText().toString(),true);
             }
         });
 
@@ -136,6 +246,8 @@ public class InputActivity extends Activity {
             }
         });
 
+        setMainList(new File(appDir,"words.txt"));
+        speechList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -166,29 +278,43 @@ public class InputActivity extends Activity {
             public void afterTextChanged(Editable editable) {
                 FindSentence(editText.getText().toString());
                 spinner.setSelection(0);
+                System.out.println(spinner.getSelectedItem().toString());
             }
         });//text change event
+
+        btn_send.setEnabled(false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                speaker=new Speaker(getApplicationContext());
+                try {
+                    Thread.sleep(1250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
     //===============================================================================================
-    String spilt(String s,int start,int end)
-    {
-        String tmp="";
-        for(int i=start;i<end;i++)
-            tmp+=String.valueOf(s.charAt(i));
-        return tmp;
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_input_activity, menu);
+        return true;
     }
     //===================================onstart======================================================
     @Override
     protected void onStart() {
         super.onStart();
-        btn_send.setEnabled(false);
-        //progressDialog2 = ProgressDialog.show(InputActivity.this, "請稍後", "載入學習及語音模組...");
         new Thread(new Runnable() {
             @Override
             public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        btn_send.setEnabled(false);
+                    }
+                });
                 learn=new Learn(getApplicationContext(),helper);
-                speaker=new Speaker(getApplicationContext());
-                //progressDialog2.dismiss();
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -198,8 +324,8 @@ public class InputActivity extends Activity {
             }
         }).start();
         Update();
-        if (con)
-            ConnectToDisplay();
+       if (con)
+            connection.ConnectToDisplay();
     }
 
     //===============================================================================================
@@ -281,6 +407,47 @@ public class InputActivity extends Activity {
     }
 
     //===============================================================================================
+    private ListAdapter createListAdapter(File dir) {
+        List<String> list = new ArrayList<>();
+        boolean APPDir=dir.equals(appDir);
+        this.parentPath = dir.getPath();
+        File[] myfiles = dir.listFiles();
+        List<String> dirs = new ArrayList<>();
+        List<String> files = new ArrayList<>();
+        list.add(fileEncoding);
+        if(!APPDir){
+            list.add(BACK);
+        }else {
+            list.add(dropbox);
+        }
+
+        for (File f : myfiles) {
+            if(MyFile.prefix.equals(f.getName()))
+                continue;
+            if(f.isDirectory())
+                dirs.add(f.getName());
+            else
+                files.add(f.getName());
+        }
+        list.addAll(dirs);
+        list.addAll(files);
+
+        if(dirs.size() + files.size()==0)
+            findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
+        else
+            findViewById(R.id.txt_no_data).setVisibility(View.GONE);
+        return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
+    }
+    //===============================================================================================
+    private void setText(String text){
+        String s = editText.getText().toString();
+        int index=editText.getSelectionStart();
+        String part1=s.substring(0,index),part2=s.substring(index,s.length());
+        s=part1+text+part2;
+        editText.setText(s);
+        editText.setSelection(part1.length()+text.length());
+    }
+
     private void setCurrentData()
     {
         int size = next_id[current_id].length;
@@ -297,17 +464,48 @@ public class InputActivity extends Activity {
     }
 
     private void setList(){
-        int size=currentData.length;
-        String[] lists=new String[size];
-        for(int i=0;i<size;i++)
-            lists[i]=currentData[i].text;
+        ArrayList<String> lists=new ArrayList<>();
+        for(InputData data:currentData){
+            String word=data.text;
+            lists.add(word);
+        }
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
-        view.setAdapter(listAdapter);
+        dbList.setAdapter(listAdapter);
+    }
+
+    private void setMainList(File file){
+        myList.clear();
+        String charset=MyFile.charset_target;
+        if(file.exists()){
+            File myFile=MyFile.getFile(file);
+            try{
+                FileInputStream in = new FileInputStream(myFile);
+                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
+                String line;
+                while ((line=myReader.readLine())!=null){
+                    myList.add(line);
+                }
+                myReader.close();
+                ArrayAdapter<String> listAdapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,myList);
+                mainList.setAdapter(listAdapter);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+
+        else {
+            String[] words=new String[]{"不","好","要","是","對","用","有","沒"};
+            myList.addAll(Arrays.asList(words));
+            ArrayAdapter<String> listAdapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,myList);
+            mainList.setAdapter(listAdapter);
+        }
+
     }
 
     private void setSpinner(){
         FindSentence("");
-        ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, list);
+        ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, sentence);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
     }
@@ -318,21 +516,21 @@ public class InputActivity extends Activity {
         if(keyword.equals("")){
             query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
                     "  ORDER BY " + DBConnection.SentenceSchema.COUNT + " desc;";
-            list[0]="";
+            sentence[0]="";
         } else {
             query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
                     " where content LIKE '%" + keyword + "%'  ORDER BY " +
                     DBConnection.SentenceSchema.COUNT + " desc;";
-            list[0]=keyword;
+            sentence[0]=keyword;
         }
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
         int SIZE = c.getCount();
-        for (int i = 1; i < list.length; i++) {
+        for (int i = 1; i < sentence.length; i++) {
             if (i > SIZE) {
-                list[i] = "";
+                sentence[i] = "";
             }else {
-                list[i] = c.getString(0);
+                sentence[i] = c.getString(0);
                 c.moveToNext();
             }
         }
@@ -341,25 +539,22 @@ public class InputActivity extends Activity {
         db.close();
     }
 
-    private void talk() {
+    private void talk(final String message,boolean learning) {
         //要傳送的字串
-        final String message = editText.getText().toString();
-        new Thread(new Runnable() {
+        MyFile.log(message);
+        if(learning)
+            new Thread(new Runnable() {
             @Override
             public void run() {
                 learn.Learning(message);
             }
         }).start();
-        if (status_speech && message.length()>0)
+        if (localVoice && message.length()>0){
+            //speaker.stop();
             speaker.speak(message);
+        }
         if (con) {
-            try {
-                //傳送資料
-                out.writeUTF(message);
-                Toast.makeText(this, "成功傳送!", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "傳送失敗", Toast.LENGTH_SHORT).show();
-            }
+            connection.Send(message);
         }
 
     }
@@ -370,50 +565,48 @@ public class InputActivity extends Activity {
         setCurrentData();
     }
 
-    private void ConnectToDisplay() {
-        try {
-            InetAddress serverAddr;
-            SocketAddress sc_add;            //設定Server IP位置
-            serverAddr = InetAddress.getByName(IP_SERVER);
-            //設定port
-            sc_add = new InetSocketAddress(serverAddr, PORT);
-            socket = new Socket();
-            //與Server連線，timeout時間2秒
-            socket.connect(sc_add, 2000);
-            out = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "連線失敗", Toast.LENGTH_SHORT).show();
-            this.finish();
-        }
-    }
-
-    private void terminate() {
-        if (con) {
-            try {
-                out.close();
-                socket.close();
-            } catch (Exception e) {
-                Log.e("terminate",e.toString());
-            }
-        }
-    }
-
+    //===============================================================================================
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        speaker.stop();
-        terminate();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.dropbox_auth:
+                mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mDBApi.getSession().authenticationSuccessful()) {
+            try {
+                // Required to complete auth, sets the access token on the session
+                mDBApi.getSession().finishAuthentication();
+
+                //String accessToken = mDBApi.getSession().getOAuth2AccessToken();
+            } catch (IllegalStateException e) {
+                Log.i("DbAuthLog", "Error authenticating", e);
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        terminate();
+        connection.terminate(con);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        speaker.shutdown();
     }
 }

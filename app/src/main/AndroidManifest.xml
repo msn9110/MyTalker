@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mytalker" >
+    <uses-sdk android:minSdkVersion="14"/>
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -39,26 +40,35 @@
         <activity
             android:name=".InputActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:theme="@style/AppBaseTheme" />
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".DisplayActivity"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppBaseTheme" />
         <activity
             android:name=".DataMove"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppTheme" />
+            android:configChanges="orientation|keyboardHidden" >
+        </activity>
         <activity
-            android:name=".SpeechMenu"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppBaseTheme" />
+            android:name=".ConnectionInterface"
+            android:configChanges="orientation|keyboardHidden" />
         <activity
-            android:name=".SpeechMode"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppBaseTheme" />
+            android:name=".BTActivity"
+            android:configChanges="orientation|keyboardHidden" />
         <!-- Used for transferring files  after a successful connection -->
-
+        <activity
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:configChanges="orientation|keyboard">
+            <intent-filter>
+                <!-- Change this to be db- followed by your app key -->
+                <data android:scheme="db-admwgo2fp9n1bli" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
 

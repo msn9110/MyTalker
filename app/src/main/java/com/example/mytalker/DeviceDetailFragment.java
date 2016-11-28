@@ -66,15 +66,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     progressDialog.dismiss();
                 }
                 progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
-                        "Connecting to :" + device.deviceAddress, true, true
-//                        new DialogInterface.OnCancelListener() {
-//
-//                            @Override
-//                            public void onCancel(DialogInterface dialog) {
-//                                ((DeviceActionListener) getActivity()).cancelDisconnect();
-//                            }
-//                        }
-                );
+                        "Connecting to :" + device.deviceAddress, true, true);
                 ((DeviceListFragment.DeviceActionListener) getActivity()).connect(config);
 
             }
@@ -99,61 +91,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                         startActivity(intent);
                     }
                 });
-        mContentView.findViewById(R.id.btn_start_speech).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Main";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs1).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub1";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs2).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub2";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs3).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub3";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
-        mContentView.findViewById(R.id.btn_start_speechs4).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        SpeechMode.path="Sub4";
-                        Intent intent = new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext, SpeechMode.class);
-                        startActivity(intent);
-                    }
-                });
         return mContentView;
     }
 
@@ -167,14 +104,17 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         this.getView().setVisibility(View.VISIBLE);
 
         // The owner IP is now known.
+        String text;
         TextView view = (TextView) mContentView.findViewById(R.id.group_owner);
-        view.setText(getResources().getString(R.string.group_owner_text)
-                + ((info.isGroupOwner == true) ? getResources().getString(R.string.yes)
-                : getResources().getString(R.string.no)));
+        text=getResources().getString(R.string.group_owner_text)
+                + ((info.isGroupOwner) ? getResources().getString(R.string.yes)
+                : getResources().getString(R.string.no));
+        view.setText(text);
 
         // InetAddress from WifiP2pInfo struct.
         view = (TextView) mContentView.findViewById(R.id.device_info);
-        view.setText("Group Owner IP - " + info.groupOwnerAddress.getHostAddress());
+        text="Group Owner IP - " + info.groupOwnerAddress.getHostAddress();
+        view.setText(text);
 
         // After the group negotiation, we assign the group owner as the file
         // server. The file server is single threaded, single connection server
@@ -190,11 +130,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             mContentView.findViewById(R.id.btn_start_client).setVisibility(View.VISIBLE);
             ((TextView) mContentView.findViewById(R.id.status_text)).setText(getResources()
                     .getString(R.string.client_text));
-            mContentView.findViewById(R.id.btn_start_speech).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs1).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs2).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs3).setVisibility(View.VISIBLE);
-            //mContentView.findViewById(R.id.btn_start_speechs4).setVisibility(View.VISIBLE);
+
         }
 
         // hide the connect button
@@ -230,37 +166,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         view = (TextView) mContentView.findViewById(R.id.status_text);
         view.setText(R.string.empty);
         mContentView.findViewById(R.id.btn_start_client).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speech).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs1).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs2).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs3).setVisibility(View.GONE);
-        mContentView.findViewById(R.id.btn_start_speechs4).setVisibility(View.GONE);
         this.getView().setVisibility(View.GONE);
     }
-
-
-
-
-
-    public static boolean copyFile(InputStream inputStream, OutputStream out) {
-        byte buf[] = new byte[1024];
-        int len;
-        long startTime=System.currentTimeMillis();
-
-        try {
-            while ((len = inputStream.read(buf)) != -1) {
-                out.write(buf, 0, len);
-            }
-            out.close();
-            inputStream.close();
-            long endTime=System.currentTimeMillis()-startTime;
-            Log.v("","Time taken to transfer all bytes is : "+endTime);
-
-        } catch (IOException e) {
-            Log.d(WiFiDirectActivity.TAG, e.toString());
-            return false;
-        }
-        return true;
-    }
-
 }

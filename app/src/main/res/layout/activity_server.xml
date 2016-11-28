@@ -22,7 +22,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="我的名字叫做黃瀚勳"
             android:id="@+id/textView"
             android:textSize="175sp"
             android:textColor="@color/MainText"/>

@@ -22,6 +22,7 @@ public class Learn {
     private String [] storewordspilt=new String[256];
     private int pointer_storewordspilt=0;
     Context context;
+    public static final Object lock=new Object();
 
     public Learn(Context ctx,DBConnection dbConnection)
     {
@@ -33,46 +34,42 @@ public class Learn {
 
     //=======================================學習===============================================
     public void Learning(String message){
-        try {
-            int sentece_lenth=1;
-            SQLiteDatabase db = helper.getWritableDatabase();
 
-            //handle sentence
-            if (message.length()>sentece_lenth){
-                if(!helper.update(false,message,db)){
-                    helper.insert(false,message,db);
-                }
-            }
-
-            String msg=SpiltString(message, db);
-            System.out.println(msg);
-
-            //handle vocabulary
-            for(int i = 0 ; i < pointer_storewordspilt ; i++){
-                String word=storewordspilt[i];
-                if(!helper.update(true,word,db)){
-                    helper.insert(true,word,db);
-                }
-            }
-            //handle relation
-            for(int i = 0 ; i < pointer_storewordspilt ; i++){
-                if(i < pointer_storewordspilt-1){//there is a word behind current word
-                    String next_word=storewordspilt[i+1];
-                    int id1=helper.getVocID(storewordspilt[i],db);
-                    int id2=helper.getVocID(next_word,db);
-                    if(!helper.update(id1,id2,db)){
-                        helper.insert(id1,id2,db);
+        synchronized (lock){
+            try {
+                int sentece_lenth=1;
+                //handle sentence
+                if (message.length()>sentece_lenth){
+                    if(!helper.update(false,message,helper.getWritableDatabase())){
+                        helper.insert(false,message,helper.getWritableDatabase());
                     }
                 }
+
+                SpiltString(message, helper.getWritableDatabase());
+                //System.out.println(msg);
+
+                //handle vocabulary
+                for(int i = 0 ; i < pointer_storewordspilt ; i++){
+                    String word=storewordspilt[i];//((i==pointer_storewordspilt)?"#":storewordspilt[i]);
+                    if(!helper.update(true,word,helper.getWritableDatabase())){
+                        helper.insert(true,word,helper.getWritableDatabase());
+                    }
+                }
+                //handle relation
+                for(int i = 0 ; i < pointer_storewordspilt-1 ; i++){
+                    int id1=helper.getVocID(storewordspilt[i],helper.getWritableDatabase());
+                    int id2=helper.getVocID(storewordspilt[i+1],helper.getWritableDatabase());
+                    if(!helper.update(id1,id2,helper.getWritableDatabase())){
+                        helper.insert(id1,id2,helper.getWritableDatabase());
+                    }
+
+                }
+                clear_storeword_spilt();
             }
-            clear_storeword_spilt();
-
-            db.close();
+            catch (Exception e){
+                Toast.makeText(context, "斷字失敗", Toast.LENGTH_SHORT).show();
+            }
         }
-        catch (Exception e){
-            Toast.makeText(context, "斷字失敗", Toast.LENGTH_SHORT).show();
-        }
-
     }
     //===============================================================================================
 
@@ -162,6 +159,8 @@ public class Learn {
             tmp+=str;
             i++;
         }
+
+        db.close();
         try {
             return spilt(tmp);
         } catch (IOException e) {
