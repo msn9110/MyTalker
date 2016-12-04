@@ -5,9 +5,9 @@ android {
     buildToolsVersion '23.0.1'
 
     defaultConfig {
-        applicationId "com.example.mytalker"
+        applicationId "com.example.mytalkers"
         minSdkVersion 16
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
