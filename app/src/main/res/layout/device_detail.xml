@@ -4,8 +4,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    android:visibility="gone"
-    android:background="@color/MainBackground">
+    android:visibility="gone">
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
@@ -23,7 +22,6 @@
                 android:layout_height="90dp"
                 android:text="啟動"
                 android:textSize="45sp"
-                android:textColor="@color/MainText"
                 android:gravity="center"
                 />
             <Button
@@ -33,7 +31,6 @@
                 android:layout_height="90dp"
                 android:text="不啟動"
                 android:textSize="45sp"
-                android:textColor="@color/MainText"
                 android:gravity="center"
                 />
             <Button
@@ -44,7 +41,6 @@
                 android:text="交談"
                 android:visibility="gone"
                 android:textSize="45sp"
-                android:textColor="@color/MainText"
                 android:gravity="center"
                 />
         </LinearLayout>
@@ -52,23 +48,19 @@
         <TextView
             android:id="@+id/device_address"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/MainText"/>
+            android:layout_height="wrap_content"/>
         <TextView
             android:id="@+id/device_info"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/MainText"/>
+            android:layout_height="wrap_content"/>
         <TextView
             android:id="@+id/group_owner"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/MainText"/>
+            android:layout_height="wrap_content"/>
         <TextView
             android:id="@+id/group_ip"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/MainText"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -82,7 +74,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_margin="5dp"
-            android:textColor="@color/MainText"
             android:id="@+id/status_text">
         </TextView>
     </LinearLayout>

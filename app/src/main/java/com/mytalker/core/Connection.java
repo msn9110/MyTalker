@@ -1,11 +1,12 @@
-package com.example.mytalker;
+package com.mytalker.core;
 
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.utils.Utils;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

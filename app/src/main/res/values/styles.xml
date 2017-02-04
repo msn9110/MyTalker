@@ -1,34 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme.Holo">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
     </style>
-    <style name="AppBaseTheme" parent="@android:style/Theme.NoTitleBar">
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="CustomButton">Button</style>
 
-    <style name="MyTheme" parent="@android:style/Theme.WithActionBar" >
-        <item name="android:actionBarStyle">@android:style/Theme.Holo.Light.DarkActionBar</item>
-    </style>
-
-
-    <!-- 应用于程序或者活动的主题 -->
-    <style name="CustomActionBarTheme"
-        parent="@android:style/Theme.WithActionBar">
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
-    </style>
-
-    <!-- ActionBar 样式 -->
-    <style name="MyActionBar"
-        parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/colorPrimaryDark</item>
-        <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
-    </style>
-    <!-- ActionBar 标题文本 -->
-    <style name="MyActionBarTitleText"
-        parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">#FEFEFE</item>
-    </style>
 </resources>

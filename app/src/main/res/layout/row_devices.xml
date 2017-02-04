@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:background="@color/MainBackground"
     android:padding="6dip">
 
     <LinearLayout
@@ -16,15 +15,13 @@
             android:layout_width="fill_parent"
             android:layout_height="45dip"
             android:gravity="center_vertical"
-            android:textSize="30sp"
-            android:textColor="@color/MainText"/>
+            android:textSize="30sp"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="45dip"
             android:id="@+id/device_details"
             android:singleLine="true"
             android:ellipsize="marquee"
-            android:textSize="30sp"
-            android:textColor="@color/MainText"/>
+            android:textSize="30sp"/>
     </LinearLayout>
 </LinearLayout>

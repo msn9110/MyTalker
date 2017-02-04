@@ -11,8 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:text="我的代言人"
-        android:textSize="45sp"
-        android:textColor="@color/MainText"/>
+        android:textSize="45sp"/>
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
@@ -37,16 +36,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="45dp"
                 android:gravity="center_vertical"
-                android:textSize="30sp"
-                android:textColor="@color/MainText"/>
+                android:textSize="30sp"/>
             <TextView
                 android:id="@+id/my_status"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:singleLine="true"
                 android:ellipsize="marquee"
-                android:textSize="30sp"
-                android:textColor="@color/MainText"/>
+                android:textSize="30sp"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -55,8 +52,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:text="我的顯示器(點選連線)"
-        android:textSize="45sp"
-        android:textColor="@color/MainText"/>
+        android:textSize="45sp"/>
 
     <View
         android:layout_width="fill_parent"
@@ -71,8 +67,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:drawSelectorOnTop="false"
-        android:textSize="30sp"
-        android:textColor="@color/MainText"/>
+        android:textSize="30sp"/>
 
     <TextView
         android:id="@id/android:empty"
@@ -80,6 +75,5 @@
         android:layout_gravity="center"
         android:layout_height="match_parent"
         android:textSize="30sp"
-        android:textColor="@color/MainText"
         android:text="@string/empty_message" />
 </LinearLayout>

@@ -5,8 +5,6 @@ import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
-import com.example.mytalker.Check;
-
 import java.util.Locale;
 
 public class Speaker implements TextToSpeech.OnInitListener {
