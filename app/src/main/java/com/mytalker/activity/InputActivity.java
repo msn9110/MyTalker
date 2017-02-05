@@ -113,7 +113,7 @@ public class InputActivity extends AppCompatActivity {
 
         MyFile.mkdirs(appDir);
 
-        connection=new Connection(this);
+        connection = new Connection();
         helper = new DBConnection(this);
 
         sw_immediate=(Switch)findViewById(R.id.sw_immediate);
@@ -252,8 +252,9 @@ public class InputActivity extends AppCompatActivity {
                 setCurrentData();
             }
         });
-
+        System.out.println(88888);
         setMainList(new File(appDir,"words.txt"));
+        System.out.println(88888);
         speechList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -331,8 +332,6 @@ public class InputActivity extends AppCompatActivity {
             }
         }).start();
         Update();
-       if (con)
-            connection.ConnectToDisplay();
     }
 
     //===============================================================================================
@@ -471,9 +470,9 @@ public class InputActivity extends AppCompatActivity {
     }
 
     private void setList(){
-        ArrayList<String> lists=new ArrayList<>();
-        for(InputData data:currentData){
-            String word=data.text;
+        ArrayList<String> lists = new ArrayList<>();
+        for(InputData data : currentData){
+            String word = data.text;
             lists.add(word);
         }
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
@@ -561,7 +560,7 @@ public class InputActivity extends AppCompatActivity {
             speaker.speak(message);
         }
         if (con) {
-            connection.Send(message);
+            connection.send(message);
         }
 
     }
@@ -603,7 +602,6 @@ public class InputActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        connection.terminate(con);
     }
 
     @Override

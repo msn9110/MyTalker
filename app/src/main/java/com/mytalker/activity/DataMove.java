@@ -1,12 +1,12 @@
 package com.mytalker.activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -19,7 +19,7 @@ import com.utils.MyFile;
 
 import java.io.File;
 
-public class DataMove extends Activity {
+public class DataMove extends AppCompatActivity {
     final int REQUEST_CODE=0;
     public static final String _DBName = "Database.db";
     String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
