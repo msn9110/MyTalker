@@ -1,5 +1,6 @@
 package com.mytalker.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -252,9 +253,7 @@ public class InputActivity extends AppCompatActivity {
                 setCurrentData();
             }
         });
-        System.out.println(88888);
         setMainList(new File(appDir,"words.txt"));
-        System.out.println(88888);
         speechList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

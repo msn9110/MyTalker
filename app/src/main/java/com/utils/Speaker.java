@@ -7,55 +7,43 @@ import android.util.Log;
 
 import java.util.Locale;
 
-public class Speaker implements TextToSpeech.OnInitListener {
+public class Speaker {
     //=============================================語音==============================================
-    private TextToSpeech tw,en;
-    private static final String TAG = "SPEAKER";
-    boolean mode=true;
+    private TextToSpeech tw, en;
+    private static final String TAG = "## Speaker";
     public Speaker(Context context){
 
-        tw=new TextToSpeech(context,this);
-        en=new TextToSpeech(context,this);
+        tw = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                setLanguage(status, tw, Locale.TAIWAN, "TW");
+            }
+        });
+
+        en = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                setLanguage(status, en, Locale.ENGLISH, "EN");
+            }
+        });
     }
-    // Implements TextToSpeech.OnInitListener.
-    public void onInit(int status) {
+
+    private void setLanguage(int status, TextToSpeech tts, Locale locale, String lang){
         // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
         if (status == TextToSpeech.SUCCESS) {
-            language();
-        }
-
-        else {
+            int result;
+            result = tts.setLanguage(locale);//<<<===================================
+            if (result == TextToSpeech.LANG_MISSING_DATA) { ///|| result == TextToSpeech.LANG_NOT_SUPPORTED
+                Log.e(TAG, lang);
+            }
+            else{
+                float speed = (float) 0.75;
+                tts.setSpeechRate(speed);
+                Log.i(TAG, lang);
+            }
+        } else {
             Log.e(TAG, "Could not initialize TextToSpeech.");
         }
-    }
-    private void language(){
-        float speed=(float)0.8;
-        int result;
-        if(!mode){
-            result = en.setLanguage(Locale.US);//<<<===================================
-
-            if (result == TextToSpeech.LANG_MISSING_DATA) { ///|| result == TextToSpeech.LANG_NOT_SUPPORTED
-                System.out.println("EN ERROR");
-            }
-            else{
-                en.setSpeechRate(speed);
-                System.out.println("EN READY");
-            }
-        }
-
-        else {
-            mode=false;
-            result = tw.setLanguage(Locale.TAIWAN);//<<<===================================
-            if (result == TextToSpeech.LANG_MISSING_DATA ) {//|| result == TextToSpeech.LANG_NOT_SUPPORTED
-                System.out.println("TW ERROR");
-                System.out.println(result);
-            }
-            else{
-                tw.setSpeechRate(speed);
-                System.out.println("TW READY");
-            }
-        }
-
     }
 
     public void speak(String hello) {
@@ -85,7 +73,7 @@ public class Speaker implements TextToSpeech.OnInitListener {
         }
 
         for(int i=0;i<=count; i++) {
-            System.out.println(msg[i]);
+            Log.i(TAG, msg[i]);
             if(speaker==0){
                 tw.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
             } else {

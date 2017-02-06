@@ -17,12 +17,18 @@ import java.util.Deque;
 
 public class DisplayManager extends AsyncTask <Void, Void, Void> {
 
-    private static String TAG = "## Display";
+    private String TAG = "## DisplayManager";
     private Handler mHandler;
-    private boolean ToReceive = true;
+    private boolean ToReceive;
 
     public DisplayManager(Handler handler){
         mHandler = handler;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        ToReceive = true;
     }
 
     @Override
@@ -33,11 +39,10 @@ public class DisplayManager extends AsyncTask <Void, Void, Void> {
         try {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             DatagramSocket socket = new DatagramSocket(PORT);
-            Log.i(TAG,"TEST");
             while (ToReceive){
-                Log.i(TAG, "Wait packet");
                 socket.receive(packet);
                 String msg = new String(buffer, 0, packet.getLength(), "UTF-8");
+                Log.i(TAG,"Receive : " + msg);
                 Message message =new Message();
                 message.obj = msg;
                 mHandler.sendMessage(message);
@@ -47,6 +52,12 @@ public class DisplayManager extends AsyncTask <Void, Void, Void> {
             Log.e(TAG, e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+        Log.i(TAG, "End");
     }
 
     public void end(){
