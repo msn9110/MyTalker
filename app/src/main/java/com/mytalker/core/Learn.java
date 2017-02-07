@@ -44,8 +44,7 @@ public class Learn {
                     }
                 }
 
-                spilt(preProcess(message));
-                //System.out.println(msg);
+                System.out.println("# " + spilt(preProcess(message)));
 
                 //handle vocabulary
                 for(int i = 0 ; i < pointer_storewordspilt ; i++){
