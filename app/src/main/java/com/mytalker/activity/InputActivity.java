@@ -3,7 +3,6 @@ package com.mytalker.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,7 +13,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,14 +27,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.session.AppKeyPair;
 import com.example.mytalker.R;
 import com.mytalker.core.Connection;
-import com.mytalker.core.DBConnection;
 import com.mytalker.core.InputData;
 import com.mytalker.core.Learn;
+import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
 import com.utils.Speaker;
 
@@ -69,13 +64,13 @@ public class InputActivity extends AppCompatActivity {
     public static boolean con = false;
 
     //for data variable
-    InputData[] Data=new InputData[1], currentData;
+    InputData[] data=new InputData[1], currentData;
     int[] map=new int[1];//to map vocabulary id to the position in Data array
     //SQLiteDatabase db;
-    int[][] next_id=new int[1][1];//level 0 indicates the all vocabularies in database
-    int current_id = 0;//0 denote main level
+    int[][] nextIDs=new int[1][1];//level 0 indicates the all vocabularies in database
+    int currentID = 0;//0 denote main level
 
-    DBConnection helper;
+    TalkerDBManager talkerDBManager;
     Learn learn;
 
     private Handler handler = new Handler();//thread to access ui
@@ -90,13 +85,6 @@ public class InputActivity extends AppCompatActivity {
     final String BACK="..(回上一頁)";
     static final String TAG="SpeechList";
 
-    //dropbox
-    final static private String APP_KEY = "admwgo2fp9n1bli";
-    final static private String APP_SECRET = "x9i4k97k4ac5ilk";
-    // In the class declaration section:
-    private DropboxAPI<AndroidAuthSession> mDBApi;
-    String dropbox="(Dropbox)";
-
     //=====================================oncreate===================================================
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -107,15 +95,10 @@ public class InputActivity extends AppCompatActivity {
             setThreadPolicy(policy);
         }
         //initialize
-        // And later in some initialization function:
-        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<>(session);
-
         MyFile.mkdirs(appDir);
 
         connection = new Connection();
-        helper = new DBConnection(this);
+        talkerDBManager = new TalkerDBManager(this);
 
         sw_immediate=(Switch)findViewById(R.id.sw_immediate);
         sw_voice=(Switch)findViewById(R.id.sw_voice);
@@ -137,7 +120,7 @@ public class InputActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 setText(currentData[position].text);
-                current_id = currentData[position].id;
+                currentID = currentData[position].id;
                 setCurrentData();
             }
         });
@@ -249,7 +232,7 @@ public class InputActivity extends AppCompatActivity {
         btn_lv1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                current_id = 0;
+                currentID = 0;
                 setCurrentData();
             }
         });
@@ -283,7 +266,7 @@ public class InputActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                FindSentence(editText.getText().toString());
+                talkerDBManager.findSentences(editText.getText().toString(), sentence);
                 spinner.setSelection(0);
                 System.out.println(spinner.getSelectedItem().toString());
             }
@@ -321,7 +304,7 @@ public class InputActivity extends AppCompatActivity {
                         btn_send.setEnabled(false);
                     }
                 });
-                learn=new Learn(getApplicationContext(),helper);
+                learn = new Learn(getApplicationContext(), talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -340,8 +323,18 @@ public class InputActivity extends AppCompatActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    LoadData();
+                    long stime = System.currentTimeMillis();
+                    loadData();
                     progressDialog.dismiss();
+                    final long avg = (System.currentTimeMillis() - stime);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
+                            currentID = 0;
+                            setCurrentData();
+                        }
+                    });
                 }
             }).start();
         } catch (Exception e) {
@@ -349,66 +342,35 @@ public class InputActivity extends AppCompatActivity {
         }
     }
 
-    private void LoadData() {
-        long stime = System.currentTimeMillis();
-        SQLiteDatabase db = helper.getReadableDatabase();
-        //db=SQLiteDatabase.openDatabase("/sdcard/DB/Database.db",null,SQLiteDatabase.OPEN_READWRITE);
-        Cursor c = db.rawQuery("SELECT * FROM " + DBConnection.VocSchema.TABLE_NAME + " ORDER BY " + DBConnection.VocSchema.COUNT + " DESC;", null);
-        int size = c.getCount();
-        if (size > 0) {
-            c.moveToFirst();
-            Data = null; //RELEASE
-            next_id = null; //RELEASE
-            map=null; //RELEASE
-            Data = new InputData[size];
-            map = new int[size + 1];
-            next_id = new int[size + 1][];
-            next_id[0] = new int[size];
-            for (int i = 0; i < size; i++) {
-                final int id = Integer.parseInt(c.getString(c.getColumnIndex(DBConnection.VocSchema.ID)));
-                next_id[0][i] = id;
-                map[id] = i;
-                Data[i] = new InputData(c.getString(c.getColumnIndex(DBConnection.VocSchema.CONTENT)), id);
-                //==============================
-                //LoadRelation(id);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LoadRelation(id);
-                    }
-                }).start();
-                //==============================
-                c.moveToNext();
-            }
-
-            final long avg = (System.currentTimeMillis() - stime);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
-                    current_id = 0;
-                    setCurrentData();
-                }
-            });
+    private void loadData(){
+        Cursor c1 = talkerDBManager.getAllVoc();
+        int size = c1.getCount();
+        Thread[] threads = new Thread[size];
+        map = null; data = null; nextIDs = null; // release memory space
+        map = new int[size + 1];
+        data = new InputData[size + 1];
+        nextIDs = new int[size + 1][];
+        nextIDs[0] = new int[size];
+        talkerDBManager.loadAllVoc(map, data, nextIDs[0], c1);
+        for (int i = 0; i < size; i++){
+            int id = nextIDs[0][i];
+            Cursor c = talkerDBManager.getRelations(id);
+            int count = c.getCount();
+            nextIDs[id] = new int[count];
+            TalkerDBManager.LoadRelations task = talkerDBManager.new LoadRelations(nextIDs[id], c);
+            threads[i] = new Thread(task);
+            threads[i] = new Thread(task);
+            threads[i].setName("## ID : " + id + " ( " + i + " )");
+            threads[i].start();
         }
-        c.close();
-    }
-
-    private void LoadRelation(int id) {
-        SQLiteDatabase db = helper.getReadableDatabase();
-        String query1 = "select " + DBConnection.RelationSchema.ID2 + " from " + DBConnection.RelationSchema.TABLE_NAME
-                + " where " + DBConnection.RelationSchema.ID1 + " = '" + String.valueOf(id) + "' order by " + DBConnection.RelationSchema.COUNT + " desc;";
-        Cursor c = db.rawQuery(query1, null);
-        int size = c.getCount();
-        next_id[id] = new int[size];
-        if (size > 0) {
-            c.moveToFirst();
-            for (int i = 0; i < size; i++) {
-                next_id[id][i] = Integer.parseInt(c.getString(0));
-                c.moveToNext();
+        for (int i = 0; i < size; i++){
+            System.out.println(threads[i].getName() + " loads complete ! ( " + threads[i].getId() + " )");
+            try {
+                threads[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        c.close();
     }
 
     //===============================================================================================
@@ -422,8 +384,6 @@ public class InputActivity extends AppCompatActivity {
         list.add(fileEncoding);
         if(!APPDir){
             list.add(BACK);
-        }else {
-            list.add(dropbox);
         }
 
         for (File f : myfiles) {
@@ -455,15 +415,15 @@ public class InputActivity extends AppCompatActivity {
 
     private void setCurrentData()
     {
-        int size = next_id[current_id].length;
+        int size = nextIDs[currentID].length;
         if (size == 0) {
-            current_id = 0;
-            size = next_id[0].length;
+            currentID = 0;
+            size = nextIDs[0].length;
         }
         currentData=new InputData[size];//prevent size=0
         for (int i = 0; i < size; i++ ) {
-            int position = map[next_id[current_id][i]];
-            currentData[i]=Data[position];
+            int position = map[nextIDs[currentID][i]];
+            currentData[i]=data[position];
         }
         setList();
     }
@@ -509,39 +469,10 @@ public class InputActivity extends AppCompatActivity {
     }
 
     private void setSpinner(){
-        FindSentence("");
+        talkerDBManager.findSentences("", sentence);
         ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, sentence);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
-    }
-
-    private void FindSentence (String keyword) {
-        SQLiteDatabase db = helper.getReadableDatabase();
-        String query;
-        if(keyword.equals("")){
-            query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
-                    "  ORDER BY " + DBConnection.SentenceSchema.COUNT + " desc;";
-            sentence[0]="";
-        } else {
-            query="select content from " + DBConnection.SentenceSchema.TABLE_NAME +
-                    " where content LIKE '%" + keyword + "%'  ORDER BY " +
-                    DBConnection.SentenceSchema.COUNT + " desc;";
-            sentence[0]=keyword;
-        }
-        Cursor c = db.rawQuery(query, null);
-        c.moveToFirst();
-        int SIZE = c.getCount();
-        for (int i = 1; i < sentence.length; i++) {
-            if (i > SIZE) {
-                sentence[i] = "";
-            }else {
-                sentence[i] = c.getString(0);
-                c.moveToNext();
-            }
-        }
-
-        c.close();
-        db.close();
     }
 
     private void talk(final String message,boolean learning) {
@@ -566,36 +497,14 @@ public class InputActivity extends AppCompatActivity {
 
     private void clear(){
         editText.setText("");
-        current_id=0;
+        currentID=0;
         setCurrentData();
     }
 
     //===============================================================================================
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.dropbox_auth:
-                mDBApi.getSession().startOAuth2Authentication(InputActivity.this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (mDBApi.getSession().authenticationSuccessful()) {
-            try {
-                // Required to complete auth, sets the access token on the session
-                mDBApi.getSession().finishAuthentication();
-
-                //String accessToken = mDBApi.getSession().getOAuth2AccessToken();
-            } catch (IllegalStateException e) {
-                Log.i("DbAuthLog", "Error authenticating", e);
-            }
-        }
     }
 
     @Override

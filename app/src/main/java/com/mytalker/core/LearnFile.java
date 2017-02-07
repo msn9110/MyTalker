@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class LearnFile extends AsyncTask<Void,Integer,Integer> {
 
-    static final String TAG="LearnFile";
+    private static final String TAG = "## LearnFile";
     private Context mContext;
     private ProgressDialog mDialog;
 

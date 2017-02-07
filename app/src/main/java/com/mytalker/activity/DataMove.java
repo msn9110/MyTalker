@@ -12,16 +12,16 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.mytalker.R;
-import com.mytalker.core.DBConnection;
 import com.mytalker.core.Learn;
 import com.mytalker.core.LearnFile;
+import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
 
 import java.io.File;
 
 public class DataMove extends AppCompatActivity {
     final int REQUEST_CODE=0;
-    public static final String _DBName = "Database.db";
+    public static final String _DBName = TalkerDBManager._DBName + TalkerDBManager._DBExt;
     String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
     final int REQUEST_DBCODE=1100;
     boolean outMode=true;//true to copy out, false to move out
@@ -36,7 +36,7 @@ public class DataMove extends AppCompatActivity {
     File out=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),_DBName);
     File in;
 
-    DBConnection helper= new DBConnection(this);
+    TalkerDBManager talkerDBManager;
     Learn learn;
 
     private Handler handler = new Handler();
@@ -45,6 +45,7 @@ public class DataMove extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.move_menu);
+        talkerDBManager = new TalkerDBManager(this);
 
         in=getDatabasePath(_DBName);
         //System.out.println(Path_in);
@@ -112,7 +113,7 @@ public class DataMove extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                learn=new Learn(getApplicationContext(),helper);
+                learn=new Learn(getApplicationContext(), talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
