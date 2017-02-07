@@ -359,7 +359,6 @@ public class InputActivity extends AppCompatActivity {
             nextIDs[id] = new int[count];
             TalkerDBManager.LoadRelations task = talkerDBManager.new LoadRelations(nextIDs[id], c);
             threads[i] = new Thread(task);
-            threads[i] = new Thread(task);
             threads[i].setName("## ID : " + id + " ( " + i + " )");
             threads[i].start();
         }
