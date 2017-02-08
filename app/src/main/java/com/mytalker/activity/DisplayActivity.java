@@ -8,7 +8,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.example.mytalker.R;
-import com.mytalker.core.DisplayManager;
+import com.mytalker.core.MyDisplayManager;
 
 
 public class DisplayActivity extends Activity {
@@ -16,7 +16,7 @@ public class DisplayActivity extends Activity {
     //public static final String END = "!!!@@@###";
     String TAG = "## DisplayActivity";
     TextView tvDisplay;
-    DisplayManager displayManager;
+    MyDisplayManager displayManager;
     private Handler handler = new Handler();
 
     @Override
@@ -27,7 +27,7 @@ public class DisplayActivity extends Activity {
         //initialize
         tvDisplay = (TextView) findViewById(R.id.txtDisplay);
         tvDisplay.setText(R.string.empty);
-        displayManager = new DisplayManager(this, handler, tvDisplay);
+        displayManager = new MyDisplayManager(getApplicationContext(), handler, tvDisplay);
         Log.i(TAG, "Init done !");
     }
 

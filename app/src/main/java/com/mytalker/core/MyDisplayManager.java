@@ -14,15 +14,15 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 
-public class DisplayManager extends AsyncTask<Void, Void, Void> {
-    private final static String TAG = "## DisplayManager";
+public class MyDisplayManager extends AsyncTask<Void, Void, Void> {
+    private static String TAG = "## MyDisplayManager";
     private TextView mDisplay;
     private Handler mHandler;
     private Context mContext;
     private Queue<String> mBuffer;
     private MyDisplay myDisplay;
     private boolean toReceive;
-    public DisplayManager(Context context, Handler handler, TextView display){
+    public MyDisplayManager(Context context, Handler handler, TextView display){
         mContext = context;
         mHandler = handler;
         mDisplay = display;
