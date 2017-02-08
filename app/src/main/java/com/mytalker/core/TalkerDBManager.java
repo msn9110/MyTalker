@@ -130,8 +130,8 @@ public final class TalkerDBManager {
 
         boolean ret = false;
         String query = "select * from " +  RelationSchema.TABLE_NAME + " where "
-                + RelationSchema.ID1 + " = '" + id1 + "' and " + RelationSchema.ID2 + " = '" + id2 + "';";
-        Cursor c = db.rawQuery(query,null);
+                + RelationSchema.ID1 + " = " + id1 + " and " + RelationSchema.ID2 + " = " + id2 + ";";
+        Cursor c = db.rawQuery(query, null);
         if(c.getCount() > 0) {
             c.moveToFirst();
             int id = c.getInt(c.getColumnIndex(RelationSchema.ID));

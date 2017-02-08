@@ -5,6 +5,10 @@ import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public class Speaker {
@@ -47,41 +51,43 @@ public class Speaker {
     }
 
     public void speak(String hello) {
-        hello=" "+hello;
-        String[] msg=new String[50];
-        for(int i=0;i<50;i++)
-            msg[i]="";
-        int previous=0,count=0,speaker=0,current;
-        char first=hello.charAt(0);
-        if(Check.check_eng(first))
-            speaker=1;
-        for(int i=0;i<hello.length();i++)
-        {
-            current=0;
-            char ch1=hello.charAt(i);
-            if(Check.check_eng(ch1))
-                current=1;
-            else if(Check.check_sign(ch1))
-                current=previous;
-
-            if(current!=previous)
-            {
-                previous=current;
-                count++;
-            }
-            msg[count]+=String.valueOf(ch1);
-        }
-
-        for(int i=0;i<=count; i++) {
-            Log.i(TAG, msg[i]);
+        hello = " " + hello;
+        for (int i = 0; i < msg.length; i++)
+            msg[i] = "";
+        int count = proccessString(hello);
+        int speaker = 0;
+        List<String> list = Arrays.asList(msg).subList(0, count + 1);
+        for(String s : list) {
+            Log.i(TAG, s);
             if(speaker==0){
-                tw.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
+                tw.speak(s, TextToSpeech.QUEUE_ADD, null);
             } else {
-                en.speak(msg[i],TextToSpeech.QUEUE_ADD,null);
+                en.speak(s, TextToSpeech.QUEUE_ADD, null);
             }
             speaker++;
-            speaker%=2;
+            speaker %= 2;
         }
+    }
+
+    String[] msg = new String[200];
+    private int proccessString(String hello){
+        int previous = 0, current; // 0 denotes tw
+        int count = 0;
+        for (int i = 0; i < hello.length(); i++)
+        {
+            char ch = hello.charAt(i);
+            current = ((Check.check_eng(ch) ? 1 : 0));
+            if (Check.check_sign(ch))
+                current = previous;
+
+            if (current != previous)
+            {
+                previous = current;
+                count++;
+            }
+            msg[count] += String.valueOf(ch);
+        }
+        return count;
     }
 
     public void stop(){
