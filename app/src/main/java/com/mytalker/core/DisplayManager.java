@@ -34,6 +34,7 @@ public class DisplayManager extends AsyncTask<Void, Void, Void> {
         toReceive = true;
         myDisplay = new MyDisplay(mContext);
         myDisplay.start();
+        Log.i(TAG, "onPreExecute");
     }
 
     @Override
@@ -61,12 +62,14 @@ public class DisplayManager extends AsyncTask<Void, Void, Void> {
     protected void onCancelled() {
         myDisplay.cancel();
         toReceive = false;
+        Log.i(TAG, "onCanceled");
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         myDisplay.cancel();
         toReceive = false;
+        Log.i(TAG, "onPostExecute");
     }
 
     private class MyDisplay extends Thread{
