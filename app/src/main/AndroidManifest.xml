@@ -33,7 +33,7 @@
         <activity
             android:name="com.mytalker.activity.DisplayActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppBaseTheme" />
+            android:theme="@style/AppTheme" />
         <activity
             android:name="com.mytalker.activity.DataMove"
             android:configChanges="orientation|keyboardHidden" >

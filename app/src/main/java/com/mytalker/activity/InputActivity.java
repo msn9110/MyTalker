@@ -50,24 +50,24 @@ import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
 public class InputActivity extends AppCompatActivity {
+    public static boolean con = false;
+
     Speaker speaker;
     Connection connection;
 
-    Switch sw_immediate,sw_voice,sw_speech;//to control three status of app
+    Switch sw_immediate, sw_voice, sw_speech; //to control three status of app
     Button btn_send, btn_lv1, btn_load, btn_clear;
-    boolean localVoice = false,immediate = false,speechMode = false;
     //localVoice to control whether local Machine is enabled voice, when running in local mode, it is forced to enable
     //when immediate is true, ie can speak the text which you select in main list
     //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
+    boolean localVoice = true, immediate = false, speechMode = false;
     ListView dbList,mainList,speechList;
     EditText editText;
-    public static boolean con = false;
 
     //for data variable
-    InputData[] data=new InputData[1], currentData;
-    int[] map=new int[1];//to map vocabulary id to the position in Data array
-    //SQLiteDatabase db;
-    int[][] nextIDs=new int[1][1];//level 0 indicates the all vocabularies in database
+    InputData[] data = new InputData[1], currentData;
+    int[] map = new int[1];//to map vocabulary id to the position in Data array
+    int[][] nextIDs = new int[1][1];//level 0 indicates the all vocabularies in database
     int currentID = 0;//0 denote main level
 
     TalkerDBManager talkerDBManager;
@@ -496,7 +496,7 @@ public class InputActivity extends AppCompatActivity {
 
     private void clear(){
         editText.setText("");
-        currentID=0;
+        currentID = 0;
         setCurrentData();
     }
 

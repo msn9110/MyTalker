@@ -1,6 +1,5 @@
 package com.mytalker.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -9,9 +8,10 @@ import android.widget.TextView;
 
 import com.example.mytalker.R;
 import com.mytalker.core.MyDisplayManager;
+import com.utils.Speaker;
 
 
-public class DisplayActivity extends Activity {
+public class DisplayActivity extends AppCompatActivity {
 
     //public static final String END = "!!!@@@###";
     String TAG = "## DisplayActivity";
@@ -27,7 +27,6 @@ public class DisplayActivity extends Activity {
         //initialize
         tvDisplay = (TextView) findViewById(R.id.txtDisplay);
         tvDisplay.setText(R.string.empty);
-        displayManager = new MyDisplayManager(getApplicationContext(), handler, tvDisplay);
         Log.i(TAG, "Init done !");
     }
 
@@ -39,12 +38,13 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        displayManager.execute();
+        displayManager = new MyDisplayManager(getApplicationContext(), handler, tvDisplay);
+        displayManager.start();
     }
     @Override
     protected void onPause(){
         super.onPause();
-        displayManager.cancel(true);
+        displayManager.cancel();
     }
 
     @Override
