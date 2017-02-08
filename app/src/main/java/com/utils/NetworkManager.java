@@ -13,7 +13,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class NetworkManager {
-
+    private static String TAG = "## NetworkManager";
     /**
      * Returns MAC address of the given interface name.
      * @param interfaceName eth0, wlan0 or NULL=use first interface
@@ -96,7 +96,7 @@ public class NetworkManager {
         String broadcastIP = "";
         try {
             inetAddr = InetAddress.getByName(getIPAddress());
-            System.out.println(inetAddr.getHostAddress());
+            Log.i(TAG, "My IP is " + inetAddr.getHostAddress());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

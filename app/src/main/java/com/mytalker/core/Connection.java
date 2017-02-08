@@ -13,11 +13,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class Connection {
-
+    private static String TAG = "## Connection";
     private InetAddress serverAddr;
     public Connection(){
         String IP = NetworkManager.getBroadcast();
-        Log.i("## IP", IP);
+        Log.i(TAG, "My broadcast IP is" + IP);
         try {
             serverAddr = InetAddress.getByName(IP);
         } catch (UnknownHostException e) {
@@ -33,6 +33,7 @@ public class Connection {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddr, port);
             DatagramSocket socket = new DatagramSocket();    // 建立傳送的 UDP Socket。
             socket.send(packet);                             // 傳送
+            Log.i(TAG, "Packet Send !");
             socket.close();                                 // 關閉 UDP socket.
         } catch (Exception e) { e.printStackTrace(); }    // 若有錯誤產生，列印函數呼叫堆疊。
     }
