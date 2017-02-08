@@ -5,8 +5,6 @@ import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -69,7 +67,7 @@ public class Speaker {
         }
     }
 
-    String[] msg = new String[200];
+    private String[] msg = new String[200];
     private int proccessString(String hello){
         int previous = 0, current; // 0 denotes tw
         int count = 0;
