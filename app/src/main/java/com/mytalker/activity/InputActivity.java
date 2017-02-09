@@ -48,7 +48,7 @@ import java.util.List;
 import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
-public class InputActivity extends AppCompatActivity {
+public class InputActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
     public static boolean con = false;
     private static final String TAG = "InputActivity";
 
@@ -114,73 +114,9 @@ public class InputActivity extends AppCompatActivity {
         editText = (EditText) findViewById(R.id.editText);
         spinner = (Spinner)findViewById(R.id.Spinner_sentence);
 
-        dbList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                setText(currentData[position].text);
-                currentID = currentData[position].id;
-                setCurrentData();
-            }
-        });
-
-        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String msg = ((TextView) view).getText().toString();
-                if(immediate)
-                    talk(msg, false);
-                else
-                    setText(msg);
-            }
-        });
-
-        fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                String select = ((TextView) view).getText().toString();
-                File file = new File(parentPath,select);
-
-                switch (select){
-                    case BACK:
-                        fileList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
-                        break;
-
-                    case fileEncoding:
-                        MyFile.setCharset();
-                        Toast.makeText(InputActivity.this,MyFile.charset,Toast.LENGTH_SHORT).show();
-                        break;
-
-                    default:
-                        if(file.isDirectory())
-                            fileList.setAdapter(createListAdapter(file));
-                        else{
-                            if(!speechMode)
-                                setMainList(file);
-                            else {
-                                final File Selection = new File(parentPath,select);
-                                try {
-                                    File myFile = MyFile.getFile(Selection);
-                                    FileInputStream fIn = new FileInputStream(myFile);
-                                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                                    String line;
-                                    while ((line = myReader.readLine()) != null) {
-                                        if(line.length() == 0)
-                                            continue;
-                                        talk(line, false);
-                                    }
-                                    myReader.close();
-                                } catch (FileNotFoundException e) {
-                                    Log.e(TAG, "File not found: " + e.toString());
-                                } catch (IOException e) {
-                                    Log.e(TAG, "Can not read file: " + e.toString());
-                                }
-                            }
-                        }
-                        break;
-                }
-            }
-        });
+        dbList.setOnItemClickListener(this);
+        mainList.setOnItemClickListener(this);
+        fileList.setOnItemClickListener(this);
 
         if (!con) {
             String text = "TALK";
@@ -519,5 +455,69 @@ public class InputActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         speaker.shutdown();
+    }
+
+    private void fileListItemOnClick(String select){
+        File file = new File(parentPath, select);
+
+        switch (select){
+            case BACK:
+                fileList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
+                break;
+
+            case fileEncoding:
+                MyFile.setCharset();
+                Toast.makeText(InputActivity.this, MyFile.charset, Toast.LENGTH_SHORT).show();
+                break;
+
+            default:
+                if(file.isDirectory())
+                    fileList.setAdapter(createListAdapter(file));
+                else{
+                    if(!speechMode)
+                        setMainList(file);
+                    else {
+                        final File Selection = new File(parentPath,select);
+                        try {
+                            File myFile = MyFile.getFile(Selection);
+                            FileInputStream fIn = new FileInputStream(myFile);
+                            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                            String line;
+                            while ((line = myReader.readLine()) != null) {
+                                if(line.length() == 0)
+                                    continue;
+                                talk(line, false);
+                            }
+                            myReader.close();
+                        } catch (FileNotFoundException e) {
+                            Log.e(TAG, "File not found: " + e.toString());
+                        } catch (IOException e) {
+                            Log.e(TAG, "Can not read file: " + e.toString());
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> a, View view, int i, long l) {
+        String select = ((TextView) view).getText().toString();
+        switch (a.getId()){
+            case R.id.mainList:
+                if(immediate)
+                    talk(select, false);
+                else
+                    setText(select);
+                break;
+            case R.id.dbList:
+                setText(currentData[i].text);
+                currentID = currentData[i].id;
+                setCurrentData();
+                break;
+            case R.id.fileList:
+                fileListItemOnClick(select);
+                break;
+        }
     }
 }
