@@ -15,7 +15,6 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -56,12 +55,11 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     Connection connection;
 
     Switch sw_immediate, sw_voice, sw_speech; //to control three status of app
-    Button btn_send, btn_lv1, btn_load, btn_clear;
     //localVoice to control whether local Machine is enabled voice, when running in local mode, it is forced to enable
     //when immediate is true, ie can speak the text which you select in main list
     //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
     boolean localVoice = true, immediate = false, speechMode = false;
-    ListView dbList, mainList, fileList;
+    ListView dbList, mainList, buttonList, fileList;
     EditText editText;
 
     //for data variable
@@ -102,13 +100,9 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         sw_voice = (Switch)findViewById(R.id.sw_voice);
         sw_speech = (Switch)findViewById(R.id.sw_speech);
 
-        btn_send = (Button) findViewById(R.id.btn_send);
-        btn_lv1 = (Button) findViewById(R.id.btn_lv1);
-        btn_clear = (Button) findViewById(R.id.btn_clear);
-        btn_load = (Button) findViewById(R.id.btn_load);
-
         dbList = (ListView) findViewById(R.id.dbList);
         mainList = (ListView) findViewById(R.id.mainList);
+        buttonList = (ListView) findViewById(R.id.buttonList);
         fileList = (ListView) findViewById(R.id.fileList);
 
         editText = (EditText) findViewById(R.id.editText);
@@ -116,11 +110,14 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
 
         dbList.setOnItemClickListener(this);
         mainList.setOnItemClickListener(this);
+        buttonList.setOnItemClickListener(this);
         fileList.setOnItemClickListener(this);
 
+        ArrayList<String> list = new ArrayList<>();
+        list.addAll(Arrays.asList("TALK", "清除", "主層", "載入資料"));
+        buttonList.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list));
+
         if (!con) {
-            String text = "TALK";
-            btn_send.setText(text);
             sw_voice.setChecked(true);
             sw_voice.setEnabled(false);
         }
@@ -144,32 +141,6 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         });
 
-        btn_clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clear();
-            }
-        });
-        btn_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                talk(editText.getText().toString(),true);
-            }
-        });
-
-        btn_load.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clear();Update();
-            }
-        });
-        btn_lv1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentID = 0;
-                setCurrentData();
-            }
-        });
         setMainList(new File(appDir,"words.txt"));
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
@@ -206,11 +177,11 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         });//text change event
 
-        btn_send.setEnabled(false);
+        buttonList.setEnabled(false);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                speaker=new Speaker(getApplicationContext());
+                speaker = new Speaker(getApplicationContext());
                 try {
                     Thread.sleep(1250);
                 } catch (InterruptedException e) {
@@ -235,14 +206,14 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        btn_send.setEnabled(false);
+                        buttonList.setEnabled(false);
                     }
                 });
                 learn = new Learn(getApplicationContext(), talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        btn_send.setEnabled(true);
+                        buttonList.setEnabled(true);
                     }
                 });
             }
@@ -409,7 +380,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         spinner.setAdapter(adapter);
     }
 
-    private void talk(final String message,boolean learning) {
+    private void talk(final String message, boolean learning) {
         //要傳送的字串
         MyFile.log(message);
         if(learning)
@@ -455,6 +426,25 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     protected void onDestroy() {
         super.onDestroy();
         speaker.shutdown();
+    }
+
+    private void buttonListOnItemClick(String select){
+        switch (select){
+            case "TALK":
+                talk(editText.getText().toString(), true);
+                break;
+            case "清除":
+                clear();
+                break;
+            case "主層":
+                currentID = 0;
+                setCurrentData();
+                break;
+            case "載入資料":
+                clear();
+                Update();
+                break;
+        }
     }
 
     private void fileListItemOnClick(String select){
@@ -514,6 +504,9 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 setText(currentData[i].text);
                 currentID = currentData[i].id;
                 setCurrentData();
+                break;
+            case R.id.buttonList:
+                buttonListOnItemClick(select);
                 break;
             case R.id.fileList:
                 fileListItemOnClick(select);
