@@ -78,12 +78,12 @@ public class InputActivity extends AppCompatActivity {
     String[] sentence = new String[15];
     Spinner spinner;
 
-    ArrayList<String> myList=new ArrayList<>();
+    ArrayList<String> myList = new ArrayList<>();
     String parentPath;
-    File appDir=new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
-    final String fileEncoding="-->更改文件編碼";
-    final String BACK="..(回上一頁)";
-    static final String TAG="SpeechList";
+    File appDir = new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
+    final String fileEncoding = "-->更改文件編碼";
+    final String BACK = "..(回上一頁)";
+    static final String TAG = "SpeechList";
 
     //=====================================oncreate===================================================
     @Override
@@ -100,21 +100,21 @@ public class InputActivity extends AppCompatActivity {
         connection = new Connection();
         talkerDBManager = new TalkerDBManager(this);
 
-        sw_immediate=(Switch)findViewById(R.id.sw_immediate);
-        sw_voice=(Switch)findViewById(R.id.sw_voice);
-        sw_speech=(Switch)findViewById(R.id.sw_speech);
+        sw_immediate = (Switch)findViewById(R.id.sw_immediate);
+        sw_voice = (Switch)findViewById(R.id.sw_voice);
+        sw_speech = (Switch)findViewById(R.id.sw_speech);
 
         btn_send = (Button) findViewById(R.id.btn_send);
         btn_lv1 = (Button) findViewById(R.id.btn_lv1);
         btn_clear = (Button) findViewById(R.id.btn_clear);
         btn_load = (Button) findViewById(R.id.btn_load);
 
-        dbList=(ListView)findViewById(R.id.dbList);
-        mainList=(ListView)findViewById(R.id.mainList);
-        speechList=(ListView)findViewById(R.id.speechList);
+        dbList = (ListView) findViewById(R.id.dbList);
+        mainList = (ListView) findViewById(R.id.mainList);
+        speechList = (ListView) findViewById(R.id.speechList);
 
         editText = (EditText) findViewById(R.id.editText);
-        spinner=(Spinner)findViewById(R.id.Spinner_sentence);
+        spinner = (Spinner)findViewById(R.id.Spinner_sentence);
 
         dbList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -128,7 +128,7 @@ public class InputActivity extends AppCompatActivity {
         mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String msg=myList.get(position);
+                String msg = myList.get(position);
                 if(immediate)
                     talk(msg,false);
                 else
@@ -140,8 +140,8 @@ public class InputActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                String select=((TextView) view).getText().toString();
-                File file=new File(parentPath,select);
+                String select = ((TextView) view).getText().toString();
+                File file = new File(parentPath,select);
 
                 switch (select){
                     case BACK:
@@ -160,16 +160,16 @@ public class InputActivity extends AppCompatActivity {
                             if(!speechMode)
                                 setMainList(file);
                             else {
-                                final File Selection=new File(parentPath,select);
+                                final File Selection = new File(parentPath,select);
                                 try {
                                     File myFile = MyFile.getFile(Selection);
                                     FileInputStream fIn = new FileInputStream(myFile);
                                     BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
                                     String line;
                                     while ((line = myReader.readLine()) != null) {
-                                        if(line.length()==0)
+                                        if(line.length() == 0)
                                             continue;
-                                        talk(line,false);
+                                        talk(line, false);
                                     }
                                     myReader.close();
                                 } catch (FileNotFoundException e) {
@@ -185,7 +185,7 @@ public class InputActivity extends AppCompatActivity {
         });
 
         if (!con) {
-            String text="TALK";
+            String text = "TALK";
             btn_send.setText(text);
             sw_voice.setChecked(true);
             sw_voice.setEnabled(false);
@@ -194,19 +194,19 @@ public class InputActivity extends AppCompatActivity {
         sw_voice.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                localVoice=b;
+                localVoice = b;
             }
         });
         sw_immediate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                immediate=b;
+                immediate = b;
             }
         });
         sw_speech.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                speechMode=b;
+                speechMode = b;
             }
         });
 
@@ -375,7 +375,7 @@ public class InputActivity extends AppCompatActivity {
     //===============================================================================================
     private ListAdapter createListAdapter(File dir) {
         List<String> list = new ArrayList<>();
-        boolean APPDir=dir.equals(appDir);
+        boolean APPDir = dir.equals(appDir);
         this.parentPath = dir.getPath();
         File[] myfiles = dir.listFiles();
         List<String> dirs = new ArrayList<>();
@@ -396,7 +396,7 @@ public class InputActivity extends AppCompatActivity {
         list.addAll(dirs);
         list.addAll(files);
 
-        if(dirs.size() + files.size()==0)
+        if(dirs.size() + files.size() == 0)
             findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
         else
             findViewById(R.id.txt_no_data).setVisibility(View.GONE);
@@ -405,11 +405,11 @@ public class InputActivity extends AppCompatActivity {
     //===============================================================================================
     private void setText(String text){
         String s = editText.getText().toString();
-        int index=editText.getSelectionStart();
-        String part1=s.substring(0,index),part2=s.substring(index,s.length());
-        s=part1+text+part2;
+        int index = editText.getSelectionStart();
+        String part1 = s.substring(0, index),part2 = s.substring(index, s.length());
+        s = part1 + text + part2;
         editText.setText(s);
-        editText.setSelection(part1.length()+text.length());
+        editText.setSelection(part1.length() + text.length());
     }
 
     private void setCurrentData()
@@ -419,15 +419,15 @@ public class InputActivity extends AppCompatActivity {
             currentID = 0;
             size = nextIDs[0].length;
         }
-        currentData=new InputData[size];//prevent size=0
+        currentData = new InputData[size];//prevent size=0
         for (int i = 0; i < size; i++ ) {
             int position = map[nextIDs[currentID][i]];
-            currentData[i]=data[position];
+            currentData[i] = data[position];
         }
-        setList();
+        setDBList();
     }
 
-    private void setList(){
+    private void setDBList(){
         ArrayList<String> lists = new ArrayList<>();
         for(InputData data : currentData){
             String word = data.text;
@@ -439,18 +439,18 @@ public class InputActivity extends AppCompatActivity {
 
     private void setMainList(File file){
         myList.clear();
-        String charset=MyFile.charset_target;
+        String charset = MyFile.charset_target;
         if(file.exists()){
-            File myFile=MyFile.getFile(file);
+            File myFile = MyFile.getFile(file);
             try{
                 FileInputStream in = new FileInputStream(myFile);
                 BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
                 String line;
-                while ((line=myReader.readLine())!=null){
+                while ((line = myReader.readLine()) != null){
                     myList.add(line);
                 }
                 myReader.close();
-                ArrayAdapter<String> listAdapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,myList);
+                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, myList);
                 mainList.setAdapter(listAdapter);
             }catch (Exception e){
                 e.printStackTrace();
@@ -459,9 +459,9 @@ public class InputActivity extends AppCompatActivity {
         }
 
         else {
-            String[] words=new String[]{"不","好","要","是","對","用","有","沒"};
+            String[] words = new String[]{"不","好","要","是","對","用","有","沒"};
             myList.addAll(Arrays.asList(words));
-            ArrayAdapter<String> listAdapter=new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,myList);
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, myList);
             mainList.setAdapter(listAdapter);
         }
 
@@ -469,7 +469,7 @@ public class InputActivity extends AppCompatActivity {
 
     private void setSpinner(){
         talkerDBManager.findSentences("", sentence);
-        ArrayAdapter adapter=new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, sentence);
+        ArrayAdapter adapter = new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, sentence);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
     }
@@ -484,7 +484,7 @@ public class InputActivity extends AppCompatActivity {
                 learn.Learning(message);
             }
         }).start();
-        if (localVoice && message.length()>0){
+        if (localVoice && message.length() > 0){
             //speaker.stop();
             speaker.speak(message);
         }
