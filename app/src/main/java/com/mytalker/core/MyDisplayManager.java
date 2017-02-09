@@ -15,7 +15,6 @@ import java.util.Queue;
 
 public class MyDisplayManager extends Thread {
     private static String TAG = "## MyDisplayManager";
-    private final Object lock = new Object();
 
     private TextView mDisplay;
     private Handler mHandler;
@@ -61,9 +60,15 @@ public class MyDisplayManager extends Thread {
     }
 
     private void onCancel() {
+        myDisplay.interrupt();
         myDisplay.cancel();
         toReceive = false;
         socket.close();
+        try {
+            myDisplay.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Log.i(TAG, "onCancel");
     }
 
@@ -89,24 +94,58 @@ public class MyDisplayManager extends Thread {
             toContinue = true;
             while (toContinue){
                 if(!mBuffer.isEmpty() && speaker.isNotSpeaking()){
-                    synchronized (lock){
-                        final String message = mBuffer.remove();
-                        if (message.length() > 0) {
-                            final int font = 6000 / (message.length() + 40);
-                            Log.i(TAG, message);
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mDisplay.setTextSize(font);
-                                    mDisplay.setText(message);
-                                    speaker.speak(message);
-                                }
-                            });
+                    final String message = mBuffer.remove();
+                    if (message.length() > 0) {
+                        final int font = 6000 / (message.length() + 40);
+                        Log.i(TAG, message);
+                        BusySpeakerListener listener = new BusySpeakerListener(speaker);
+                        listener.start();
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDisplay.setTextSize(font);
+                                mDisplay.setText(message);
+                                speaker.speak(message);
+                            }
+                        });
+
+                        try {
+                            listener.join();
+                            //Log.d(TAG, "Listener's status is " + listener.isAlive());
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            if(listener.isAlive()){
+                                listener.toSpeak = false;
+                                listener.interrupt();
+                            }
+                            Log.i(TAG, "MyDisplay interrupt !");
                         }
                     }
                 }
             }
         }
 
+    }
+}
+
+class BusySpeakerListener extends Thread{
+    private Speaker speaker;
+    boolean toSpeak;
+
+    BusySpeakerListener(Speaker speaker){
+        this.speaker = speaker;
+    }
+
+    @Override
+    public void run() {
+        try {
+            toSpeak = true;
+            Thread.sleep(20);
+            while (! speaker.isNotSpeaking() && toSpeak) // speaker is busy now
+                Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Log.i("## Listener", "interrupt !");
+        }
     }
 }

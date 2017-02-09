@@ -45,6 +45,11 @@ public class DisplayActivity extends AppCompatActivity {
     protected void onPause(){
         super.onPause();
         displayManager.cancel();
+        try {
+            displayManager.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
