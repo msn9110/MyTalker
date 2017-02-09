@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -32,6 +33,7 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name="com.mytalker.activity.DisplayActivity"
+            android:screenOrientation="locked"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/AppTheme" />
         <activity

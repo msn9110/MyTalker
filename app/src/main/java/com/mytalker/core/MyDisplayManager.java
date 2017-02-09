@@ -30,6 +30,7 @@ public class MyDisplayManager extends Thread {
         mHandler = handler;
         mDisplay = display;
         mBuffer = new LinkedList<>();
+        Log.d(TAG, "Created !");
     }
 
     private void onPreExecute() {
@@ -128,6 +129,7 @@ public class MyDisplayManager extends Thread {
     }
 }
 
+// TODO: 2017/2/9 add this class to Speaker 
 class BusySpeakerListener extends Thread{
     private Speaker speaker;
     boolean toSpeak;
