@@ -126,7 +126,7 @@
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/speechList">
+                android:id="@+id/fileList">
             </ListView>
         </LinearLayout>
     </LinearLayout>

@@ -1,6 +1,5 @@
 package com.mytalker.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.database.Cursor;
 import android.os.Build;
@@ -51,6 +50,7 @@ import static android.os.StrictMode.setThreadPolicy;
 
 public class InputActivity extends AppCompatActivity {
     public static boolean con = false;
+    private static final String TAG = "InputActivity";
 
     Speaker speaker;
     Connection connection;
@@ -61,7 +61,7 @@ public class InputActivity extends AppCompatActivity {
     //when immediate is true, ie can speak the text which you select in main list
     //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
     boolean localVoice = true, immediate = false, speechMode = false;
-    ListView dbList,mainList,speechList;
+    ListView dbList, mainList, fileList;
     EditText editText;
 
     //for data variable
@@ -78,12 +78,10 @@ public class InputActivity extends AppCompatActivity {
     String[] sentence = new String[15];
     Spinner spinner;
 
-    ArrayList<String> myList = new ArrayList<>();
     String parentPath;
-    File appDir = new File(Environment.getExternalStorageDirectory(),"MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
+    File appDir = new File(Environment.getExternalStorageDirectory(), "MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
     final String fileEncoding = "-->更改文件編碼";
     final String BACK = "..(回上一頁)";
-    static final String TAG = "SpeechList";
 
     //=====================================oncreate===================================================
     @Override
@@ -111,7 +109,7 @@ public class InputActivity extends AppCompatActivity {
 
         dbList = (ListView) findViewById(R.id.dbList);
         mainList = (ListView) findViewById(R.id.mainList);
-        speechList = (ListView) findViewById(R.id.speechList);
+        fileList = (ListView) findViewById(R.id.fileList);
 
         editText = (EditText) findViewById(R.id.editText);
         spinner = (Spinner)findViewById(R.id.Spinner_sentence);
@@ -128,15 +126,15 @@ public class InputActivity extends AppCompatActivity {
         mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String msg = myList.get(position);
+                String msg = ((TextView) view).getText().toString();
                 if(immediate)
-                    talk(msg,false);
+                    talk(msg, false);
                 else
                     setText(msg);
             }
         });
 
-        speechList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
@@ -145,7 +143,7 @@ public class InputActivity extends AppCompatActivity {
 
                 switch (select){
                     case BACK:
-                        speechList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
+                        fileList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
                         break;
 
                     case fileEncoding:
@@ -155,7 +153,7 @@ public class InputActivity extends AppCompatActivity {
 
                     default:
                         if(file.isDirectory())
-                            speechList.setAdapter(createListAdapter(file));
+                            fileList.setAdapter(createListAdapter(file));
                         else{
                             if(!speechMode)
                                 setMainList(file);
@@ -237,7 +235,7 @@ public class InputActivity extends AppCompatActivity {
             }
         });
         setMainList(new File(appDir,"words.txt"));
-        speechList.setAdapter(this.createListAdapter(appDir));
+        fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -438,6 +436,7 @@ public class InputActivity extends AppCompatActivity {
     }
 
     private void setMainList(File file){
+        ArrayList<String> myList = new ArrayList<>();
         myList.clear();
         String charset = MyFile.charset_target;
         if(file.exists()){
