@@ -52,7 +52,7 @@ public class Speaker {
         hello = " " + hello;
         for (int i = 0; i < msg.length; i++)
             msg[i] = "";
-        int count = proccessString(hello);
+        int count = processString(hello);
         int speaker = 0;
         List<String> list = Arrays.asList(msg).subList(0, count + 1);
         for(String s : list) {
@@ -67,8 +67,25 @@ public class Speaker {
         }
     }
 
+    public void speakSync(String hello){
+        speak(hello);
+        BusySpeakerListener listener = new BusySpeakerListener(this);
+        listener.start();
+        try {
+            listener.join();
+            //Log.d(TAG, "Listener's status is " + listener.isAlive());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            if(listener.isAlive()){
+                listener.cancel();
+                listener.interrupt();
+            }
+            Log.i(TAG, "interrupt !");
+        }
+    }
+
     private String[] msg = new String[200];
-    private int proccessString(String hello){
+    private int processString(String hello){
         int previous = 0, current; // 0 denotes tw
         int count = 0;
         for (int i = 0; i < hello.length(); i++)
@@ -105,9 +122,35 @@ public class Speaker {
             en.stop();
             en.shutdown();
         }
-        tw=en=null;
+        tw = en = null;
     }
     public boolean isNotSpeaking(){
         return (!tw.isSpeaking() || !en.isSpeaking());
+    }
+
+    class BusySpeakerListener extends Thread {
+        private Speaker speaker;
+        private boolean toSpeak;
+
+        BusySpeakerListener(Speaker speaker) {
+            this.speaker = speaker;
+        }
+
+        @Override
+        public void run() {
+            try {
+                toSpeak = true;
+                Thread.sleep(20);
+                while (!speaker.isNotSpeaking() && toSpeak) // speaker is busy now
+                    Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Log.i("## Listener", "interrupt !");
+            }
+        }
+
+        void cancel(){
+            toSpeak = false;
+        }
     }
 }

@@ -99,55 +99,18 @@ public class MyDisplayManager extends Thread {
                     if (message.length() > 0) {
                         final int font = 6000 / (message.length() + 40);
                         Log.i(TAG, message);
-                        BusySpeakerListener listener = new BusySpeakerListener(speaker);
-                        listener.start();
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 mDisplay.setTextSize(font);
                                 mDisplay.setText(message);
-                                speaker.speak(message);
                             }
                         });
-
-                        try {
-                            listener.join();
-                            //Log.d(TAG, "Listener's status is " + listener.isAlive());
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            if(listener.isAlive()){
-                                listener.toSpeak = false;
-                                listener.interrupt();
-                            }
-                            Log.i(TAG, "MyDisplay interrupt !");
-                        }
+                        speaker.speakSync(message);
                     }
                 }
             }
         }
 
-    }
-}
-
-// TODO: 2017/2/9 add this class to Speaker 
-class BusySpeakerListener extends Thread{
-    private Speaker speaker;
-    boolean toSpeak;
-
-    BusySpeakerListener(Speaker speaker){
-        this.speaker = speaker;
-    }
-
-    @Override
-    public void run() {
-        try {
-            toSpeak = true;
-            Thread.sleep(20);
-            while (! speaker.isNotSpeaking() && toSpeak) // speaker is busy now
-                Thread.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Log.i("## Listener", "interrupt !");
-        }
     }
 }
