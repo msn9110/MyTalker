@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -47,7 +48,8 @@ import java.util.List;
 import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
-public class InputActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class InputActivity extends AppCompatActivity implements AdapterView.OnItemClickListener,
+        View.OnClickListener, AdapterView.OnItemSelectedListener{
     public static boolean con = false;
     private static final String TAG = "InputActivity";
 
@@ -59,6 +61,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     //when immediate is true, ie can speak the text which you select in main list
     //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
     boolean localVoice = true, immediate = false, speechMode = false;
+    Button btnTalk;
     ListView dbList, mainList, buttonList, fileList;
     EditText editText;
 
@@ -90,7 +93,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             ThreadPolicy policy = new ThreadPolicy.Builder().permitAll().build();
             setThreadPolicy(policy);
         }
-        //initialize
+        //variable initialize
         MyFile.mkdirs(appDir);
 
         connection = new Connection();
@@ -100,21 +103,26 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         sw_voice = (Switch)findViewById(R.id.sw_voice);
         sw_speech = (Switch)findViewById(R.id.sw_speech);
 
+        btnTalk = (Button) findViewById(R.id.btnTalk);
         dbList = (ListView) findViewById(R.id.dbList);
         mainList = (ListView) findViewById(R.id.mainList);
         buttonList = (ListView) findViewById(R.id.buttonList);
         fileList = (ListView) findViewById(R.id.fileList);
-
         editText = (EditText) findViewById(R.id.editText);
         spinner = (Spinner)findViewById(R.id.Spinner_sentence);
 
+        // listener set
+        btnTalk.setOnClickListener(this);
         dbList.setOnItemClickListener(this);
         mainList.setOnItemClickListener(this);
         buttonList.setOnItemClickListener(this);
         fileList.setOnItemClickListener(this);
+        spinner.setOnItemSelectedListener(this);
+        editText.addTextChangedListener(textChange); // text change event
 
+        // ui content init
         ArrayList<String> list = new ArrayList<>();
-        list.addAll(Arrays.asList("TALK", "清除", "主層", "載入資料"));
+        list.addAll(Arrays.asList("清除", "主層", "載入資料"));
         buttonList.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list));
 
         if (!con) {
@@ -144,40 +152,8 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         setMainList(new File(appDir,"words.txt"));
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String _content = parent.getSelectedItem().toString();
-                if(_content.length()>0){
-                    editText.setText(_content);
-                    editText.setSelection(_content.length());
-                }
-            }
 
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        editText.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                talkerDBManager.findSentences(editText.getText().toString(), sentence);
-                spinner.setSelection(0);
-                System.out.println(spinner.getSelectedItem().toString());
-            }
-        });//text change event
-
-        buttonList.setEnabled(false);
+        btnTalk.setEnabled(false);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -206,14 +182,14 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        buttonList.setEnabled(false);
+                        btnTalk.setEnabled(false);
                     }
                 });
                 learn = new Learn(getApplicationContext(), talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        buttonList.setEnabled(true);
+                        btnTalk.setEnabled(true);
                     }
                 });
             }
@@ -427,12 +403,9 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         super.onDestroy();
         speaker.shutdown();
     }
-
+    //for on click listener
     private void buttonListOnItemClick(String select){
         switch (select){
-            case "TALK":
-                talk(editText.getText().toString(), true);
-                break;
             case "清除":
                 clear();
                 break;
@@ -489,7 +462,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 break;
         }
     }
-
+    //on click listener
     @Override
     public void onItemClick(AdapterView<?> a, View view, int i, long l) {
         String select = ((TextView) view).getText().toString();
@@ -513,4 +486,48 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 break;
         }
     }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.btnTalk:
+                talk(editText.getText().toString(), true);
+                break;
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> a, View view, int i, long l) {
+        String select = a.getSelectedItem().toString();
+        switch (a.getId()){
+            case R.id.Spinner_sentence:
+                if(select.length() > 0){
+                    editText.setText(select);
+                    editText.setSelection(select.length());
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    private TextWatcher textChange = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            talkerDBManager.findSentences(editText.getText().toString(), sentence);
+        }
+    };
 }
