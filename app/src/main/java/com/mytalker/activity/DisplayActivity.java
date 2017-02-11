@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import com.example.mytalker.R;
 import com.mytalker.core.MyDisplayManager;
-import com.utils.Speaker;
 
 
 public class DisplayActivity extends AppCompatActivity {

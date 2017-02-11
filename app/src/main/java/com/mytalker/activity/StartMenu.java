@@ -71,7 +71,6 @@ public class StartMenu extends AppCompatActivity{
             @Override
             public void onClick(View v) {
 
-                InputActivity.con=false;
                 Intent intent =new Intent();
                 intent.setClass(getApplicationContext(),InputActivity.class);
                 startActivity(intent);
@@ -81,7 +80,7 @@ public class StartMenu extends AppCompatActivity{
         mode[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputActivity.con=true;
+
                 Intent intent =new Intent();
                 intent.setClass(getApplicationContext(),WiFiDirectActivity.class);
                 startActivity(intent);

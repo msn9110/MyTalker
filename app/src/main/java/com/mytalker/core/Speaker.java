@@ -1,9 +1,11 @@
-package com.utils;
+package com.mytalker.core;
 
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+
+import com.utils.Check;
 
 import java.util.Arrays;
 import java.util.List;

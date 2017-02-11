@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+
 public final class TalkerDBManager {
     public final static String _DBName = "MyTalkers";
     public final static String _DBExt = ".mtks.db"; //use for file manager to filter files
@@ -253,30 +255,27 @@ public final class TalkerDBManager {
         c.close();
     }
 
-    public void findSentences(String keyword, String[] sentence){
+    public void findSentences(String keyword, ArrayList<String> result){
         keyword = keyword.replaceAll("'", "");
         SQLiteDatabase db = dbConnection.getReadableDatabase();
+        result.clear();;
+        result.add("相關句");
         String query;
         if(keyword.equals("")){
             query = "select content from " + SentenceSchema.TABLE_NAME +
                     "  ORDER BY " + SentenceSchema.COUNT + " desc;";
-            sentence[0] = "";
         } else {
             query = "select content from " + SentenceSchema.TABLE_NAME +
                     " where content LIKE '%" + keyword + "%'  ORDER BY " +
                     SentenceSchema.COUNT + " desc;";
-            sentence[0] = keyword;
         }
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
-        int SIZE = c.getCount();
-        for (int i = 1; i < sentence.length; i++) {
-            if (i > SIZE) {
-                sentence[i] = "";
-            }else {
-                sentence[i] = c.getString(0);
-                c.moveToNext();
-            }
+        final int SIZE = c.getCount();
+        final int resultLength = 15;
+        for (int i = 0; i < resultLength && i < SIZE; i++) {
+            result.add(c.getString(0));
+            c.moveToNext();
         }
 
         c.close();

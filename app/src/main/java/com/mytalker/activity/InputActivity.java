@@ -16,12 +16,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +32,7 @@ import com.mytalker.core.InputData;
 import com.mytalker.core.Learn;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
-import com.utils.Speaker;
+import com.mytalker.core.Speaker;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -50,17 +50,15 @@ import static android.os.StrictMode.setThreadPolicy;
 
 public class InputActivity extends AppCompatActivity implements AdapterView.OnItemClickListener,
         View.OnClickListener, AdapterView.OnItemSelectedListener{
-    public static boolean con = false;
+
     private static final String TAG = "InputActivity";
+    public static final int immediateMode = 0, speechMode = 1, localMode = 2, connectMode = 3;
+    private Boolean[] mySettings = new Boolean[]{false, false, true, false};
 
     Speaker speaker;
     Connection connection;
 
-    Switch sw_immediate, sw_voice, sw_speech; //to control three status of app
-    //localVoice to control whether local Machine is enabled voice, when running in local mode, it is forced to enable
-    //when immediate is true, ie can speak the text which you select in main list
-    //if  speechMode is true, it will speak the whole file;otherwise, it will load file to main list
-    boolean localVoice = true, immediate = false, speechMode = false;
+    CheckBox[] chkSettings = new CheckBox[4];
     Button btnTalk;
     ListView dbList, mainList, buttonList, fileList;
     EditText editText;
@@ -76,7 +74,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
-    String[] sentence = new String[15];
+    ArrayList<String> mySentence = new ArrayList<>();
     Spinner spinner;
 
     String parentPath;
@@ -99,9 +97,10 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         connection = new Connection();
         talkerDBManager = new TalkerDBManager(this);
 
-        sw_immediate = (Switch)findViewById(R.id.sw_immediate);
-        sw_voice = (Switch)findViewById(R.id.sw_voice);
-        sw_speech = (Switch)findViewById(R.id.sw_speech);
+        int[] chkID = new int[] {R.id.chk1, R.id.chk2, R.id.chk3, R.id.chk4};
+        for(int i = 0; i < chkID.length; i++){
+            chkSettings[i] = (CheckBox) findViewById(chkID[i]);
+        }
 
         btnTalk = (Button) findViewById(R.id.btnTalk);
         dbList = (ListView) findViewById(R.id.dbList);
@@ -109,7 +108,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         buttonList = (ListView) findViewById(R.id.buttonList);
         fileList = (ListView) findViewById(R.id.fileList);
         editText = (EditText) findViewById(R.id.editText);
-        spinner = (Spinner)findViewById(R.id.Spinner_sentence);
+        spinner = (Spinner) findViewById(R.id.Spinner_sentence);
 
         // listener set
         btnTalk.setOnClickListener(this);
@@ -119,35 +118,40 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         fileList.setOnItemClickListener(this);
         spinner.setOnItemSelectedListener(this);
         editText.addTextChangedListener(textChange); // text change event
+        chkSettings[connectMode].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mySettings[connectMode] = b;
+                if (!mySettings[connectMode]){
+                    chkSettings[localMode].setChecked(true);
+                    chkSettings[localMode].setEnabled(false);
+                } else {
+                    chkSettings[localMode].setChecked(false);
+                    chkSettings[localMode].setEnabled(true);
+                }
+            }
+        });
+        for (int i = 0; i < chkSettings.length - 1; i++){
+            final int j = i;
+            chkSettings[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    mySettings[j] = b;
+                }
+            });
+        }
 
         // ui content init
-        ArrayList<String> list = new ArrayList<>();
-        list.addAll(Arrays.asList("清除", "主層", "載入資料"));
-        buttonList.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list));
+        buttonList.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料")));
 
-        if (!con) {
-            sw_voice.setChecked(true);
-            sw_voice.setEnabled(false);
+        if (!mySettings[connectMode]){
+            chkSettings[localMode].setChecked(true);
+            chkSettings[localMode].setEnabled(false);
         }
-        localVoice = !con;
-        sw_voice.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                localVoice = b;
-            }
-        });
-        sw_immediate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                immediate = b;
-            }
-        });
-        sw_speech.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                speechMode = b;
-            }
-        });
+        mySettings[localMode] = !mySettings[connectMode];
+        for (int i = 0; i < chkSettings.length; i++){
+            chkSettings[i].setChecked(mySettings[i]);
+        }
 
         setMainList(new File(appDir,"words.txt"));
         fileList.setAdapter(this.createListAdapter(appDir));
@@ -350,8 +354,8 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     private void setSpinner(){
-        talkerDBManager.findSentences("", sentence);
-        ArrayAdapter adapter = new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, sentence);
+        talkerDBManager.findSentences("", mySentence);
+        ArrayAdapter adapter = new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, mySentence);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
     }
@@ -366,11 +370,11 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 learn.Learning(message);
             }
         }).start();
-        if (localVoice && message.length() > 0){
+        if (mySettings[localMode] && message.length() > 0){
             //speaker.stop();
             speaker.speak(message);
         }
-        if (con) {
+        if (mySettings[connectMode]) {
             connection.send(message);
         }
 
@@ -437,7 +441,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 if(file.isDirectory())
                     fileList.setAdapter(createListAdapter(file));
                 else{
-                    if(!speechMode)
+                    if(!mySettings[speechMode])
                         setMainList(file);
                     else {
                         final File Selection = new File(parentPath,select);
@@ -462,13 +466,14 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                 break;
         }
     }
+
     //on click listener
     @Override
     public void onItemClick(AdapterView<?> a, View view, int i, long l) {
         String select = ((TextView) view).getText().toString();
         switch (a.getId()){
             case R.id.mainList:
-                if(immediate)
+                if(mySettings[immediateMode])
                     talk(select, false);
                 else
                     setText(select);
@@ -501,7 +506,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         String select = a.getSelectedItem().toString();
         switch (a.getId()){
             case R.id.Spinner_sentence:
-                if(select.length() > 0){
+                if(select.length() > 0 && i > 0){
                     editText.setText(select);
                     editText.setSelection(select.length());
                 }
@@ -527,7 +532,8 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
 
         @Override
         public void afterTextChanged(Editable editable) {
-            talkerDBManager.findSentences(editText.getText().toString(), sentence);
+            talkerDBManager.findSentences(editText.getText().toString(), mySentence);
+            spinner.setSelection(0);
         }
     };
 }
