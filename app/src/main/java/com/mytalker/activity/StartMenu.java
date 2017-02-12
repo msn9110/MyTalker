@@ -72,7 +72,7 @@ public class StartMenu extends AppCompatActivity{
             public void onClick(View v) {
 
                 Intent intent =new Intent();
-                intent.setClass(getApplicationContext(),InputActivity.class);
+                intent.setClass(getApplicationContext(),MainActivity.class);
                 startActivity(intent);
             }
         });

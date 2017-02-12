@@ -100,21 +100,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         });
 
         Button btn_display=(Button)findViewById(R.id.btn_display);
-        Button btn_input=(Button)findViewById(R.id.btn_input);
         btn_display.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent=new Intent();
                 intent.setClass(WiFiDirectActivity.this,DisplayActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btn_input.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent();
-                intent.setClass(WiFiDirectActivity.this,InputActivity.class);
                 startActivity(intent);
             }
         });

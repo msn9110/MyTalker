@@ -28,7 +28,7 @@
             android:name="com.mytalker.activity.WiFiDirectActivity" />
 
         <activity
-            android:name="com.mytalker.activity.InputActivity"
+            android:name="com.mytalker.activity.MainActivity"
             android:configChanges="orientation|keyboardHidden"
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity

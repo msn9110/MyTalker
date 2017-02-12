@@ -39,12 +39,6 @@
             <Button
                 android:layout_width="200dp"
                 android:layout_height="70dp"
-                android:text="啟動代言人"
-                android:textSize="25sp"
-                android:id="@+id/btn_input" />
-            <Button
-                android:layout_width="200dp"
-                android:layout_height="70dp"
                 android:text="熱點顯示器"
                 android:textSize="25sp"
                 android:id="@+id/btn_display" />

@@ -26,7 +26,6 @@ public final class TalkerDBManager {
         String CONTENT = "content";       //CONTENT
         String COUNT = "count";           //COUNT
     }
-
     private interface RelationSchema {
         String TABLE_NAME = "Relation";          //Table Name
         String ID = "_id";                    //ID
@@ -258,7 +257,7 @@ public final class TalkerDBManager {
     public void findSentences(String keyword, ArrayList<String> result){
         keyword = keyword.replaceAll("'", "");
         SQLiteDatabase db = dbConnection.getReadableDatabase();
-        result.clear();;
+        result.clear();
         result.add("相關句");
         String query;
         if(keyword.equals("")){
