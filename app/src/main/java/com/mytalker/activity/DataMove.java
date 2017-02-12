@@ -12,8 +12,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.mytalker.R;
-import com.mytalker.core.Learn;
 import com.mytalker.core.LearnFile;
+import com.mytalker.core.LearnManager;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
 
@@ -22,7 +22,7 @@ import java.io.File;
 public class DataMove extends AppCompatActivity {
     final int REQUEST_CODE=0;
     public static final String _DBName = TalkerDBManager._DBName + TalkerDBManager._DBExt;
-    String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
+    //String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
     final int REQUEST_DBCODE=1100;
     boolean outMode=true;//true to copy out, false to move out
 
@@ -37,7 +37,7 @@ public class DataMove extends AppCompatActivity {
     File in;
 
     TalkerDBManager talkerDBManager;
-    Learn learn;
+    LearnManager learnManager;
 
     private Handler handler = new Handler();
 
@@ -113,7 +113,7 @@ public class DataMove extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                learn=new Learn(getApplicationContext(), talkerDBManager);
+                learnManager = new LearnManager(getApplicationContext(), talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -158,7 +158,7 @@ public class DataMove extends AppCompatActivity {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                new LearnFile(DataMove.this,arg,learn).execute();
+                                new LearnFile(DataMove.this, arg, learnManager).execute();
                             }
                         });
                         break;

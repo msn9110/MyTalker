@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-public class Learn {
+public class LearnManager {
 
     private TalkerDBManager talkerDBManager;
     private Dictionary dic;
@@ -23,7 +23,7 @@ public class Learn {
     private Context context;
     private static final Object lock=new Object();
 
-    public Learn(Context ctx, TalkerDBManager dbManager)
+    public LearnManager(Context ctx, TalkerDBManager dbManager)
     {
         this.context = ctx;
         talkerDBManager = dbManager;

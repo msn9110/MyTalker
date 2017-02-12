@@ -24,15 +24,15 @@ public class LearnFile extends AsyncTask<Void,Integer,Integer> {
     private ProgressDialog mDialog;
 
     private int mFileLen;
-    private Learn mLearn;
+    private LearnManager mLearn;
     private ArrayList<String> Data;
 
     public LearnFile(Context context,
-                     final String path, Learn learn){
-        mContext=context.getApplicationContext();
-        mLearn=learn;
-        Data=new ArrayList<>();
-        mFileLen=readFromFile(path);
+                     final String path, LearnManager learn){
+        mContext = context.getApplicationContext();
+        mLearn = learn;
+        Data = new ArrayList<>();
+        mFileLen = readFromFile(path);
         mDialog = new ProgressDialog(context);
     }
 

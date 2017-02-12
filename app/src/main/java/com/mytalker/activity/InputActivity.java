@@ -27,9 +27,9 @@ import android.widget.Toast;
 
 
 import com.example.mytalker.R;
-import com.mytalker.core.Connection;
 import com.mytalker.core.InputData;
-import com.mytalker.core.Learn;
+import com.mytalker.core.LearnManager;
+import com.mytalker.core.Sender;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
 import com.mytalker.core.Speaker;
@@ -56,7 +56,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     private Boolean[] mySettings = new Boolean[]{false, false, true, false};
 
     Speaker speaker;
-    Connection connection;
+    Sender sender;
 
     CheckBox[] chkSettings = new CheckBox[4];
     Button btnTalk;
@@ -70,7 +70,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     int currentID = 0;//0 denote main level
 
     TalkerDBManager talkerDBManager;
-    Learn learn;
+    LearnManager learnManager;
 
     private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
@@ -94,7 +94,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         //variable initialize
         MyFile.mkdirs(appDir);
 
-        connection = new Connection();
+        sender = new Sender();
         talkerDBManager = new TalkerDBManager(this);
 
         int[] chkID = new int[] {R.id.chk1, R.id.chk2, R.id.chk3, R.id.chk4};
@@ -189,7 +189,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                         btnTalk.setEnabled(false);
                     }
                 });
-                learn = new Learn(getApplicationContext(), talkerDBManager);
+                learnManager = new LearnManager(getApplicationContext(), talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -367,7 +367,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             new Thread(new Runnable() {
             @Override
             public void run() {
-                learn.Learning(message);
+                learnManager.Learning(message);
             }
         }).start();
         if (mySettings[localMode] && message.length() > 0){
@@ -375,7 +375,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             speaker.speak(message);
         }
         if (mySettings[connectMode]) {
-            connection.send(message);
+            sender.send(message);
         }
 
     }

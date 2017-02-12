@@ -12,10 +12,10 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class Connection {
+public class Sender {
     private static String TAG = "## Connection";
     private InetAddress serverAddr;
-    public Connection(){
+    public Sender(){
         String IP = NetworkManager.getBroadcast();
         Log.i(TAG, "My broadcast IP is" + IP);
         try {
