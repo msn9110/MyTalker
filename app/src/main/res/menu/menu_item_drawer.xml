@@ -3,18 +3,23 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_input"
-            android:title="@string/nav_input" />
+            android:title="@string/nav_input"
+            android:icon="@drawable/talker_input"/>
         <item
             android:id="@+id/nav_display"
-            android:title="@string/nav_display" />
+            android:title="@string/nav_display"
+            android:icon="@drawable/talker_display"/>
         <item
             android:id="@+id/nav_backup"
-            android:title="@string/nav_backup" />
+            android:title="@string/nav_backup"
+            android:icon="@drawable/talker_backup"/>
         <item
             android:id="@+id/nav_setting"
-            android:title="@string/nav_setting" />
+            android:title="@string/nav_setting"
+            android:icon="@drawable/talker_setting"/>
         <item
             android:id="@+id/nav_help"
-            android:title="@string/nav_help" />
+            android:title="@string/nav_help"
+            android:icon="@android:drawable/ic_menu_help"/>
     </group>
 </menu>
