@@ -1,13 +1,18 @@
-package com.mytalker.activity;
+package com.mytalker.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -19,12 +24,33 @@ import com.utils.MyFile;
 
 import java.io.File;
 
-public class DataMove extends AppCompatActivity {
-    final int REQUEST_CODE=0;
+import static android.app.Activity.RESULT_OK;
+
+
+public class BackupFragment extends Fragment {
+    private Context mContext;
+    private View mView;
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mContext = activity;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mView = inflater.inflate(R.layout.fragment_backup, container, false);
+        initialize();
+        return mView;
+    }
+    //===============================================================================================
+    final int REQUEST_CODE = 0;
     public static final String _DBName = TalkerDBManager._DBName + TalkerDBManager._DBExt;
     //String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
-    final int REQUEST_DBCODE=1100;
-    boolean outMode=true;//true to copy out, false to move out
+    final int REQUEST_DBCODE = 1100;
+    boolean outMode = true;//true to copy out, false to move out
 
     Button button_moveintoout;
     Button button_copyintoout;
@@ -41,34 +67,31 @@ public class DataMove extends AppCompatActivity {
 
     private Handler handler = new Handler();
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.move_menu);
-        talkerDBManager = new TalkerDBManager(this);
+    private void initialize(){
+        talkerDBManager = new TalkerDBManager(mContext);
 
-        in=getDatabasePath(_DBName);
+        in = mContext.getDatabasePath(_DBName);
         //System.out.println(Path_in);
 
-        button_moveintoout = (Button)findViewById(R.id.btn_moveintoout);
-        button_copyintoout = (Button)findViewById(R.id.btn_copyintoout);
-        button_moveouttoin = (Button)findViewById(R.id.btn_moveouttoin);
-        button_copyouttoin = (Button)findViewById(R.id.btn_copyouttoin);
-        button_deletein = (Button)findViewById(R.id.btn_deletein);
-        button_learndata = (Button)findViewById(R.id.btn_learndata);
+        button_moveintoout = (Button)mView.findViewById(R.id.btn_moveintoout);
+        button_copyintoout = (Button)mView.findViewById(R.id.btn_copyintoout);
+        button_moveouttoin = (Button)mView.findViewById(R.id.btn_moveouttoin);
+        button_copyouttoin = (Button)mView.findViewById(R.id.btn_copyouttoin);
+        button_deletein = (Button)mView.findViewById(R.id.btn_deletein);
+        button_learndata = (Button)mView.findViewById(R.id.btn_learndata);
 
         button_moveintoout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MyFile.moveFile(in,out);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_copyintoout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MyFile.copyFile(in,out);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_moveouttoin.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +118,7 @@ public class DataMove extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 MyFile.deleteFiles(in);
-                Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
             }
         });
         button_learndata.setOnClickListener(new View.OnClickListener() {
@@ -113,13 +136,13 @@ public class DataMove extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                learnManager = new LearnManager(getApplicationContext(), talkerDBManager);
+                learnManager = new LearnManager(mContext, talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         button_learndata.setEnabled(true);
                     }
-            });
+                });
             }
         }).start();//學習模組初始化
     }
@@ -127,15 +150,15 @@ public class DataMove extends AppCompatActivity {
     private void OutToIn(File source,boolean mode){
         if(mode){
             MyFile.copyFile(source,in);
-            Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
         } else{
             MyFile.moveFile(source,in);
-            Toast.makeText(DataMove.this,"Success",Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // 有選擇檔案
         if ( resultCode == RESULT_OK)
@@ -158,20 +181,20 @@ public class DataMove extends AppCompatActivity {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                new LearnFile(DataMove.this, arg, learnManager).execute();
+                                new LearnFile(mContext, arg, learnManager).execute();
                             }
                         });
                         break;
 
                     case REQUEST_DBCODE:
-                        String ext=".db";
+                        String ext= TalkerDBManager._DBExt;
                         File MyDB=new File(path);
                         if(MyDB.getName().endsWith(ext))
                             OutToIn(MyDB,outMode);
                         else{
-                            AlertDialog.Builder MyAlertDialog = new AlertDialog.Builder(this);
+                            AlertDialog.Builder MyAlertDialog = new AlertDialog.Builder(mContext);
                             MyAlertDialog.setTitle("選擇類型錯誤");
-                            MyAlertDialog.setMessage("請選擇db檔(*.db)");
+                            MyAlertDialog.setMessage("請選擇db檔(*" + TalkerDBManager._DBExt + ")");
                             MyAlertDialog.show();
                         }
                         break;
@@ -180,10 +203,6 @@ public class DataMove extends AppCompatActivity {
                         break;
                 }
             }
-            else
-                setTitle("無效的檔案路徑 !!");
         }
-        else
-            setTitle("取消選擇檔案 !!");
     }
 }

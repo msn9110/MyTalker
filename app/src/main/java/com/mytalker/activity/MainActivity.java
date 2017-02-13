@@ -3,23 +3,36 @@ package com.mytalker.activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.app.FragmentTransaction;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
 
 import com.example.mytalker.R;
 import com.mytalker.core.LearnManager;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.TalkerDBManager;
-import com.mytalker.fragment.FragmentInput;
+import com.mytalker.fragment.BackupFragment;
+import com.mytalker.fragment.DisplayFragment;
+import com.mytalker.fragment.InputFragment;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     TalkerDBManager talkerDBManager;
     LearnManager learnManager;
     Speaker speaker;
 
+    DrawerLayout drawerLayout;
+    NavigationView view;
+    @SuppressWarnings("deprecation")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +46,28 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        view = (NavigationView) findViewById(R.id.navigation_view);
+        view.setNavigationItemSelectedListener(this);
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle( this, drawerLayout, toolbar, R.string.openDrawer , R.string.closeDrawer){
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super .onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super .onDrawerOpened(drawerView);
+            }
+        };
+
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+
         new Thread(initTask).start();
         setFragment(R.layout.fragment_input);
     }
@@ -41,7 +76,13 @@ public class MainActivity extends AppCompatActivity {
         Fragment f = null;
         switch (resId){
             case R.layout.fragment_input:
-                f = new FragmentInput();
+                f = new InputFragment();
+                break;
+            case R.layout.fragment_display:
+                f = new DisplayFragment();
+                break;
+            case R.layout.fragment_backup:
+                f = new BackupFragment();
                 break;
         }
 
@@ -51,6 +92,31 @@ public class MainActivity extends AppCompatActivity {
             transaction.commit();
         }
 
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id){
+            case R.id.nav_input:
+                setFragment(R.layout.fragment_input);
+                break;
+            case R.id.nav_display:
+                setFragment(R.layout.fragment_display);
+                break;
+            case R.id.nav_backup:
+                setFragment(R.layout.fragment_backup);
+                break;
+            case R.id.nav_setting:
+
+                break;
+            case R.id.nav_help:
+
+                break;
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     @Override

@@ -15,8 +15,10 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.mytalker.activity.StartMenu"
-            android:label="@string/app_name" android:launchMode="singleTask">
+            android:name="com.mytalker.activity.MainActivity"
+            android:label="@string/app_name" android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden"
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action
                     android:name="android.intent.action.MAIN" />
@@ -26,20 +28,6 @@
         </activity>
         <activity
             android:name="com.mytalker.activity.WiFiDirectActivity" />
-
-        <activity
-            android:name="com.mytalker.activity.MainActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="com.mytalker.activity.DisplayActivity"
-            android:screenOrientation="locked"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name="com.mytalker.activity.DataMove"
-            android:configChanges="orientation|keyboardHidden" >
-        </activity>
         <!-- Used for transferring files  after a successful connection -->
         <activity
             android:name="com.dropbox.client2.android.AuthActivity"

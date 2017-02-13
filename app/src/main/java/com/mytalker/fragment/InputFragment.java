@@ -1,18 +1,22 @@
-package com.mytalker.activity;
+package com.mytalker.fragment;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.os.StrictMode;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -25,14 +29,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.example.mytalker.R;
 import com.mytalker.core.InputData;
 import com.mytalker.core.LearnManager;
 import com.mytalker.core.Sender;
+import com.mytalker.core.Speaker;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
-import com.mytalker.core.Speaker;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,13 +48,42 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 
-public class InputActivity extends AppCompatActivity implements AdapterView.OnItemClickListener,
-        View.OnClickListener, AdapterView.OnItemSelectedListener{
 
-    private static final String TAG = "InputActivity";
+public class InputFragment extends Fragment implements AdapterView.OnItemClickListener,
+        View.OnClickListener, AdapterView.OnItemSelectedListener{
+    private Context mContext;
+    private View mView;
+
+    public static InputFragment create(LearnManager learnManager, Speaker speaker){
+        InputFragment myFragment = new InputFragment();
+        // TODO: 2017/2/12 args
+        return myFragment;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mContext = activity;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        speaker.shutdown();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mView = inflater.inflate(R.layout.fragment_input, container, false);
+        initialize();
+        return mView;
+    }
+
+    private static final String TAG = "## InputFragment";
     public static final int immediateMode = 0, speechMode = 1, localMode = 2, connectMode = 3;
     private Boolean[] mySettings = new Boolean[]{false, false, true, false};
 
@@ -82,33 +114,35 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     final String fileEncoding = "-->更改文件編碼";
     final String BACK = "..(回上一頁)";
 
-    //=====================================oncreate===================================================
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_input);
+    private void initialize(){
         if (Build.VERSION.SDK_INT > 9) {
-            ThreadPolicy policy = new ThreadPolicy.Builder().permitAll().build();
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             setThreadPolicy(policy);
         }
         //variable initialize
         MyFile.mkdirs(appDir);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                speaker = new Speaker(mContext);
+            }
+        }).start();
 
         sender = new Sender();
-        talkerDBManager = new TalkerDBManager(this);
+        talkerDBManager = new TalkerDBManager(mContext);
 
         int[] chkID = new int[] {R.id.chk1, R.id.chk2, R.id.chk3, R.id.chk4};
         for(int i = 0; i < chkID.length; i++){
-            chkSettings[i] = (CheckBox) findViewById(chkID[i]);
+            chkSettings[i] = (CheckBox) mView.findViewById(chkID[i]);
         }
 
-        btnTalk = (Button) findViewById(R.id.btnTalk);
-        dbList = (ListView) findViewById(R.id.dbList);
-        mainList = (ListView) findViewById(R.id.mainList);
-        buttonList = (ListView) findViewById(R.id.buttonList);
-        fileList = (ListView) findViewById(R.id.fileList);
-        editText = (EditText) findViewById(R.id.editText);
-        spinner = (Spinner) findViewById(R.id.Spinner_sentence);
+        btnTalk = (Button) mView.findViewById(R.id.btnTalk);
+        dbList = (ListView) mView.findViewById(R.id.dbList);
+        mainList = (ListView) mView.findViewById(R.id.mainList);
+        buttonList = (ListView) mView.findViewById(R.id.buttonList);
+        fileList = (ListView) mView.findViewById(R.id.fileList);
+        editText = (EditText) mView.findViewById(R.id.editText);
+        spinner = (Spinner) mView.findViewById(R.id.Spinner_sentence);
 
         // listener set
         btnTalk.setOnClickListener(this);
@@ -142,7 +176,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         }
 
         // ui content init
-        buttonList.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料")));
+        buttonList.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料")));
 
         if (!mySettings[connectMode]){
             chkSettings[localMode].setChecked(true);
@@ -161,35 +195,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         new Thread(new Runnable() {
             @Override
             public void run() {
-                speaker = new Speaker(getApplicationContext());
-                try {
-                    Thread.sleep(1250);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-    //===============================================================================================
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_input_activity, menu);
-        return true;
-    }
-    //===================================onstart======================================================
-    @Override
-    protected void onStart() {
-        super.onStart();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        btnTalk.setEnabled(false);
-                    }
-                });
-                learnManager = new LearnManager(getApplicationContext(), talkerDBManager);
+                learnManager = new LearnManager(mContext, talkerDBManager);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -204,7 +210,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     //===============================================================================================
     private void Update() {
         try {
-            progressDialog = ProgressDialog.show(InputActivity.this, "請稍後", "載入資料...");
+            progressDialog = ProgressDialog.show(mContext, "請稍後", "載入資料...");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -215,7 +221,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(InputActivity.this, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
                             currentID = 0;
                             setCurrentData();
                         }
@@ -282,10 +288,10 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         list.addAll(files);
 
         if(dirs.size() + files.size() == 0)
-            findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
+            mView.findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
         else
-            findViewById(R.id.txt_no_data).setVisibility(View.GONE);
-        return new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, list);
+            mView.findViewById(R.id.txt_no_data).setVisibility(View.GONE);
+        return new ArrayAdapter<>(mContext,android.R.layout.simple_list_item_1, list);
     }
     //===============================================================================================
     private void setText(String text){
@@ -318,7 +324,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             String word = data.text;
             lists.add(word);
         }
-        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,lists);
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext,android.R.layout.simple_list_item_1,lists);
         dbList.setAdapter(listAdapter);
     }
 
@@ -336,7 +342,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
                     myList.add(line);
                 }
                 myReader.close();
-                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, myList);
+                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, myList);
                 mainList.setAdapter(listAdapter);
             }catch (Exception e){
                 e.printStackTrace();
@@ -347,7 +353,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
         else {
             String[] words = new String[]{"不","好","要","是","對","用","有","沒"};
             myList.addAll(Arrays.asList(words));
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, myList);
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, myList);
             mainList.setAdapter(listAdapter);
         }
 
@@ -355,7 +361,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
 
     private void setSpinner(){
         talkerDBManager.findSentences("", mySentence);
-        ArrayAdapter adapter = new ArrayAdapter<>(InputActivity.this, R.layout.myspinner, mySentence);
+        ArrayAdapter adapter = new ArrayAdapter<>(mContext, R.layout.myspinner, mySentence);
         adapter.setDropDownViewResource(R.layout.myspinner);
         spinner.setAdapter(adapter);
     }
@@ -387,26 +393,6 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
     }
 
     //===============================================================================================
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        speaker.shutdown();
-    }
     //for on click listener
     private void buttonListOnItemClick(String select){
         switch (select){
@@ -434,7 +420,7 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
 
             case fileEncoding:
                 MyFile.setCharset();
-                Toast.makeText(InputActivity.this, MyFile.charset, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, MyFile.charset, Toast.LENGTH_SHORT).show();
                 break;
 
             default:
@@ -536,4 +522,5 @@ public class InputActivity extends AppCompatActivity implements AdapterView.OnIt
             spinner.setSelection(0);
         }
     };
+
 }

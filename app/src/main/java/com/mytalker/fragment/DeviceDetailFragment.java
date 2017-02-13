@@ -31,10 +31,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mytalker.R;
-import com.mytalker.activity.DisplayActivity;
-import com.mytalker.activity.InputActivity;
-import com.mytalker.activity.WiFiDirectActivity;
-import com.mytalker.fragment.DeviceListFragment;
 
 /**
  * A fragment that manages a particular peer and allows interaction with device
@@ -87,9 +83,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
                     @Override
                     public void onClick(View v) {
-                        Intent intent=new Intent();
-                        intent.setClass(WiFiDirectActivity.mContext,InputActivity.class);
-                        startActivity(intent);
+
                     }
                 });
         return mContentView;
@@ -122,9 +116,9 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         // socket.
         if (info.groupFormed && info.isGroupOwner) {
             // new FileServerAsyncTask(getActivity(), mContentView.findViewById(R.id.status_text)) .execute();
-            Intent intent=new Intent();
-            intent.setClass(getActivity(), DisplayActivity.class);
-            startActivity(intent);
+            //Intent intent=new Intent();
+            //intent.setClass(getActivity(), DisplayActivity.class);
+            //startActivity(intent);
         } else if (info.groupFormed) {
             // The other device acts as the client. In this case, we enable the
             // get file button.

@@ -98,16 +98,6 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
                 wifiAdmin.addNetwork(wifiAdmin.CreateWifiInfo("MyDisplay", "mydisplay", 3));
             }
         });
-
-        Button btn_display=(Button)findViewById(R.id.btn_display);
-        btn_display.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent=new Intent();
-                intent.setClass(WiFiDirectActivity.this,DisplayActivity.class);
-                startActivity(intent);
-            }
-        });
         //===========================================================================================
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
