@@ -15,6 +15,7 @@ public final class TalkerDBManager {
     private final static int _DBVersion = 1;
     private DBConnection dbConnection;
     private final static Object lock = new Object();
+    private String replace = "";
 
     public TalkerDBManager(Context context){
         dbConnection = new DBConnection(context, _DBName + _DBExt, _DBVersion);
@@ -41,6 +42,7 @@ public final class TalkerDBManager {
     }
 
     int insertVoc(String content){
+        content = content.replaceAll("'",replace);
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         String content_name = VocSchema.CONTENT;
         String table_name = VocSchema.TABLE_NAME;
@@ -77,6 +79,7 @@ public final class TalkerDBManager {
     }
 
     int insertSentence(String content){
+        content = content.replaceAll("'",replace);
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         String content_name = SentenceSchema.CONTENT;
         String table_name = SentenceSchema.TABLE_NAME;
@@ -94,6 +97,7 @@ public final class TalkerDBManager {
     }
 
     boolean updateVoc(String content){
+        content = content.replaceAll("'",replace);
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         String content_name = VocSchema.CONTENT;
         String table_name = VocSchema.TABLE_NAME;
@@ -154,6 +158,7 @@ public final class TalkerDBManager {
     }
 
     boolean updateSentence(String content){
+        content = content.replaceAll("'",replace);
         SQLiteDatabase db = dbConnection.getWritableDatabase();
         String content_name = SentenceSchema.CONTENT;
         String table_name = SentenceSchema.TABLE_NAME;
@@ -185,6 +190,7 @@ public final class TalkerDBManager {
     }
 
     boolean isExistVoc(String content){
+        content = content.replaceAll("'",replace);
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         Cursor c = db.rawQuery("SELECT * FROM " + VocSchema.TABLE_NAME +
                         " WHERE " + VocSchema.CONTENT + " = '" + content + "';", null);
@@ -195,6 +201,7 @@ public final class TalkerDBManager {
     }
 
     private int getVocID(String content){
+        content = content.replaceAll("'",replace);
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         int id = -1;
         try{
@@ -255,7 +262,7 @@ public final class TalkerDBManager {
     }
 
     public void findSentences(String keyword, ArrayList<String> result){
-        keyword = keyword.replaceAll("'", "");
+        keyword = keyword.replaceAll("'", replace);
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         result.clear();
         result.add("相關句");
