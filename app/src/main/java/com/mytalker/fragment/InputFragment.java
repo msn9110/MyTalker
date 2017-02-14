@@ -55,18 +55,37 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         View.OnClickListener, AdapterView.OnItemSelectedListener{
     private Context mContext;
     private View mView;
-
-    public static InputFragment create(LearnManager learnManager, Speaker speaker){
-        InputFragment myFragment = new InputFragment();
-        // TODO: 2017/2/12 args
-        return myFragment;
-    }
+    Speaker speaker;
+    Sender sender;
+    TalkerDBManager talkerDBManager;
+    LearnManager learnManager;
+    private Handler handler = new Handler(); // thread to access ui
 
     @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sender = new Sender();
+        talkerDBManager = new TalkerDBManager(mContext);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                speaker = new Speaker(mContext);
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                learnManager = new LearnManager(mContext, talkerDBManager);
+            }
+        }).start();
+
     }
 
     @Override
@@ -87,9 +106,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     public static final int immediateMode = 0, speechMode = 1, localMode = 2, connectMode = 3;
     private Boolean[] mySettings = new Boolean[]{false, false, true, false};
 
-    Speaker speaker;
-    Sender sender;
-
     CheckBox[] chkSettings = new CheckBox[4];
     Button btnTalk;
     ListView dbList, mainList, buttonList, fileList;
@@ -101,10 +117,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     int[][] nextIDs = new int[1][1];//level 0 indicates the all vocabularies in database
     int currentID = 0;//0 denote main level
 
-    TalkerDBManager talkerDBManager;
-    LearnManager learnManager;
-
-    private Handler handler = new Handler();//thread to access ui
     private ProgressDialog progressDialog = null;
     ArrayList<String> mySentence = new ArrayList<>();
     Spinner spinner;
@@ -121,15 +133,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         }
         //variable initialize
         MyFile.mkdirs(appDir);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                speaker = new Speaker(mContext);
-            }
-        }).start();
-
-        sender = new Sender();
-        talkerDBManager = new TalkerDBManager(mContext);
 
         int[] chkID = new int[] {R.id.chk1, R.id.chk2, R.id.chk3, R.id.chk4};
         for(int i = 0; i < chkID.length; i++){
@@ -191,19 +194,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
 
-        btnTalk.setEnabled(false);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                learnManager = new LearnManager(mContext, talkerDBManager);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        btnTalk.setEnabled(true);
-                    }
-                });
-            }
-        }).start();
         Update();
     }
 

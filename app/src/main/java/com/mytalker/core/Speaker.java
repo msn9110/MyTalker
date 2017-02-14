@@ -7,11 +7,13 @@ import android.util.Log;
 
 import com.utils.Check;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class Speaker {
+public class Speaker implements Serializable {
+    private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
     private TextToSpeech tw, en;
     private static final String TAG = "## Speaker";
@@ -50,6 +52,7 @@ public class Speaker {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void speak(String hello) {
         hello = " " + hello;
         for (int i = 0; i < msg.length; i++)
@@ -69,7 +72,7 @@ public class Speaker {
         }
     }
 
-    public void speakSync(String hello){
+    void speakSync(String hello){
         speak(hello);
         BusySpeakerListener listener = new BusySpeakerListener(this);
         listener.start();
@@ -116,21 +119,18 @@ public class Speaker {
 
     public void shutdown(){
 
-        if (tw != null){
-            tw.stop();
+        stop();
+        if (tw != null)
             tw.shutdown();
-        }
-        if (en != null){
-            en.stop();
+        if (en != null)
             en.shutdown();
-        }
         tw = en = null;
     }
-    public boolean isNotSpeaking(){
+    boolean isNotSpeaking(){
         return (!tw.isSpeaking() || !en.isSpeaking());
     }
 
-    class BusySpeakerListener extends Thread {
+    private class BusySpeakerListener extends Thread {
         private Speaker speaker;
         private boolean toSpeak;
 

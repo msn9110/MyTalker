@@ -12,9 +12,11 @@ import com.utils.Check;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
 
-public class LearnManager {
+public class LearnManager implements Serializable {
+    private static final long serialVersionUID = -6919461967497580385L;
 
     private TalkerDBManager talkerDBManager;
     private Dictionary dic;

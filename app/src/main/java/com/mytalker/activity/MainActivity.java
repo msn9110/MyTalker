@@ -16,19 +16,12 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.mytalker.R;
-import com.mytalker.core.LearnManager;
-import com.mytalker.core.Speaker;
-import com.mytalker.core.TalkerDBManager;
 import com.mytalker.fragment.BackupFragment;
 import com.mytalker.fragment.DisplayFragment;
 import com.mytalker.fragment.InputFragment;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-
-    TalkerDBManager talkerDBManager;
-    LearnManager learnManager;
-    Speaker speaker;
 
     DrawerLayout drawerLayout;
     NavigationView view;
@@ -37,14 +30,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Runnable initTask = new Runnable() {
-            @Override
-            public void run() {
-                talkerDBManager = new TalkerDBManager(getApplicationContext());
-                //learnManager = new LearnManager(getApplicationContext(), talkerDBManager);
-                //speaker = new Speaker(getApplicationContext());
-            }
-        };
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         view = (NavigationView) findViewById(R.id.navigation_view);
@@ -68,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
 
-        new Thread(initTask).start();
         setFragment(R.layout.fragment_input);
     }
 
@@ -117,11 +101,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //speaker.shutdown();
     }
 }
