@@ -30,6 +30,14 @@
     <string name="backup_cloud">備份至雲端</string>
     <string name="backup_delete">刪除資料</string>
 
+    <string name="input_chk1">即時語音</string>
+    <string name="input_chk2">演講模式</string>
+    <string name="input_chk3">本地語音</string>
+    <string name="input_chk4">連線模式</string>
+    <string name="input_talk">TALK</string>
+    <string name="no_data">無資料</string>
+
+
     <string name="connect_mode_title">連線模式</string>
 
     <string name="nav_input">代言人</string>
