@@ -4,8 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -13,7 +12,11 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mytalker.R;
@@ -23,11 +26,14 @@ import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
-import static android.app.Activity.RESULT_OK;
 
 
-public class BackupFragment extends Fragment {
+public class BackupFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener{
     private Context mContext;
     private View mView;
 
@@ -46,163 +52,155 @@ public class BackupFragment extends Fragment {
         return mView;
     }
     //===============================================================================================
-    final int REQUEST_CODE = 0;
+    private final String Ext = TalkerDBManager._DBExt;
     public static final String _DBName = TalkerDBManager._DBName + TalkerDBManager._DBExt;
-    //String LPath=Environment.getExternalStorageDirectory().getPath()+"/MyTalker/Default/LearnData1.txt";
-    final int REQUEST_DBCODE = 1100;
-    boolean outMode = true;//true to copy out, false to move out
 
-    Button button_moveintoout;
-    Button button_copyintoout;
-    Button button_moveouttoin;
-    Button button_copyouttoin;
-    Button button_deletein;
-    Button button_learndata;
+    Button localBkup, cloudBkup, delData;
+    ListView fileList;
 
-    File out=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),_DBName);
     File in;
+    File currentDir;
+    ArrayList<String> dirFiles = new ArrayList<>();
 
     TalkerDBManager talkerDBManager;
     LearnManager learnManager;
 
-    private Handler handler = new Handler();
+    //private Handler handler = new Handler();
 
     private void initialize(){
         talkerDBManager = new TalkerDBManager(mContext);
-
-        in = mContext.getDatabasePath(_DBName);
-        //System.out.println(Path_in);
-
-        button_moveintoout = (Button)mView.findViewById(R.id.btn_moveintoout);
-        button_copyintoout = (Button)mView.findViewById(R.id.btn_copyintoout);
-        button_moveouttoin = (Button)mView.findViewById(R.id.btn_moveouttoin);
-        button_copyouttoin = (Button)mView.findViewById(R.id.btn_copyouttoin);
-        button_deletein = (Button)mView.findViewById(R.id.btn_deletein);
-        button_learndata = (Button)mView.findViewById(R.id.btn_learndata);
-
-        button_moveintoout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MyFile.moveFile(in,out);
-                Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
-            }
-        });
-        button_copyintoout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MyFile.copyFile(in,out);
-                Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
-            }
-        });
-        button_moveouttoin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                outMode=false;
-                final String mimeType = "*/*";
-                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType(mimeType);
-                startActivityForResult(intent, REQUEST_DBCODE);
-            }
-        });
-        button_copyouttoin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                outMode=true;
-                final String mimeType = "*/*";
-                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType(mimeType);
-                startActivityForResult(intent, REQUEST_DBCODE);
-            }
-        });
-        button_deletein.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MyFile.deleteFiles(in);
-                Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
-            }
-        });
-        button_learndata.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //new LearnFile(DataMove.this,LPath,learn).execute();
-                final String mimeType = "text/plain";
-                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType(mimeType);
-                startActivityForResult(intent, REQUEST_CODE);
-            }
-        });
-//thread無法直接access ui
-        button_learndata.setEnabled(false);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 learnManager = new LearnManager(mContext, talkerDBManager);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        button_learndata.setEnabled(true);
-                    }
-                });
             }
         }).start();//學習模組初始化
+        currentDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        in = mContext.getDatabasePath(_DBName);
+
+        localBkup = (Button) mView.findViewById(R.id.localBkup);
+        cloudBkup = (Button) mView.findViewById(R.id.cloudBkup);
+        delData = (Button) mView.findViewById(R.id.delData);
+        fileList = (ListView) mView.findViewById(R.id.fileList);
+
+        localBkup.setOnClickListener(this);
+        cloudBkup.setOnClickListener(this);
+        delData.setOnClickListener(this);
+        fileList.setOnItemClickListener(this);
+
+        fileList.setAdapter(createAdapter());
     }
 
-    private void OutToIn(File source,boolean mode){
-        if(mode){
-            MyFile.copyFile(source,in);
-            Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
-        } else{
-            MyFile.moveFile(source,in);
-            Toast.makeText(mContext,"Success",Toast.LENGTH_SHORT).show();
+
+    private void setDirFiles(){
+        dirFiles.clear();
+        ArrayList<String> myDirs = new ArrayList<>(), myFiles = new ArrayList<>();
+        myDirs.add("..");
+        File[] files = currentDir.listFiles();
+        String[] exts = new String[]{Ext, ".txt", "TXT"};
+        for (File f : files){
+            if (f.isFile()){
+                String filename = f.getName();
+                for (String ext : exts){
+                    if (filename.endsWith(ext)){
+                        myFiles.add(filename);
+                        break;
+                    }
+                }
+            } else if(f.isDirectory()){
+                myDirs.add(f.getName());
+            }
         }
+        dirFiles.addAll(myDirs);
+        dirFiles.addAll(myFiles);
+    }
+
+    private ArrayAdapter<String> createAdapter(){
+        setDirFiles();
+        return new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, dirFiles);
+    }
+
+    private void reloadFileList(){
+        fileList.setAdapter(createAdapter());
+    }
+
+    private int checkExtension(String name){
+        name = name.toLowerCase();
+        String[] exts = new String[]{"txt", Ext};
+        for (int i = 0; i < exts.length; i++){
+            if (name.endsWith(exts[i])){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void fileListItemOnClick(String select){
+        if(select.equals("..")){
+            if (! currentDir.getParentFile().equals(Environment.getExternalStorageDirectory())){ // check whether is external root
+                currentDir = currentDir.getParentFile(); // change to parent dir
+                reloadFileList();
+                return;
+            }
+        }
+        File file = new File(currentDir, select);
+        if(file.isDirectory()){
+            currentDir = file;
+            reloadFileList();
+            return;
+        }
+
+        switch (checkExtension(select)){
+            case 0:
+                final File learningFile = new File(currentDir, select);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+                dialog.setTitle("學習文件").setMessage("確定學習此文件?").setCancelable(false).setNegativeButton("取消", null)
+                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                new LearnFile(mContext, learningFile.getPath(), learnManager).execute();
+                            }
+                        })
+                        .create();
+                dialog.show();
+                break;
+            case 1:
+                File out = new File(currentDir, select);
+                boolean isSuccess = MyFile.copyFile(out, in);
+                String msg = (isSuccess ? "Success !" : "Failed;");
+                Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+    @Override
+    public void onClick(View view) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
+        String filename = df.format(new Date()) + Ext;
+        boolean isSuccess = false;
+        switch (view.getId()){
+            case R.id.localBkup:
+                File out = new File(currentDir, filename);
+                isSuccess = MyFile.copyFile(in, out);
+                reloadFileList();
+                break;
+            case R.id.cloudBkup:
+
+                break;
+            case R.id.delData:
+                isSuccess = MyFile.deleteFiles(in);
+                break;
+        }
+        String msg = (isSuccess ? "Success !" : "Failed;");
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // 有選擇檔案
-        if ( resultCode == RESULT_OK)
-        {
-            // 取得檔案的 Uri
-            Uri uri= data.getData();
-            String path;
-            if( uri != null )
-            {
-                path=uri.getPath();
-                if (path.startsWith("/file")){
-                    path=path.replaceFirst("/file","");
-                }
-
-                switch (requestCode){
-
-                    case REQUEST_CODE:
-                        final String arg=path;
-                        System.out.println(path);
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                new LearnFile(mContext, arg, learnManager).execute();
-                            }
-                        });
-                        break;
-
-                    case REQUEST_DBCODE:
-                        String ext= TalkerDBManager._DBExt;
-                        File MyDB=new File(path);
-                        if(MyDB.getName().endsWith(ext))
-                            OutToIn(MyDB,outMode);
-                        else{
-                            AlertDialog.Builder MyAlertDialog = new AlertDialog.Builder(mContext);
-                            MyAlertDialog.setTitle("選擇類型錯誤");
-                            MyAlertDialog.setMessage("請選擇db檔(*" + TalkerDBManager._DBExt + ")");
-                            MyAlertDialog.show();
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        String select = ((TextView) view).getText().toString();
+        switch (adapterView.getId()){
+            case R.id.fileList:
+                fileListItemOnClick(select);
+                break;
         }
     }
 }

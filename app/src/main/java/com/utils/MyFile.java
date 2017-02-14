@@ -73,23 +73,15 @@ public class MyFile {
         }
     }
 
-    static public void moveFile(File source, File target) {
-        copyFile(source,target);
-        deleteFiles(source);
+    static public boolean moveFile(File source, File target) {
+        return copyFile(source, target) && deleteFiles(source);
     }
 
-    static public void deleteFiles(File file) {
-        try {
-            // delete the original file
-            if(!file.delete())
-                System.out.println("Delete : Fail");
-        }
-        catch (Exception e) {
-            Log.e("tag", e.getMessage());
-        }
+    static public boolean deleteFiles(File file) {
+        return file.delete();
     }
 
-    static public void copyFile(File source, File target) {
+    static public boolean copyFile(File source, File target) {
 
         InputStream in;
         OutputStream out;
@@ -111,10 +103,12 @@ public class MyFile {
             // write the output file
             out.flush();
             out.close();
+            return true;
 
         } catch (Exception e) {
             Log.e("tag", e.getMessage());
         }
+        return false;
     }
 
     static public void log(String sentence){

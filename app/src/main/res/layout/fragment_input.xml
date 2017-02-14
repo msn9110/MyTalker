@@ -47,14 +47,15 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_gravity="center_horizontal"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:layout_weight="1"
-            >
+            android:baselineAligned="false">
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -104,6 +105,7 @@
                 </ListView>
             </LinearLayout>
         </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="1dp"
@@ -172,6 +174,15 @@
                         android:id="@+id/chk4" />
                 </LinearLayout>
             </ScrollView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="#00ABFF"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginRight="3dp">
+
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
