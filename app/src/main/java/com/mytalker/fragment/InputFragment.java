@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,6 +70,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
+        //activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     @Override
@@ -76,12 +78,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         super.onCreate(savedInstanceState);
         sender = new Sender();
         talkerDBManager = new TalkerDBManager(mContext);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                speaker = new Speaker(mContext);
-            }
-        }).start();
+        speaker = new Speaker(mContext);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -92,8 +89,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         speaker.shutdown();
     }
 
