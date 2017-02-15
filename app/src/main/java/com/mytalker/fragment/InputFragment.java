@@ -112,10 +112,10 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     EditText editText;
 
     //for data variable
-    InputData[] data = new InputData[1], currentData;
-    int[] map = new int[1];//to map vocabulary id to the position in Data array
-    int[][] nextIDs = new int[1][1];//level 0 indicates the all vocabularies in database
-    int currentID = 0;//0 denote main level
+    private final static int mainLevel = 0;
+    InputData[] data, currentData;
+    int[] map; // to map vocabulary id to the position in Data array
+    int[][] nextIDs; // mainLevel indicates the all vocabularies in database
 
     private ProgressDialog progressDialog = null;
     ArrayList<String> mySentence = new ArrayList<>();
@@ -194,11 +194,11 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
 
-        Update();
+        updateDBList();
     }
 
-    //===============================================================================================
-    private void Update() {
+    //  Loading data
+    private void updateDBList() {
         try {
             progressDialog = ProgressDialog.show(mContext, "請稍後", "載入資料...");
             new Thread(new Runnable() {
@@ -212,8 +212,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                         @Override
                         public void run() {
                             Toast.makeText(mContext, "載入時間 : " + String.valueOf(avg) + " msec", Toast.LENGTH_SHORT).show();
-                            currentID = 0;
-                            setCurrentData();
+                            setCurrentData(mainLevel);
                         }
                     });
                 }
@@ -224,17 +223,17 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     }
 
     private void loadData(){
-        Cursor c1 = talkerDBManager.getAllVoc();
-        int size = c1.getCount();
+        Cursor cursor = talkerDBManager.getAllVoc();
+        int size = cursor.getCount();
         Thread[] threads = new Thread[size];
         map = null; data = null; nextIDs = null; // release memory space
         map = new int[size + 1];
         data = new InputData[size + 1];
         nextIDs = new int[size + 1][];
-        nextIDs[0] = new int[size];
-        talkerDBManager.loadAllVoc(map, data, nextIDs[0], c1);
+        nextIDs[mainLevel] = new int[size];
+        talkerDBManager.loadAllVoc(map, data, nextIDs[mainLevel], cursor);
         for (int i = 0; i < size; i++){
-            int id = nextIDs[0][i];
+            int id = nextIDs[mainLevel][i];
             Cursor c = talkerDBManager.getRelations(id);
             int count = c.getCount();
             nextIDs[id] = new int[count];
@@ -253,7 +252,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         }
     }
 
-    //===============================================================================================
+    //listView adapter create
     private ListAdapter createListAdapter(File dir) {
         List<String> list = new ArrayList<>();
         boolean APPDir = dir.equals(appDir);
@@ -283,7 +282,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             mView.findViewById(R.id.txt_no_data).setVisibility(View.GONE);
         return new ArrayAdapter<>(mContext,android.R.layout.simple_list_item_1, list);
     }
-    //===============================================================================================
+    //======================================set function================================================
     private void setText(String text){
         String s = editText.getText().toString();
         int index = editText.getSelectionStart();
@@ -293,14 +292,11 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         editText.setSelection(part1.length() + text.length());
     }
 
-    private void setCurrentData()
+    private void setCurrentData(int id)
     {
+        int currentID = ((nextIDs[id].length == 0) ? mainLevel : id); //  ? true : false
         int size = nextIDs[currentID].length;
-        if (size == 0) {
-            currentID = 0;
-            size = nextIDs[0].length;
-        }
-        currentData = new InputData[size];//prevent size=0
+        currentData = new InputData[size];
         for (int i = 0; i < size; i++ ) {
             int position = map[nextIDs[currentID][i]];
             currentData[i] = data[position];
@@ -314,7 +310,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             String word = data.text;
             lists.add(word);
         }
-        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext,android.R.layout.simple_list_item_1,lists);
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, lists);
         dbList.setAdapter(listAdapter);
     }
 
@@ -378,8 +374,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
     private void clear(){
         editText.setText("");
-        currentID = 0;
-        setCurrentData();
+        setCurrentData(mainLevel);
     }
 
     //===============================================================================================
@@ -390,12 +385,11 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 clear();
                 break;
             case "主層":
-                currentID = 0;
-                setCurrentData();
+                setCurrentData(mainLevel);
                 break;
             case "載入資料":
                 clear();
-                Update();
+                updateDBList();
                 break;
         }
     }
@@ -456,8 +450,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 break;
             case R.id.dbList:
                 setText(currentData[i].text);
-                currentID = currentData[i].id;
-                setCurrentData();
+                setCurrentData(currentData[i].id);
                 break;
             case R.id.buttonList:
                 buttonListOnItemClick(select);
