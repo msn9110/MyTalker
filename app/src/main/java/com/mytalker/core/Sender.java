@@ -17,7 +17,7 @@ public class Sender {
     private InetAddress serverAddr;
     public Sender(){
         String IP = NetworkManager.getBroadcast();
-        Log.i(TAG, "My broadcast IP is" + IP);
+        Log.i(TAG, "My broadcast IP is " + IP);
         try {
             serverAddr = InetAddress.getByName(IP);
         } catch (UnknownHostException e) {
