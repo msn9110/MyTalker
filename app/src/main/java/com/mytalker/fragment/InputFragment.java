@@ -1,9 +1,11 @@
 package com.mytalker.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 
 import com.example.mytalker.R;
 import com.mytalker.core.InputData;
+import com.mytalker.core.LearnFile;
 import com.mytalker.core.LearnManager;
 import com.mytalker.core.Sender;
 import com.mytalker.core.Speaker;
@@ -52,7 +55,7 @@ import static android.os.StrictMode.setThreadPolicy;
 
 
 public class InputFragment extends Fragment implements AdapterView.OnItemClickListener,
-        View.OnClickListener, AdapterView.OnItemSelectedListener{
+        View.OnClickListener, AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener{
     private Context mContext;
     private View mView;
     Speaker speaker;
@@ -121,7 +124,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     ArrayList<String> mySentence = new ArrayList<>();
     Spinner spinner;
 
-    String parentPath;
+    File currentDir;
     File appDir = new File(Environment.getExternalStorageDirectory(), "MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
     final String fileEncoding = "-->更改文件編碼";
     final String BACK = "..(回上一頁)";
@@ -153,6 +156,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         mainList.setOnItemClickListener(this);
         buttonList.setOnItemClickListener(this);
         fileList.setOnItemClickListener(this);
+        fileList.setOnItemLongClickListener(this);
         spinner.setOnItemSelectedListener(this);
         editText.addTextChangedListener(textChange); // text change event
         chkSettings[connectMode].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -256,8 +260,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     private ListAdapter createListAdapter(File dir) {
         List<String> list = new ArrayList<>();
         boolean APPDir = dir.equals(appDir);
-        this.parentPath = dir.getPath();
-        File[] myfiles = dir.listFiles();
+        currentDir = dir;
+        File[] myFiles = dir.listFiles();
         List<String> dirs = new ArrayList<>();
         List<String> files = new ArrayList<>();
         list.add(fileEncoding);
@@ -265,7 +269,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             list.add(BACK);
         }
 
-        for (File f : myfiles) {
+        for (File f : myFiles) {
             if(MyFile.prefix.equals(f.getName()))
                 continue;
             if(f.isDirectory())
@@ -315,10 +319,9 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     }
 
     private void setMainList(File file){
-        ArrayList<String> myList = new ArrayList<>();
-        myList.clear();
-        String charset = MyFile.charset_target;
         if(file.exists()){
+            ArrayList<String> myList = new ArrayList<>();
+            String charset = MyFile.charset_target;
             File myFile = MyFile.getFile(file);
             try{
                 FileInputStream in = new FileInputStream(myFile);
@@ -334,12 +337,9 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 e.printStackTrace();
             }
 
-        }
-
-        else {
+        } else {
             String[] words = new String[]{"不","好","要","是","對","用","有","沒"};
-            myList.addAll(Arrays.asList(words));
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, myList);
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, words);
             mainList.setAdapter(listAdapter);
         }
 
@@ -395,11 +395,11 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     }
 
     private void fileListItemOnClick(String select){
-        File file = new File(parentPath, select);
+        File file = new File(currentDir, select);
 
         switch (select){
             case BACK:
-                fileList.setAdapter(createListAdapter(new File(parentPath).getParentFile()));
+                fileList.setAdapter(createListAdapter(currentDir.getParentFile()));
                 break;
 
             case fileEncoding:
@@ -414,7 +414,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                     if(!mySettings[speechMode])
                         setMainList(file);
                     else {
-                        final File Selection = new File(parentPath,select);
+                        final File Selection = new File(currentDir, select);
                         try {
                             File myFile = MyFile.getFile(Selection);
                             FileInputStream fIn = new FileInputStream(myFile);
@@ -506,4 +506,26 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         }
     };
 
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        String select = ((TextView) view).getText().toString();
+        switch (adapterView.getId()){
+            case R.id.fileList:
+                if (select.endsWith(".txt")){
+                    final File learningFile = new File(currentDir, select);
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("學習文件").setMessage("確定學習此文件?").setCancelable(false).setNegativeButton("取消", null)
+                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    new LearnFile(mContext, learningFile.getPath(), learnManager).execute();
+                                }
+                            })
+                            .create();
+                    dialog.show();
+                    break;
+                }
+        }
+        return true;
+    }
 }

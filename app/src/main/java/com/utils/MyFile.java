@@ -74,11 +74,7 @@ public class MyFile {
     }
 
     static public boolean moveFile(File source, File target) {
-        return copyFile(source, target) && deleteFiles(source);
-    }
-
-    static public boolean deleteFiles(File file) {
-        return file.delete();
+        return copyFile(source, target) && source.delete();
     }
 
     static public boolean copyFile(File source, File target) {

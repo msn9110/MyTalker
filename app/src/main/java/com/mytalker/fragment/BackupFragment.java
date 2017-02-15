@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,7 +32,8 @@ import java.util.Locale;
 
 
 
-public class BackupFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener{
+public class BackupFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener{
     private Context mContext;
     private View mView;
 
@@ -87,6 +87,7 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
         cloudBkup.setOnClickListener(this);
         delData.setOnClickListener(this);
         fileList.setOnItemClickListener(this);
+        fileList.setOnItemLongClickListener(this);
 
         fileList.setAdapter(createAdapter());
     }
@@ -149,11 +150,10 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
             reloadFileList();
             return;
         }
-
+        AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
         switch (checkExtension(select)){
             case 0:
                 final File learningFile = new File(currentDir, select);
-                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
                 dialog.setTitle("學習文件").setMessage("確定學習此文件?").setCancelable(false).setNegativeButton("取消", null)
                         .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                             @Override
@@ -165,10 +165,19 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
                 dialog.show();
                 break;
             case 1:
-                File out = new File(currentDir, select);
-                boolean isSuccess = MyFile.copyFile(out, in);
-                String msg = (isSuccess ? "Success !" : "Failed;");
-                Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+                final File out = new File(currentDir, select);
+                dialog.setTitle("複製詞句庫").setMessage("確定要取代目前所使用的詞句庫?").setCancelable(false).setNegativeButton("取消", null)
+                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (MyFile.copyFile(out, in)){
+                                    reloadFileList();
+                                    Toast.makeText(mContext, "成功複製!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .create();
+                dialog.show();
                 break;
         }
     }
@@ -187,8 +196,19 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
 
                 break;
             case R.id.delData:
-                isSuccess = MyFile.deleteFiles(in);
-                break;
+                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+                dialog.setTitle("刪除詞句庫").setMessage("確定刪除現在使用中的詞句庫?").setCancelable(false).setNegativeButton("取消", null)
+                        .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (in.delete()){
+                                    Toast.makeText(mContext, "成功刪除!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .create();
+                dialog.show();
+                return;
         }
         String msg = (isSuccess ? "Success !" : "Failed;");
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
@@ -202,5 +222,31 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
                 fileListItemOnClick(select);
                 break;
         }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        String select = ((TextView) view).getText().toString();
+        switch (adapterView.getId()){
+            case R.id.fileList:
+                if(! select.equals("..")){
+                    final File file = new File(currentDir, select);
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+                    dialog.setTitle("刪除文件").setMessage("確定刪除此文件?").setCancelable(false).setNegativeButton("取消", null)
+                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (file.delete()){
+                                        reloadFileList();
+                                        Toast.makeText(mContext, "成功刪除!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            })
+                            .create();
+                    dialog.show();
+                }
+                break;
+        }
+        return true;
     }
 }

@@ -28,7 +28,7 @@
     <string name="backup_title">資料備份</string>
     <string name="backup_local">備份至本地</string>
     <string name="backup_cloud">備份至雲端</string>
-    <string name="backup_delete">刪除資料</string>
+    <string name="backup_delete">刪除辭庫</string>
 
     <string name="input_chk1">即時語音</string>
     <string name="input_chk2">演講模式</string>
