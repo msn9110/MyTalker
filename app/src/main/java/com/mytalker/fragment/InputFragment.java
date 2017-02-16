@@ -179,8 +179,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         fileList.setOnItemLongClickListener(this);
         spinner.setOnItemSelectedListener(this);
         editText.addTextChangedListener(textChange); // text change event
-        for (int i = 0; i < chkSettings.length; i++){
-            chkSettings[i].setOnCheckedChangeListener(this);
+        for (CheckBox checkBox : chkSettings){
+            checkBox.setOnCheckedChangeListener(this);
         }
 
         // ui content init
