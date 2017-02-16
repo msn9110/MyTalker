@@ -185,7 +185,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
         // ui content init
         setPreference();
-        buttonList.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料")));
+        buttonList.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料", "暫停/繼續", "停止")));
         setMainList(new File(appDir,"words.txt"));
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
@@ -355,7 +355,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             }).start();
         if (mySettings[localMode] && message.length() > 0){
             //speaker.stop();
-            speaker.speak(message);
+            speaker.addSpeak(message);
         }
         if (mySettings[connectMode]) {
             sender.send(message);
@@ -381,6 +381,12 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             case "載入資料":
                 clear();
                 updateDBList();
+                break;
+            case "暫停/繼續":
+                speaker.pause();
+                break;
+            case "停止":
+                speaker.stop();
                 break;
         }
     }

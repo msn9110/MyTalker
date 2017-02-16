@@ -2,23 +2,39 @@ package com.mytalker.core;
 
 
 import android.content.Context;
+import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.utils.Check;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 public class Speaker implements Serializable {
     private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
     private TextToSpeech tw, en;
+    private Queue<String> queue = new LinkedList<>();
     private static final String TAG = "## Speaker";
+    private SpeakerQueueMonitor monitor;
     public Speaker(Context context){
+        initSpeaker(context);
+        monitor = new SpeakerQueueMonitor(this);
+        monitor.start();
+    }
+    public Speaker(Context context, Handler handler, TextView display){
+        initSpeaker(context);
+        monitor = new SpeakerQueueMonitor(this, handler, display);
+        monitor.start();
+    }
 
+    private void initSpeaker(Context context){
         tw = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -52,8 +68,17 @@ public class Speaker implements Serializable {
         }
     }
 
+    public void addSpeak(String string){
+        queue.add(string);
+    }
+
+    public void stop(){
+        queue.clear();
+        stopCurrent();
+    }
+
     @SuppressWarnings("deprecation")
-    public void speak(String hello) {
+    private void speak(String hello) {
         hello = " " + hello;
         for (int i = 0; i < msg.length; i++)
             msg[i] = "";
@@ -62,7 +87,7 @@ public class Speaker implements Serializable {
         List<String> list = Arrays.asList(msg).subList(0, count + 1);
         for(String s : list) {
             Log.i(TAG, s);
-            if(speaker==0){
+            if(speaker == 0){
                 tw.speak(s, TextToSpeech.QUEUE_ADD, null);
             } else {
                 en.speak(s, TextToSpeech.QUEUE_ADD, null);
@@ -72,21 +97,15 @@ public class Speaker implements Serializable {
         }
     }
 
-    void speakSync(String hello){
+    private void speakSync(String hello) throws InterruptedException {
         speak(hello);
         BusySpeakerListener listener = new BusySpeakerListener(this);
         listener.start();
-        try {
-            listener.join();
-            //Log.d(TAG, "Listener's status is " + listener.isAlive());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            if(listener.isAlive()){
-                listener.cancel();
-                listener.interrupt();
-            }
-            Log.i(TAG, "interrupt !");
-        }
+        //if(listener.isAlive()){
+         //   listener.cancel();
+         //   listener.interrupt();
+        //}
+        listener.join();
     }
 
     private String[] msg = new String[200];
@@ -110,7 +129,12 @@ public class Speaker implements Serializable {
         return count;
     }
 
-    public void stop(){
+    public boolean pause(){
+        stopCurrent();
+        return monitor.pause();
+    }
+
+    private void stopCurrent(){
         if (tw != null)
             tw.stop();
         if (en != null)
@@ -118,16 +142,71 @@ public class Speaker implements Serializable {
     }
 
     public void shutdown(){
-
         stop();
         if (tw != null)
             tw.shutdown();
         if (en != null)
             en.shutdown();
         tw = en = null;
+        monitor.stopMonitor();
+        monitor.interrupt();
     }
-    boolean isNotSpeaking(){
+    private boolean isNotSpeaking(){
         return (!tw.isSpeaking() || !en.isSpeaking());
+    }
+
+    private class SpeakerQueueMonitor extends Thread {
+        private Speaker speaker;
+        private boolean toMonitor;
+        private boolean isPaused = false;
+        private TextView mDisplay;
+        private Handler mHandler;
+
+        SpeakerQueueMonitor(Speaker speaker){
+            this.speaker = speaker;
+        }
+
+        SpeakerQueueMonitor(Speaker speaker, Handler handler, TextView display){
+            this.speaker = speaker;
+            mHandler = handler;
+            mDisplay = display;
+        }
+
+        @Override
+        public void run() {
+            toMonitor = true;
+            while (toMonitor){
+                if (! queue.isEmpty() && ! isPaused){
+                    final String message = queue.remove();
+                    if (message.length() > 0) {
+                        final int font = 6000 / (message.length() + 40);
+                        Log.i("## SpeakerQueueMonitor", message);
+                        if (mDisplay != null)
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mDisplay.setTextSize(font);
+                                    mDisplay.setText(message);
+                                }
+                            });
+                        try {
+                            speaker.speakSync(message);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
+        private boolean pause(){
+            isPaused = !isPaused;
+            return isPaused;
+        }
+
+        private void stopMonitor(){
+            toMonitor = false;
+        }
     }
 
     private class BusySpeakerListener extends Thread {

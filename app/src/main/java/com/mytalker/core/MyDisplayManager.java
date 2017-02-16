@@ -17,8 +17,7 @@ public class MyDisplayManager extends Thread {
     private TextView mDisplay;
     private Handler mHandler;
     private Context mContext;
-    private Queue<String> mBuffer;
-    private MyDisplay myDisplay;
+    private Speaker mSpeaker;
 
     private boolean toReceive;
     private DatagramSocket socket;
@@ -27,14 +26,12 @@ public class MyDisplayManager extends Thread {
         mContext = context;
         mHandler = handler;
         mDisplay = display;
-        mBuffer = new LinkedList<>();
         Log.d(TAG, "Created !");
     }
 
     private void onPreExecute() {
         toReceive = true;
-        myDisplay = new MyDisplay(mContext);
-        myDisplay.start();
+        mSpeaker = new Speaker(mContext, mHandler, mDisplay);
         Log.i(TAG, "onPreExecute");
     }
 
@@ -51,7 +48,7 @@ public class MyDisplayManager extends Thread {
                 socket.receive(packet);
                 String msg = new String(buffer, 0, packet.getLength(), "UTF-8");
                 Log.i(TAG,"Receive : " + msg);
-                mBuffer.add(msg);
+                mSpeaker.addSpeak(msg);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -59,56 +56,13 @@ public class MyDisplayManager extends Thread {
     }
 
     private void onCancel() {
-        myDisplay.interrupt();
-        myDisplay.cancel();
+        mSpeaker.shutdown();
         toReceive = false;
         socket.close();
-        try {
-            myDisplay.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         Log.i(TAG, "onCancel");
     }
 
     public void cancel(){
         onCancel();
-    }
-
-    private class MyDisplay extends Thread{
-        private Speaker speaker;
-        private boolean toContinue;
-
-        MyDisplay(Context context){
-            speaker = new Speaker(context);
-        }
-
-        void cancel(){
-            toContinue = false;
-            speaker.shutdown();
-        }
-
-        @Override
-        public void run() {
-            toContinue = true;
-            while (toContinue){
-                if(!mBuffer.isEmpty() && speaker.isNotSpeaking()){
-                    final String message = mBuffer.remove();
-                    if (message.length() > 0) {
-                        final int font = 6000 / (message.length() + 40);
-                        Log.i(TAG, message);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mDisplay.setTextSize(font);
-                                mDisplay.setText(message);
-                            }
-                        });
-                        speaker.speakSync(message);
-                    }
-                }
-            }
-        }
-
     }
 }
