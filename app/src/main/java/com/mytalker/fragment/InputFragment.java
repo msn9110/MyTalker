@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Build;
@@ -56,7 +57,8 @@ import static android.os.StrictMode.setThreadPolicy;
 
 
 public class InputFragment extends Fragment implements AdapterView.OnItemClickListener,
-        View.OnClickListener, AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener{
+        View.OnClickListener, AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener,
+        CompoundButton.OnCheckedChangeListener {
     private Context mContext;
     private View mView;
     Speaker speaker;
@@ -65,6 +67,27 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     LearnManager learnManager;
     private Handler handler = new Handler(); // thread to access ui
 
+    private interface PrefKey{
+        String immediateMode = "immediateMode";
+        String speechMode = "speechMode";
+        String localMode = "localMode";
+        String connectMode = "connectMode";
+    }
+    private void setPreference(){
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences("MyPreference", Context.MODE_PRIVATE);
+        mySettings[immediateMode] = sharedPreferences.getBoolean(PrefKey.immediateMode, false);
+        mySettings[speechMode] = sharedPreferences.getBoolean(PrefKey.speechMode, false);
+        mySettings[localMode] = sharedPreferences.getBoolean(PrefKey.localMode, true);
+        mySettings[connectMode] = sharedPreferences.getBoolean(PrefKey.connectMode, false);
+        for (int i = 0; i < chkSettings.length; i++){
+            chkSettings[i].setChecked(mySettings[i]);
+        }
+        chkSettings[localMode].setEnabled(mySettings[connectMode]);
+    }
+    private void savePreference(String key, boolean value){
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences("MyPreference", Context.MODE_PRIVATE);
+        sharedPreferences.edit().putBoolean(key, value).apply();
+    }
     @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity activity) {
@@ -156,45 +179,16 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         fileList.setOnItemLongClickListener(this);
         spinner.setOnItemSelectedListener(this);
         editText.addTextChangedListener(textChange); // text change event
-        chkSettings[connectMode].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                mySettings[connectMode] = b;
-                if (!mySettings[connectMode]){
-                    chkSettings[localMode].setChecked(true);
-                    chkSettings[localMode].setEnabled(false);
-                } else {
-                    chkSettings[localMode].setChecked(false);
-                    chkSettings[localMode].setEnabled(true);
-                }
-            }
-        });
-        for (int i = 0; i < chkSettings.length - 1; i++){
-            final int j = i;
-            chkSettings[i].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    mySettings[j] = b;
-                }
-            });
+        for (int i = 0; i < chkSettings.length; i++){
+            chkSettings[i].setOnCheckedChangeListener(this);
         }
 
         // ui content init
+        setPreference();
         buttonList.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料")));
-
-        if (!mySettings[connectMode]){
-            chkSettings[localMode].setChecked(true);
-            chkSettings[localMode].setEnabled(false);
-        }
-        mySettings[localMode] = !mySettings[connectMode];
-        for (int i = 0; i < chkSettings.length; i++){
-            chkSettings[i].setChecked(mySettings[i]);
-        }
-
         setMainList(new File(appDir,"words.txt"));
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
-
         updateDBList();
     }
 
@@ -524,5 +518,29 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 }
         }
         return true;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        switch (compoundButton.getId()){
+            case R.id.chk1:
+                mySettings[immediateMode] = b;
+                savePreference(PrefKey.immediateMode, mySettings[immediateMode]);
+                break;
+            case R.id.chk2:
+                mySettings[speechMode] = b;
+                savePreference(PrefKey.speechMode, mySettings[speechMode]);
+                break;
+            case R.id.chk3:
+                mySettings[localMode] = b;
+                savePreference(PrefKey.localMode, mySettings[localMode]);
+                break;
+            case R.id.chk4:
+                mySettings[connectMode] = b;
+                savePreference(PrefKey.connectMode, mySettings[connectMode]);
+                chkSettings[localMode].setChecked(!mySettings[connectMode]);
+                chkSettings[localMode].setEnabled(mySettings[connectMode]);
+                break;
+        }
     }
 }
