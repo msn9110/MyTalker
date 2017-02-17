@@ -10,7 +10,9 @@ import android.widget.TextView;
 import com.utils.Check;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -20,7 +22,7 @@ public class Speaker implements Serializable {
     private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
     private TextToSpeech tw, en;
-    private Queue<String> queue = new LinkedList<>();
+    private Deque<String> queue = new ArrayDeque<>();
     private static final String TAG = "## Speaker";
     private SpeakerQueueMonitor monitor;
     public Speaker(Context context){
@@ -71,6 +73,9 @@ public class Speaker implements Serializable {
     public void addSpeak(String string){
         queue.add(string);
     }
+    public void setEnable(boolean enable){
+        monitor.isPaused = !enable;
+    }
 
     public void stop(){
         queue.clear();
@@ -97,15 +102,20 @@ public class Speaker implements Serializable {
         }
     }
 
-    private void speakSync(String hello) throws InterruptedException {
+    private void speakSync(String hello) {
         speak(hello);
         BusySpeakerListener listener = new BusySpeakerListener(this);
         listener.start();
-        //if(listener.isAlive()){
-         //   listener.cancel();
-         //   listener.interrupt();
-        //}
-        listener.join();
+        try {
+            listener.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            if(listener.isAlive()){
+                listener.cancel();
+                listener.interrupt();
+            }
+            Log.i(TAG, "Interrupted in Speak Sync");
+        }
     }
 
     private String[] msg = new String[200];
@@ -130,6 +140,10 @@ public class Speaker implements Serializable {
     }
 
     public boolean pause(){
+        if (! isNotSpeaking()){
+            String tmp = queue.peek();
+            queue.addFirst(tmp);
+        }
         stopCurrent();
         return monitor.pause();
     }
@@ -150,6 +164,11 @@ public class Speaker implements Serializable {
         tw = en = null;
         monitor.stopMonitor();
         monitor.interrupt();
+        try {
+            monitor.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
     private boolean isNotSpeaking(){
         return (!tw.isSpeaking() || !en.isSpeaking());
@@ -177,8 +196,8 @@ public class Speaker implements Serializable {
             toMonitor = true;
             while (toMonitor){
                 if (! queue.isEmpty() && ! isPaused){
-                    final String message = queue.remove();
-                    if (message.length() > 0) {
+                    final String message = queue.peek();
+                    if (message != null && message.length() > 0) {
                         final int font = 6000 / (message.length() + 40);
                         Log.i("## SpeakerQueueMonitor", message);
                         if (mDisplay != null)
@@ -189,11 +208,8 @@ public class Speaker implements Serializable {
                                     mDisplay.setText(message);
                                 }
                             });
-                        try {
-                            speaker.speakSync(message);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        speaker.speakSync(message);
+                        queue.poll(); // replace remove
                     }
                 }
             }

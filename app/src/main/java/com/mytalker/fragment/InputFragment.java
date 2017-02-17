@@ -354,7 +354,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 }
             }).start();
         if (mySettings[localMode] && message.length() > 0){
-            //speaker.stop();
+            speaker.setEnable(true);
             speaker.addSpeak(message);
         }
         if (mySettings[connectMode]) {
