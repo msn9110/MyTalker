@@ -5,10 +5,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.utils.Check;
+import com.utils.TransferMode;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.LinkedList;
-import java.util.Queue;
 
 
 public class MyDisplayManager extends Thread {
@@ -47,8 +48,20 @@ public class MyDisplayManager extends Thread {
             while (toReceive){
                 socket.receive(packet);
                 String msg = new String(buffer, 0, packet.getLength(), "UTF-8");
-                Log.i(TAG,"Receive : " + msg);
-                mSpeaker.addSpeak(msg);
+                switch (Check.checkMode(msg)){
+                    case TransferMode.IMODE_TEXT:
+                        msg = msg.replaceFirst(TransferMode.MODE_TEXT, "");
+                        Log.i(TAG,"Receive : " + msg);
+                        mSpeaker.setEnable(true);
+                        mSpeaker.addSpeak(msg);
+                        break;
+                    case TransferMode.IMODE_PAUSE:
+                        mSpeaker.pause();
+                        break;
+                    case TransferMode.IMODE_STOP:
+                        mSpeaker.stop();
+                        break;
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());

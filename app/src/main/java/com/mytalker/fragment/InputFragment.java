@@ -41,6 +41,7 @@ import com.mytalker.core.Sender;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
+import com.utils.TransferMode;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -358,7 +359,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             speaker.addSpeak(message);
         }
         if (mySettings[connectMode]) {
-            sender.send(message);
+            sender.sendMessage(message);
         }
 
     }
@@ -384,9 +385,13 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 break;
             case "暫停/繼續":
                 speaker.pause();
+                if (mySettings[connectMode])
+                    sender.remoteControl(TransferMode.IMODE_PAUSE);
                 break;
             case "停止":
                 speaker.stop();
+                if (mySettings[connectMode])
+                    sender.remoteControl(TransferMode.IMODE_STOP);
                 break;
         }
     }
