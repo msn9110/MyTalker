@@ -12,8 +12,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 
-public class MyDisplayManager extends Thread {
-    private static String TAG = "## MyDisplayManager";
+public class ReceiveManager extends Thread {
+    private static String TAG = "## ReceiveManager";
 
     private TextView mDisplay;
     private Handler mHandler;
@@ -23,7 +23,7 @@ public class MyDisplayManager extends Thread {
     private boolean toReceive;
     private DatagramSocket socket;
 
-    public MyDisplayManager(Context context, Handler handler, TextView display){
+    public ReceiveManager(Context context, Handler handler, TextView display){
         mContext = context;
         mHandler = handler;
         mDisplay = display;

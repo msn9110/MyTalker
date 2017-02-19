@@ -58,11 +58,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setFragment(@LayoutRes int resId){
         Fragment f = null;
+        int nOrientation = getRequestedOrientation();
         switch (resId){
             case R.layout.fragment_input:
                 f = new InputFragment();
                 break;
             case R.layout.fragment_display:
+
                 f = new DisplayFragment();
                 break;
             case R.layout.fragment_backup:

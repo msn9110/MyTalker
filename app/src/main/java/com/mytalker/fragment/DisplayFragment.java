@@ -3,7 +3,6 @@ package com.mytalker.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -14,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mytalker.R;
-import com.mytalker.core.MyDisplayManager;
+import com.mytalker.core.ReceiveManager;
 
 
 public class DisplayFragment extends Fragment {
@@ -40,16 +39,16 @@ public class DisplayFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        displayManager = new MyDisplayManager(mContext, handler, tvDisplay);
-        displayManager.start();
+        manager = new ReceiveManager(mContext, handler, tvDisplay);
+        manager.start();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        displayManager.cancel();
+        manager.cancel();
         try {
-            displayManager.join();
+            manager.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -58,7 +57,7 @@ public class DisplayFragment extends Fragment {
     //public static final String END = "!!!@@@###";
     String TAG = "## DisplayFragment";
     TextView tvDisplay;
-    MyDisplayManager displayManager;
+    ReceiveManager manager;
     private Handler handler = new Handler();
 
     private void initialize(){
