@@ -13,15 +13,17 @@ import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Queue;
 
 public class Speaker implements Serializable {
     private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
-    private TextToSpeech tw, en;
+    private static final int TW = 1;
+    private static String[] LANG = new String[]{"EN", "TW"};
+    private static Locale[] locales = new Locale[]{Locale.ENGLISH, Locale.TAIWAN};
+    private final int size = 2;
+    private TextToSpeech[] mTTS = new TextToSpeech[size];
     private Deque<String> queue = new ArrayDeque<>();
     private static final String TAG = "## Speaker";
     private SpeakerQueueMonitor monitor;
@@ -30,26 +32,22 @@ public class Speaker implements Serializable {
         monitor = new SpeakerQueueMonitor(this);
         monitor.start();
     }
-    public Speaker(Context context, Handler handler, TextView display){
+    Speaker(Context context, Handler handler, TextView display){
         initSpeaker(context);
         monitor = new SpeakerQueueMonitor(this, handler, display);
         monitor.start();
     }
 
     private void initSpeaker(Context context){
-        tw = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                setLanguage(status, tw, Locale.TAIWAN, "TW");
-            }
-        });
-
-        en = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                setLanguage(status, en, Locale.ENGLISH, "EN");
-            }
-        });
+        for (int i = 0; i < size; i++){
+            final int j = i;
+            mTTS[j] = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    setLanguage(status, mTTS[j], locales[j], LANG[j]);
+                }
+            });
+        }
     }
 
     private void setLanguage(int status, TextToSpeech tts, Locale locale, String lang){
@@ -88,17 +86,13 @@ public class Speaker implements Serializable {
         for (int i = 0; i < msg.length; i++)
             msg[i] = "";
         int count = processString(hello);
-        int speaker = 0;
+        int speaker = TW;
         List<String> list = Arrays.asList(msg).subList(0, count + 1);
         for(String s : list) {
             Log.i(TAG, s);
-            if(speaker == 0){
-                tw.speak(s, TextToSpeech.QUEUE_ADD, null);
-            } else {
-                en.speak(s, TextToSpeech.QUEUE_ADD, null);
-            }
-            speaker++;
             speaker %= 2;
+            mTTS[speaker++].speak(s, TextToSpeech.QUEUE_ADD, null);
+
         }
     }
 
@@ -149,19 +143,19 @@ public class Speaker implements Serializable {
     }
 
     private void stopCurrent(){
-        if (tw != null)
-            tw.stop();
-        if (en != null)
-            en.stop();
+        for (TextToSpeech tts : mTTS){
+            if (tts != null)
+                tts.stop();
+        }
     }
 
     public void shutdown(){
         stop();
-        if (tw != null)
-            tw.shutdown();
-        if (en != null)
-            en.shutdown();
-        tw = en = null;
+        for (TextToSpeech tts : mTTS){
+            if (tts != null)
+                tts.shutdown();
+            // tts = null;
+        }
         monitor.stopMonitor();
         monitor.interrupt();
         try {
@@ -171,7 +165,11 @@ public class Speaker implements Serializable {
         }
     }
     private boolean isNotSpeaking(){
-        return (!tw.isSpeaking() || !en.isSpeaking());
+        for (TextToSpeech tts : mTTS){
+            if (tts != null && !tts.isSpeaking())
+                return true;
+        }
+        return false;
     }
 
     private class SpeakerQueueMonitor extends Thread {

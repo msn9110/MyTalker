@@ -25,7 +25,6 @@ public class DisplayFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
-        //activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Nullable
