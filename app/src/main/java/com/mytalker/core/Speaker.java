@@ -70,9 +70,10 @@ public class Speaker implements Serializable {
 
     public void addSpeak(String string){
         queue.add(string);
+        monitor.wake();
     }
     public void setEnable(boolean enable){
-        monitor.isPaused = !enable;
+        monitor.setEnable(enable);
     }
 
     public void stop(){
@@ -193,6 +194,18 @@ public class Speaker implements Serializable {
         public void run() {
             toMonitor = true;
             while (toMonitor){
+
+                synchronized (this){
+                    if (queue.isEmpty() || isPaused){
+                        try {
+                            Log.d("## SpeakerQueueMonitor", "Waiting.....");
+                            wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
                 if (! queue.isEmpty() && ! isPaused){
                     final String message = queue.peek();
                     if (message != null && message.length() > 0) {
@@ -213,13 +226,24 @@ public class Speaker implements Serializable {
             }
         }
 
-        private boolean pause(){
+        private synchronized boolean pause(){
             isPaused = !isPaused;
+            notify();
             return isPaused;
         }
 
-        private void stopMonitor(){
+        private synchronized void setEnable(boolean enable){
+            isPaused = !enable;
+            notify();
+        }
+
+        private synchronized void stopMonitor(){
             toMonitor = false;
+            notify();
+        }
+
+        private synchronized void wake(){
+            notify();
         }
     }
 
