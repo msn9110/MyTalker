@@ -19,7 +19,7 @@ import java.util.Locale;
 public class Speaker implements Serializable {
     private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
-    private static final int TW = 1;
+    private static final int TW = 1, EN = 0;
     private static String[] LANG = new String[]{"EN", "TW"};
     private static Locale[] locales = new Locale[]{Locale.ENGLISH, Locale.TAIWAN};
     private final int size = 2;
@@ -84,10 +84,8 @@ public class Speaker implements Serializable {
     @SuppressWarnings("deprecation")
     private void speak(String hello) {
         hello = " " + hello;
-        for (int i = 0; i < msg.length; i++)
-            msg[i] = "";
         int count = processString(hello);
-        int speaker = TW;
+        int speaker = ((Check.checkChar(hello.charAt(0)) == EN) ? EN : TW);
         List<String> list = Arrays.asList(msg).subList(0, count + 1);
         for(String s : list) {
             Log.i(TAG, s);
@@ -114,15 +112,25 @@ public class Speaker implements Serializable {
     }
 
     private String[] msg = new String[200];
+
     private int processString(String hello){
-        int previous = 0, current; // 0 denotes tw
+        for (int i = 0; i < msg.length; i++)
+            msg[i] = "";
+        int previous = TW, current;
         int count = 0;
         for (int i = 0; i < hello.length(); i++)
         {
             char ch = hello.charAt(i);
-            current = ((Check.check_eng(ch) ? 1 : 0));
-            if (Check.check_sign(ch))
-                current = previous;
+            switch (Check.checkChar(ch)){
+                case -1:
+                    current = previous;
+                    break;
+                case EN:
+                    current = EN;
+                    break;
+                default:
+                    current = TW;
+            }
 
             if (current != previous)
             {

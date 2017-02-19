@@ -16,6 +16,14 @@ public class Check {
         return ret;
     }
 
+    static public int checkChar(char ch){
+        if(ch >= 32 && ch <= 64 || ch >= 91 && ch <= 96 || ch >= 123 && ch <= 126)
+            return -1;
+        if(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
+            return 0;
+        return 1;
+    }
+
     static public int checkMode(String text){
         if (text.startsWith(TransferMode.MODE_TEXT)){
             return TransferMode.IMODE_TEXT;
