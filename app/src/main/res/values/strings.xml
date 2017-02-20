@@ -36,9 +36,11 @@
     <string name="input_chk4">連線模式</string>
     <string name="input_talk">TALK</string>
     <string name="no_data">無資料</string>
+    <string name="quick_setting">快速設定</string>
 
 
-    <string name="connect_mode_title">連線模式</string>
+    <string name="connect_mode_title">代言人顯示器</string>
+    <string name="saying_prompt">message( 以下可滑動 ) :</string>
 
     <string name="nav_input">代言人</string>
     <string name="nav_display">顯示器</string>

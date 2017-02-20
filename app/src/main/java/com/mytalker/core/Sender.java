@@ -14,7 +14,7 @@ import java.net.UnknownHostException;
 import com.utils.TransferMode;
 
 public class Sender {
-    private static String TAG = "## Connection";
+    private static String TAG = "## Sender";
     private InetAddress serverAddr;
     public Sender(){
         String IP = NetworkManager.getBroadcast();

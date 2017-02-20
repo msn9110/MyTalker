@@ -202,18 +202,7 @@ public class Speaker implements Serializable {
         public void run() {
             toMonitor = true;
             while (toMonitor){
-
-                synchronized (this){
-                    if (queue.isEmpty() || isPaused){
-                        try {
-                            Log.d("## SpeakerQueueMonitor", "Waiting.....");
-                            wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
+                waiting();
                 if (! queue.isEmpty() && ! isPaused){
                     final String message = queue.peek();
                     if (message != null && message.length() > 0) {
@@ -230,6 +219,16 @@ public class Speaker implements Serializable {
                         speaker.speakSync(message);
                         queue.poll(); // replace remove
                     }
+                }
+            }
+        }
+        private synchronized void waiting(){
+            if (queue.isEmpty() || isPaused) {
+                try {
+                    Log.d("## SpeakerQueueMonitor", "Waiting.....");
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }

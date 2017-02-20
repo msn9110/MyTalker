@@ -3,11 +3,17 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="7pt"
+        android:id="@+id/txtIP"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="15dp">
+        android:orientation="horizontal">
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -56,6 +62,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
             android:layout_weight="1"
             android:baselineAligned="false">
             <LinearLayout
@@ -108,83 +116,86 @@
             </LinearLayout>
         </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#00ABFF"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp">
-
-        </LinearLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_weight="4"
-            >
-            <ListView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/buttonList">
-            </ListView>
+            android:orientation="horizontal"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:layout_weight="4">
 
-            <ScrollView
+            <LinearLayout
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#00ABFF"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <LinearLayout
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <ListView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_gravity="center"
-                        android:text="設定"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="20sp"/>
-                    <CheckBox
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:textSize="15sp"
-                        android:text="@string/input_chk1"
-                        android:id="@+id/chk1" />
-                    <CheckBox
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:textSize="15sp"
-                        android:text="@string/input_chk2"
-                        android:id="@+id/chk2" />
-                    <CheckBox
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:textSize="15sp"
-                        android:text="@string/input_chk3"
-                        android:id="@+id/chk3" />
-                    <CheckBox
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:textSize="15sp"
-                        android:text="@string/input_chk4"
-                        android:id="@+id/chk4" />
-                </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#00ABFF"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
-            android:layout_marginRight="3dp">
+                    android:id="@+id/buttonList">
+                </ListView>
 
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:layout_gravity="center"
+                            android:text="@string/quick_setting"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="20sp"/>
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textSize="15sp"
+                            android:text="@string/input_chk1"
+                            android:id="@+id/chk1" />
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textSize="15sp"
+                            android:text="@string/input_chk2"
+                            android:id="@+id/chk2" />
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textSize="15sp"
+                            android:text="@string/input_chk3"
+                            android:id="@+id/chk3" />
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:textSize="15sp"
+                            android:text="@string/input_chk4"
+                            android:id="@+id/chk4" />
+                    </LinearLayout>
+                </ScrollView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#00ABFF"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

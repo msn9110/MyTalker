@@ -40,6 +40,7 @@ import com.mytalker.core.Sender;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
+import com.utils.NetworkManager;
 import com.utils.TransferMode;
 
 import java.io.BufferedReader;
@@ -122,6 +123,14 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         mView = inflater.inflate(R.layout.fragment_input, container, false);
         initialize();
         return mView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String prompt = "現在IP : " + NetworkManager.getIPAddress() + "\t\t\t廣播IP : " + NetworkManager.getBroadcast();
+        TextView tvIP = (TextView) mView.findViewById(R.id.txtIP);
+        tvIP.setText(prompt);
     }
 
     private static final String TAG = "## InputFragment";

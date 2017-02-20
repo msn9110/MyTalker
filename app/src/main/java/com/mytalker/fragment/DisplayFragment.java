@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.mytalker.R;
 import com.mytalker.core.ReceiveManager;
+import com.utils.NetworkManager;
 
 
 public class DisplayFragment extends Fragment {
@@ -31,13 +32,13 @@ public class DisplayFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_display, container, false);
-        initialize();
         return mView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        initialize();
         manager = new ReceiveManager(mContext, handler, tvDisplay);
         manager.start();
     }
@@ -63,6 +64,10 @@ public class DisplayFragment extends Fragment {
         //initialize
         tvDisplay = (TextView) mView.findViewById(R.id.txtDisplay);
         tvDisplay.setText(R.string.empty);
+        String prompt = "現在IP : " + NetworkManager.getIPAddress() + "\n廣播IP : " + NetworkManager.getBroadcast() +
+                        "\n ( 詳細使用方式請見說明 )\n";
+        TextView tvIP = (TextView) mView.findViewById(R.id.txtIP);
+        tvIP.setText(prompt);
         Log.i(TAG, "Init done !");
     }
 }
