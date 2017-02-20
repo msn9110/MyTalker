@@ -3,12 +3,27 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_margin="10dp"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="7pt"
-        android:id="@+id/txtIP"/>
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="7pt"
+            android:id="@+id/txtIP"
+            android:text=""/>
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="7pt"
+            android:id="@+id/txtIPB"
+            android:text=""/>
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"

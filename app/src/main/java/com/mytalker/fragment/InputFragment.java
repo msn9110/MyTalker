@@ -128,8 +128,11 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     @Override
     public void onResume() {
         super.onResume();
-        String prompt = "現在IP : " + NetworkManager.getIPAddress() + "\t\t\t廣播IP : " + NetworkManager.getBroadcast();
+        String prompt = "現在IP : " + NetworkManager.getIPAddress();
         TextView tvIP = (TextView) mView.findViewById(R.id.txtIP);
+        tvIP.setText(prompt);
+        prompt = "廣播IP : " + NetworkManager.getBroadcast();
+        tvIP = (TextView) mView.findViewById(R.id.txtIPB);
         tvIP.setText(prompt);
     }
 
