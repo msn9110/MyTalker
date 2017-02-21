@@ -15,7 +15,7 @@ public final class TalkerDBManager {
     private final static int _DBVersion = 1;
     private DBConnection dbConnection;
     private final static Object lock = new Object();
-    private String replace = "";
+    private String replace = "axDCcdXA";
 
     public TalkerDBManager(Context context){
         dbConnection = new DBConnection(context, _DBName + _DBExt, _DBVersion);
@@ -280,7 +280,8 @@ public final class TalkerDBManager {
         final int SIZE = c.getCount();
         final int resultLength = 15;
         for (int i = 0; i < resultLength && i < SIZE; i++) {
-            result.add(c.getString(0));
+            String sentence = c.getString(0).replaceAll(replace, "\'");
+            result.add(sentence);
             c.moveToNext();
         }
 

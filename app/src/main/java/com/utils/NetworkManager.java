@@ -120,4 +120,8 @@ public class NetworkManager {
         return broadcastIP;
     }
 
+    public static boolean isConnectToWifi(){
+        return (!getIPAddress().equals(""));
+    }
+
 }

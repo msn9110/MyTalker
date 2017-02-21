@@ -67,6 +67,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     TalkerDBManager talkerDBManager;
     LearnManager learnManager;
     private Handler handler = new Handler(); // thread to access ui
+    private int myCustomItem;
 
     private interface PrefKey{
         String immediateMode = "immediateMode";
@@ -76,6 +77,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     }
     private void setPreference(){
         SharedPreferences sharedPreferences = mContext.getSharedPreferences("MyPreference", Context.MODE_PRIVATE);
+        myCustomItem = sharedPreferences.getInt("customItem", android.R.layout.simple_list_item_1);
         mySettings[immediateMode] = sharedPreferences.getBoolean(PrefKey.immediateMode, false);
         mySettings[speechMode] = sharedPreferences.getBoolean(PrefKey.speechMode, false);
         mySettings[localMode] = sharedPreferences.getBoolean(PrefKey.localMode, true);
@@ -99,7 +101,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sender = new Sender();
         talkerDBManager = new TalkerDBManager(mContext);
         speaker = new Speaker(mContext);
         new Thread(new Runnable() {
@@ -128,6 +129,11 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     @Override
     public void onResume() {
         super.onResume();
+        setConnectMode();
+    }
+
+    private void setConnectMode(){
+        sender = new Sender();
         String prompt = "現在IP : " + NetworkManager.getIPAddress();
         TextView tvIP = (TextView) mView.findViewById(R.id.txtIP);
         tvIP.setText(prompt);
@@ -196,7 +202,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
         // ui content init
         setPreference();
-        buttonList.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, Arrays.asList("清除", "主層", "載入資料", "暫停/繼續", "停止")));
+        buttonList.setAdapter(new ArrayAdapter<>(mContext, myCustomItem, Arrays.asList("清除", "主層", "載入資料", "暫停/繼續", "停止")));
         setMainList(new File(appDir,"words.txt"));
         fileList.setAdapter(this.createListAdapter(appDir));
         setSpinner();
@@ -286,7 +292,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             mView.findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
         else
             mView.findViewById(R.id.txt_no_data).setVisibility(View.GONE);
-        return new ArrayAdapter<>(mContext,android.R.layout.simple_list_item_1, list);
+        return new ArrayAdapter<>(mContext, myCustomItem, list);
     }
     //======================================set function================================================
     private void setText(String text){
@@ -316,7 +322,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             String word = data.text;
             lists.add(word);
         }
-        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, lists);
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, lists);
         dbList.setAdapter(listAdapter);
     }
 
@@ -333,7 +339,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                     myList.add(line);
                 }
                 myReader.close();
-                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, myList);
+                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, myList);
                 mainList.setAdapter(listAdapter);
             }catch (Exception e){
                 e.printStackTrace();
@@ -341,7 +347,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
         } else {
             String[] words = new String[]{"不","好","要","是","對","用","有","沒"};
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1, words);
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, words);
             mainList.setAdapter(listAdapter);
         }
 
