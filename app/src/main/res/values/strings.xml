@@ -48,6 +48,10 @@
     <string name="nav_setting">設定</string>
     <string name="nav_help">說明</string>
 
+    <string name="connection_setting">連線設定</string>
+    <string name="system_setting">系統設定</string>
+    <string name="system_help">使用說明</string>
+
     <string name="openDrawer">Open Drawer</string>
     <string name="closeDrawer">Close Drawer</string>
 </resources>

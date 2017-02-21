@@ -142,7 +142,7 @@
             <LinearLayout
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="#00ABFF"
+                android:background="@color/colorPrimary"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="30dp" />
 
@@ -208,7 +208,7 @@
             <LinearLayout
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="#00ABFF"
+                android:background="@color/colorPrimary"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="30dp" />
         </LinearLayout>

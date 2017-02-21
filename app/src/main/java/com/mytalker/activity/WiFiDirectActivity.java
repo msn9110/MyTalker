@@ -59,7 +59,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     private WifiP2pManager manager;
     private boolean isWifiP2pEnabled = false;
     private boolean retryChannel = false;
-    public  static Context mContext=null;
+    public static Context mContext=null;
 
     private final IntentFilter intentFilter = new IntentFilter();
     private Channel channel;

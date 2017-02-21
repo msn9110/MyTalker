@@ -1,7 +1,9 @@
 package com.mytalker.activity;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,13 +14,22 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.mytalker.R;
 import com.mytalker.fragment.BackupFragment;
 import com.mytalker.fragment.DisplayFragment;
+import com.mytalker.fragment.HelpFragment;
 import com.mytalker.fragment.InputFragment;
+import com.mytalker.fragment.SettingFragment;
+import com.utils.MyFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -53,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
 
+        defaultDataCopy();
         setFragment(R.layout.fragment_input);
     }
 
@@ -69,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.layout.fragment_backup:
                 f = new BackupFragment();
+                break;
+            case R.layout.fragment_setting:
+                f = new SettingFragment();
+                break;
+            case R.layout.fragment_help:
+                f = new HelpFragment();
                 break;
         }
 
@@ -94,14 +112,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(R.layout.fragment_backup);
                 break;
             case R.id.nav_setting:
-
+                setFragment(R.layout.fragment_setting);
                 break;
             case R.id.nav_help:
-
+                setFragment(R.layout.fragment_help);
                 break;
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_title_bar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_wifi:
+                Intent intent = new Intent(MainActivity.this, WiFiDirectActivity.class);
+                startActivity(intent);
+                break;
+        }
+        return true;
+    }
+
+    private void defaultDataCopy() {
+        String filename = "words.txt";
+        File appDir = Environment.getExternalStoragePublicDirectory("MyTalker");
+        File file = new File(appDir, filename);
+        try {
+            InputStream inputStream = getAssets().open(filename);
+            MyFile.copyFile(inputStream, file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

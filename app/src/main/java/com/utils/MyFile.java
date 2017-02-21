@@ -107,6 +107,34 @@ public class MyFile {
         return false;
     }
 
+    static public boolean copyFile(InputStream in, File target) {
+
+        OutputStream out;
+        try {
+
+            //create output directory if it doesn't exist
+            File dir = new File (target.getParent());
+            mkdirs(dir);
+
+            out = new FileOutputStream(target.getPath());
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            // write the output file
+            out.flush();
+            out.close();
+            return true;
+
+        } catch (Exception e) {
+            Log.e("tag", e.getMessage());
+        }
+        return false;
+    }
+
     static public void log(String sentence){
         File dir=new File(Environment.getExternalStorageDirectory().getPath()+"/MyTalker/紀錄");
         mkdirs(dir);
