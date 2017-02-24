@@ -114,15 +114,6 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="@string/no_data"
-                    android:id="@+id/txt_no_data"
-                    android:layout_gravity="center_horizontal"
-                    android:visibility="gone"/>
-
                 <ListView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

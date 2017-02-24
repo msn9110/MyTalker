@@ -28,9 +28,6 @@
                     android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.mytalker.activity.WiFiDirectActivity"
-            android:theme="@style/AppBaseTheme"/>
         <!-- Used for transferring files  after a successful connection -->
         <activity
             android:name="com.dropbox.client2.android.AuthActivity"

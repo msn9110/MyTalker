@@ -287,11 +287,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         }
         list.addAll(dirs);
         list.addAll(files);
-
-        if(dirs.size() + files.size() == 0)
-            mView.findViewById(R.id.txt_no_data).setVisibility(View.VISIBLE);
-        else
-            mView.findViewById(R.id.txt_no_data).setVisibility(View.GONE);
         return new ArrayAdapter<>(mContext, myCustomItem, list);
     }
     //======================================set function================================================
