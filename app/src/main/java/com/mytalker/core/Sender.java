@@ -39,11 +39,13 @@ public class Sender {
         try {
             byte buffer[] = Utils.getUTF8Bytes(msg);                 // 將訊息字串 msg 轉換為位元串。
             // 封裝該位元串成為封包 DatagramPacket，同時指定傳送對象。
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddr, port);
-            DatagramSocket socket = new DatagramSocket();    // 建立傳送的 UDP Socket。
-            socket.send(packet);                             // 傳送
-            Log.i(TAG, "Packet Send !");
-            socket.close();                                 // 關閉 UDP socket.
+            if (buffer != null){
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddr, port);
+                DatagramSocket socket = new DatagramSocket();    // 建立傳送的 UDP Socket。
+                socket.send(packet);                             // 傳送
+                Log.i(TAG, "Packet Send !");
+                socket.close();                                 // 關閉 UDP socket.
+            }
         } catch (Exception e) { e.printStackTrace(); }    // 若有錯誤產生，列印函數呼叫堆疊。
     }
 

@@ -25,8 +25,7 @@ public class WifiAdmin {
     // 构造器
     public WifiAdmin(Context context) {
         // 取得WifiManager对象
-        mWifiManager = (WifiManager) context
-                .getSystemService(Context.WIFI_SERVICE);
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         // 取得WifiInfo对象
         mWifiInfo = mWifiManager.getConnectionInfo();
     }
@@ -135,7 +134,8 @@ public class WifiAdmin {
     }
 
     // 添加一个网络并连接
-    public void addNetwork(WifiConfiguration wcg) {
+    public void addNetwork() {
+        WifiConfiguration wcg = createWifiInfo();
         int netId = mWifiManager.addNetwork(wcg);
         System.out.println(netId + "," + wcg.networkId);
         boolean ok =  mWifiManager.enableNetwork(netId,true);
@@ -154,8 +154,10 @@ public class WifiAdmin {
 
 //然后是一个实际应用方法，只验证过没有密码的情况：
 
-    public WifiConfiguration CreateWifiInfo(String SSID, String Password, int Type)
+    public WifiConfiguration createWifiInfo()
     {
+        String SSID = WifiApControl.SSID, Password = WifiApControl.PASSWORD;
+        int Type = WifiApControl.TYPE;
         WifiConfiguration config = new WifiConfiguration();
         config.allowedAuthAlgorithms.clear();
         config.allowedGroupCiphers.clear();
@@ -169,6 +171,17 @@ public class WifiAdmin {
             mWifiManager.removeNetwork(tempConfig.networkId);
         }
 
+        config.preSharedKey = "\"" + Password + "\"";
+        config.hiddenSSID = true;
+        config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+        //config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+        config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        config.status = WifiConfiguration.Status.ENABLED;
+/*
         if(Type == 1) //WIFICIPHER_NOPASS
         {
             config.wepKeys[0] = "";
@@ -187,23 +200,11 @@ public class WifiAdmin {
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
             config.wepTxKeyIndex = 0;
         }
-        if(Type == 3) //WIFICIPHER_WPA
-        {
-            config.preSharedKey = "\"" + Password + "\"";
-            config.hiddenSSID = true;
-            config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            //config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-            config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            config.status = WifiConfiguration.Status.ENABLED;
-        }
+*/
         return config;
     }
 
-    public WifiConfiguration IsExsits(String SSID)
+    private WifiConfiguration IsExsits(String SSID)
     {
         List<WifiConfiguration> existingConfigs = mWifiManager.getConfiguredNetworks();
         for (WifiConfiguration existingConfig : existingConfigs)

@@ -2,17 +2,21 @@ package com.utils;
 
 import java.lang.reflect.Method;
 
+import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+import android.widget.Toast;
 
-/**
+/*
  * This class is use to handle all Hotspot related information.
- *
- *
- *
  */
 public class WifiApControl {
+    private static final String TAG = "## WifiApControl";
+    static final String SSID = "MyTalker_OPAfGjk85637";
+    static final String PASSWORD = "jgyutfsSH$8753";
+    static final int TYPE = 3;
+
     private static Method getWifiApState;
     private static Method isWifiApEnabled;
     private static Method setWifiApEnabled;
@@ -20,11 +24,11 @@ public class WifiApControl {
 
     public static final String WIFI_AP_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_AP_STATE_CHANGED";
 
-    public static final int WIFI_AP_STATE_DISABLED = WifiManager.WIFI_STATE_DISABLED;
-    public static final int WIFI_AP_STATE_DISABLING = WifiManager.WIFI_STATE_DISABLING;
-    public static final int WIFI_AP_STATE_ENABLED = WifiManager.WIFI_STATE_ENABLED;
-    public static final int WIFI_AP_STATE_ENABLING = WifiManager.WIFI_STATE_ENABLING;
-    public static final int WIFI_AP_STATE_FAILED = WifiManager.WIFI_STATE_UNKNOWN;
+    private static final int WIFI_AP_STATE_DISABLED = WifiManager.WIFI_STATE_DISABLED;
+    private static final int WIFI_AP_STATE_DISABLING = WifiManager.WIFI_STATE_DISABLING;
+    private static final int WIFI_AP_STATE_ENABLED = WifiManager.WIFI_STATE_ENABLED;
+    private static final int WIFI_AP_STATE_ENABLING = WifiManager.WIFI_STATE_ENABLING;
+    private static final int WIFI_AP_STATE_FAILED = WifiManager.WIFI_STATE_UNKNOWN;
 
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = WifiManager.EXTRA_PREVIOUS_WIFI_STATE;
     public static final String EXTRA_WIFI_AP_STATE = WifiManager.EXTRA_WIFI_STATE;
@@ -51,60 +55,88 @@ public class WifiApControl {
         }
     }
 
-    public static boolean isApSupported() {
+    private static boolean isApSupported() {
         return (getWifiApState != null && isWifiApEnabled != null
                 && setWifiApEnabled != null && getWifiApConfiguration != null);
     }
 
-    private WifiManager mgr;
+    private WifiManager mWifiManager;
 
-    private WifiApControl(WifiManager mgr) {
-        this.mgr = mgr;
+    private WifiApControl(WifiManager wifiManager) {
+        this.mWifiManager = wifiManager;
     }
 
-    public static WifiApControl getApControl(WifiManager mgr) {
-        if (!isApSupported())
+    public static WifiApControl createApControl(Context context) {
+        if (!isApSupported()){
+            Toast.makeText(context, "Cannot Support WifiAP", Toast.LENGTH_LONG).show();
             return null;
-        return new WifiApControl(mgr);
+        }
+        WifiManager wifiManager= (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        return new WifiApControl(wifiManager);
     }
 
     public boolean isWifiApEnabled() {
         try {
-            return (Boolean) isWifiApEnabled.invoke(mgr);
+            boolean isEnabled = (Boolean) isWifiApEnabled.invoke(mWifiManager);
+            Log.i(TAG, "AP is " + isEnabled);
+            return isEnabled;
         } catch (Exception e) {
-            Log.v("BatPhone", e.toString(), e); // shouldn't happen
+            Log.w(TAG, e.getMessage());
             return false;
         }
     }
 
-    public int getWifiApState() {
+    public void printWifiApState() {
         try {
-            return (Integer) getWifiApState.invoke(mgr);
+            int state = (Integer) getWifiApState.invoke(mWifiManager);
+            switch (state){
+                case WIFI_AP_STATE_DISABLED:
+                    Log.i(TAG, "WIFI_AP_STATE : " + "DISABLED");
+                    break;
+                case WIFI_AP_STATE_DISABLING:
+                    Log.i(TAG, "WIFI_AP_STATE : " + "DISABLING");
+                    break;
+                case WIFI_AP_STATE_ENABLED:
+                    Log.i(TAG, "WIFI_AP_STATE : " + "ENABLED");
+                    break;
+                case WIFI_AP_STATE_ENABLING:
+                    Log.i(TAG, "WIFI_AP_STATE : " + "ENABLING");
+                    break;
+                case WIFI_AP_STATE_FAILED:
+                    Log.i(TAG, "WIFI_AP_STATE : " + "FAILED");
+                    break;
+            }
         } catch (Exception e) {
-            Log.v("BatPhone", e.toString(), e); // shouldn't happen
-            return -1;
+            Log.v(TAG, e.getMessage());
         }
     }
 
     public WifiConfiguration getWifiApConfiguration() {
         try {
-            return (WifiConfiguration) getWifiApConfiguration.invoke(mgr);
+            return (WifiConfiguration) getWifiApConfiguration.invoke(mWifiManager);
         } catch (Exception e) {
-            Log.v("BatPhone", e.toString(), e); // shouldn't happen
+            Log.i(TAG, e.getMessage());
             return null;
         }
     }
 
     public boolean openAP(boolean enable){
-        WifiConfiguration config = createWifiInfo("MyTaker_tgf5klmd4678AP", "kher39bzStkm", 3);
-        return setWifiApEnabled(config, enable);
+        WifiConfiguration config = createWifiInfo(SSID, PASSWORD, TYPE);
+        if (enable){
+            mWifiManager.setWifiEnabled(false);
+            return setWifiApEnabled(config);
+        }
+        mWifiManager.setWifiEnabled(true);
+        return false;
     }
 
-    private boolean setWifiApEnabled(WifiConfiguration config, boolean enabled) {
+    private boolean setWifiApEnabled(WifiConfiguration config) {
         try {
-            return (Boolean) setWifiApEnabled.invoke(mgr, config, enabled);
+            Method method = mWifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+            return (Boolean) method.invoke(mWifiManager, config, true);
         } catch (Exception e) {
-            Log.v("BatPhone", e.toString(), e); // shouldn't happen
+            //e.printStackTrace();
+            Log.e(TAG, "setWifiApEnabled");
             return false;
         }
     }

@@ -27,6 +27,8 @@ import com.mytalker.fragment.HelpFragment;
 import com.mytalker.fragment.InputFragment;
 import com.mytalker.fragment.SettingFragment;
 import com.utils.MyFile;
+import com.utils.WifiAdmin;
+import com.utils.WifiApControl;
 
 import java.io.File;
 import java.io.IOException;
@@ -136,6 +138,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()){
             case R.id.menu_wifi:
                 startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                break;
+            case R.id.menu_openAP:
+                WifiApControl wifiApControl = WifiApControl.createApControl(this);
+                if (wifiApControl != null)
+                    wifiApControl.openAP(!wifiApControl.isWifiApEnabled());
+                break;
+            case R.id.menu_connectAP:
+                WifiAdmin wifiAdmin = new WifiAdmin(this);
+                wifiAdmin.openWifi();
+                wifiAdmin.addNetwork();
                 break;
         }
         return true;

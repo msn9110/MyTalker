@@ -63,7 +63,7 @@ public class DisplayFragment extends Fragment {
     private void initialize(){
         //initialize
         tvDisplay = (TextView) mView.findViewById(R.id.txtDisplay);
-        tvDisplay.setText(R.string.empty);
+        tvDisplay.setText("");
         String prompt = "現在IP : " + NetworkManager.getIPAddress() + "\n廣播IP : " + NetworkManager.getBroadcast() +
                         "\n ( 詳細使用方式請見說明 )\n";
         TextView tvIP = (TextView) mView.findViewById(R.id.txtIP);

@@ -49,12 +49,12 @@ public final class TalkerDBManager {
                         loadRelations(id);
                     }
                 });
-                threads[i].setName("%% ID : " + id + " ( " + i + " )");
+                //threads[i].setName("%% ID : " + id + " ( " + i + " )");
                 threads[i].start();
                 c.moveToNext();
             }
             for (int i = 0; i < size; i++){
-                System.out.println(threads[i].getName() + " loads complete ! ( " + threads[i].getId() + " )");
+                //System.out.println(threads[i].getName() + " loads complete ! ( " + threads[i].getId() + " )");
                 try {
                     threads[i].join();
                 } catch (InterruptedException e) {

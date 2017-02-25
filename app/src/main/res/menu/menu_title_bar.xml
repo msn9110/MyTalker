@@ -7,4 +7,14 @@
         android:icon="@drawable/talker_wifi"
         android:id="@+id/menu_wifi"
         app:showAsAction="ifRoom|withText"/>
+    <item
+        android:visible="false"
+        android:title="@string/openAP"
+        android:id="@+id/menu_openAP"
+        app:showAsAction="withText" />
+    <item
+        android:visible="false"
+        android:title="@string/connectAP"
+        android:id="@+id/menu_connectAP"
+        app:showAsAction="withText" />
 </menu>
