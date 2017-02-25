@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,7 +25,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -48,6 +46,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ import static android.os.StrictMode.setThreadPolicy;
 
 public class InputFragment extends Fragment implements AdapterView.OnItemClickListener,
         View.OnClickListener, AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener,
-        CompoundButton.OnCheckedChangeListener {
+        CompoundButton.OnCheckedChangeListener, TalkerDBManager.OnDataUpdateListener {
     private Context mContext;
     private View mView;
     Speaker speaker;
@@ -68,6 +67,19 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     LearnManager learnManager;
     private Handler handler = new Handler(); // thread to access ui
     private int myCustomItem;
+
+    //for data variable
+    private final static int mainLevel = 0;
+    InputData[] data, currentData;
+    Integer[] map; // to map vocabulary id to the position in Data array
+    Integer[][] nextIDs; // mainLevel indicates the all vocabularies in database
+
+    @Override
+    public void onUpdate(Integer[] map, Integer[][] nextIDs, InputData[] data) {
+        this.map = map;
+        this.nextIDs = nextIDs;
+        this.data = data;
+    }
 
     private interface PrefKey{
         String immediateMode = "immediateMode";
@@ -102,6 +114,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         talkerDBManager = new TalkerDBManager(mContext);
+        talkerDBManager.setOnDataUpdateListener(this);
         speaker = new Speaker(mContext);
         new Thread(new Runnable() {
             @Override
@@ -151,12 +164,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     ListView dbList, mainList, buttonList, fileList;
     EditText editText;
 
-    //for data variable
-    private final static int mainLevel = 0;
-    InputData[] data, currentData;
-    int[] map; // to map vocabulary id to the position in Data array
-    int[][] nextIDs; // mainLevel indicates the all vocabularies in database
-
     private ProgressDialog progressDialog = null;
     ArrayList<String> mySentence = new ArrayList<>();
     Spinner spinner;
@@ -204,7 +211,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         setPreference();
         buttonList.setAdapter(new ArrayAdapter<>(mContext, myCustomItem, Arrays.asList("清除", "主層", "載入資料", "暫停/繼續", "停止")));
         setMainList(new File(appDir,"words.txt"));
-        fileList.setAdapter(this.createListAdapter(appDir));
+        setFileList(appDir);
         setSpinner();
         updateDBList();
     }
@@ -217,7 +224,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 @Override
                 public void run() {
                     long stime = System.currentTimeMillis();
-                    loadData();
+                    talkerDBManager.loadData();
                     progressDialog.dismiss();
                     final long avg = (System.currentTimeMillis() - stime);
                     handler.post(new Runnable() {
@@ -234,38 +241,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         }
     }
 
-    private void loadData(){
-        Cursor cursor = talkerDBManager.getAllVoc();
-        int size = cursor.getCount();
-        Thread[] threads = new Thread[size];
-        map = null; data = null; nextIDs = null; // release memory space
-        map = new int[size + 1];
-        data = new InputData[size + 1];
-        nextIDs = new int[size + 1][];
-        nextIDs[mainLevel] = new int[size];
-        talkerDBManager.loadAllVoc(map, data, nextIDs[mainLevel], cursor);
-        for (int i = 0; i < size; i++){
-            int id = nextIDs[mainLevel][i];
-            Cursor c = talkerDBManager.getRelations(id);
-            int count = c.getCount();
-            nextIDs[id] = new int[count];
-            TalkerDBManager.LoadRelations task = talkerDBManager.new LoadRelations(nextIDs[id], c);
-            threads[i] = new Thread(task);
-            threads[i].setName("## ID : " + id + " ( " + i + " )");
-            threads[i].start();
-        }
-        for (int i = 0; i < size; i++){
-            //System.out.println(threads[i].getName() + " loads complete ! ( " + threads[i].getId() + " )");
-            try {
-                threads[i].join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     //listView adapter create
-    private ListAdapter createListAdapter(File dir) {
+    private void setFileList(File dir) {
         List<String> list = new ArrayList<>();
         boolean APPDir = dir.equals(appDir);
         currentDir = dir;
@@ -273,9 +250,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         List<String> dirs = new ArrayList<>();
         List<String> files = new ArrayList<>();
         list.add(fileEncoding);
-        if(!APPDir){
+        if(!APPDir)
             list.add(BACK);
-        }
 
         for (File f : myFiles) {
             if(MyFile.prefix.equals(f.getName()))
@@ -287,7 +263,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         }
         list.addAll(dirs);
         list.addAll(files);
-        return new ArrayAdapter<>(mContext, myCustomItem, list);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext, myCustomItem, list);
+        fileList.setAdapter(adapter);
     }
     //======================================set function================================================
     private void setText(String text){
@@ -322,30 +299,28 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
     }
 
     private void setMainList(File file){
-        if(file.exists()){
-            ArrayList<String> myList = new ArrayList<>();
-            String charset = MyFile.charset_target;
-            File myFile = MyFile.getFile(file);
-            try{
+        ArrayList<String> myList = new ArrayList<>();
+        String charset = MyFile.charset_target;
+        try{
+            BufferedReader myReader;
+            if (file.exists()){
+                File myFile = MyFile.getFile(file);
                 FileInputStream in = new FileInputStream(myFile);
-                BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
-                String line;
-                while ((line = myReader.readLine()) != null){
-                    myList.add(line);
-                }
-                myReader.close();
-                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, myList);
-                mainList.setAdapter(listAdapter);
-            }catch (Exception e){
-                e.printStackTrace();
+                myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
+            } else {
+                InputStream in = mContext.getAssets().open("words.txt");
+                myReader = new BufferedReader(new InputStreamReader(in, Charset.forName("BIG5")));
             }
-
-        } else {
-            String[] words = new String[]{"不","好","要","是","對","用","有","沒"};
-            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, words);
+            String line;
+            while ((line = myReader.readLine()) != null){
+                myList.add(line);
+            }
+            myReader.close();
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, myList);
             mainList.setAdapter(listAdapter);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-
     }
 
     private void setSpinner(){
@@ -412,7 +387,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
         switch (select){
             case BACK:
-                fileList.setAdapter(createListAdapter(currentDir.getParentFile()));
+                setFileList(currentDir.getParentFile());
                 break;
 
             case fileEncoding:
@@ -422,7 +397,7 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
             default:
                 if(file.isDirectory())
-                    fileList.setAdapter(createListAdapter(file));
+                    setFileList(file);
                 else{
                     if(!mySettings[speechMode])
                         setMainList(file);

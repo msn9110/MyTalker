@@ -14,12 +14,73 @@ public final class TalkerDBManager {
     public final static String _DBExt = ".mtks.db"; //use for file manager to filter files
     private final static int _DBVersion = 1;
     private DBConnection dbConnection;
-    private final static Object lock = new Object();
     private String replace = "axDCcdXA";
+
+    private OnDataUpdateListener listener;
+    private Integer[][] nextIDs;
 
     public TalkerDBManager(Context context){
         dbConnection = new DBConnection(context, _DBName + _DBExt, _DBVersion);
     }
+    public interface OnDataUpdateListener {
+        void onUpdate(Integer[] map, Integer[][] nextIDs, InputData[] data);
+    }
+    public void setOnDataUpdateListener(OnDataUpdateListener listener){
+        this.listener = listener;
+    }
+    public void loadData(){
+        final int mainLevel = 0;
+        Cursor c = getAllVoc();
+        int size = c.getCount();
+        Integer[] map = new Integer[size + 1];
+        InputData[] data = new InputData[size + 1];
+        Thread[] threads = new Thread[size];
+        nextIDs = new Integer[size + 1][];
+        nextIDs[mainLevel] = new Integer[size];
+        if(size > 0){
+            c.moveToFirst();
+            for (int i = 0; i < size; i++){
+                final int id = nextIDs[mainLevel][i] = c.getInt(c.getColumnIndex(VocSchema.ID));
+                map[id] = i;
+                data[i] = new InputData(c.getString(c.getColumnIndex(VocSchema.CONTENT)), id);
+                threads[i] = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadRelations(id);
+                    }
+                });
+                threads[i].setName("%% ID : " + id + " ( " + i + " )");
+                threads[i].start();
+                c.moveToNext();
+            }
+            for (int i = 0; i < size; i++){
+                System.out.println(threads[i].getName() + " loads complete ! ( " + threads[i].getId() + " )");
+                try {
+                    threads[i].join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        c.close();
+        listener.onUpdate(map, nextIDs, data);
+    }
+
+    private void loadRelations(int id){
+        Cursor c = getRelations(id);
+        int size = c.getCount();
+        nextIDs[id] = new Integer[size];
+        if (size > 0){
+            Integer[] nextID = nextIDs[id];
+            c.moveToFirst();
+            for(int i = 0; i < size; i++){
+                nextID[i] = c.getInt(0);
+                c.moveToNext();
+            }
+        }
+        c.close();
+    }
+
     // Table and its attribute name
     private interface VocSchema {
         String TABLE_NAME = "Voc";          //Table Name
@@ -221,44 +282,16 @@ public final class TalkerDBManager {
         return id;
     }
 
-    public Cursor getAllVoc(){
+    private Cursor getAllVoc(){
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         return db.rawQuery("SELECT * FROM " + VocSchema.TABLE_NAME + " ORDER BY " + VocSchema.COUNT + " DESC;", null);
     }
 
-    public Cursor getRelations(int id){
+    private Cursor getRelations(int id){
         SQLiteDatabase db = dbConnection.getReadableDatabase();
         String query = "select " + RelationSchema.ID2 + " from " + RelationSchema.TABLE_NAME +
                 " where " + RelationSchema.ID1 + " = '" + String.valueOf(id) + "' order by " + RelationSchema.COUNT + " desc;";
         return db.rawQuery(query, null);
-    }
-
-    private void loadRelations(int[] nextIDs, Cursor c){
-        synchronized (lock){
-            int size = c.getCount();
-            if (size > 0){
-                c.moveToFirst();
-                for(int i = 0; i < size; i++){
-                    nextIDs[i] = c.getInt(0);
-                    c.moveToNext();
-                }
-            }
-            c.close();
-        }
-    }
-
-    public void loadAllVoc(int[] map, InputData[] data, int[] nextIDs, Cursor c){
-        int size = c.getCount();
-        if(size > 0){
-            c.moveToFirst();
-            for (int i = 0; i < size; i++){
-                int id = nextIDs[i] = c.getInt(c.getColumnIndex(VocSchema.ID));
-                map[id] = i;
-                data[i] = new InputData(c.getString(c.getColumnIndex(VocSchema.CONTENT)), id);
-                c.moveToNext();
-            }
-        }
-        c.close();
     }
 
     public void findSentences(String keyword, ArrayList<String> result){
@@ -287,22 +320,6 @@ public final class TalkerDBManager {
 
         c.close();
         db.close();
-    }
-
-    public class LoadRelations implements Runnable{
-
-        private int[] nextIDs;
-        private Cursor cursor;
-
-        public LoadRelations(int[] nextIDs, Cursor cursor){
-            this.nextIDs = nextIDs;
-            this.cursor = cursor;
-        }
-
-        @Override
-        public void run() {
-            loadRelations(nextIDs, cursor);
-        }
     }
 
 /*

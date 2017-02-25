@@ -95,12 +95,61 @@ public class WifiApControl {
         }
     }
 
-    public boolean setWifiApEnabled(WifiConfiguration config, boolean enabled) {
+    public boolean openAP(boolean enable){
+        WifiConfiguration config = createWifiInfo("MyTaker_tgf5klmd4678AP", "kher39bzStkm", 3);
+        return setWifiApEnabled(config, enable);
+    }
+
+    private boolean setWifiApEnabled(WifiConfiguration config, boolean enabled) {
         try {
             return (Boolean) setWifiApEnabled.invoke(mgr, config, enabled);
         } catch (Exception e) {
             Log.v("BatPhone", e.toString(), e); // shouldn't happen
             return false;
         }
+    }
+
+    private WifiConfiguration createWifiInfo(String SSID, String Password, int Type)
+    {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedAuthAlgorithms.clear();
+        config.allowedGroupCiphers.clear();
+        config.allowedKeyManagement.clear();
+        config.allowedPairwiseCiphers.clear();
+        config.allowedProtocols.clear();
+        config.SSID = "\"" + SSID + "\"";
+
+        if(Type == 1) //WIFICIPHER_NOPASS
+        {
+            config.wepKeys[0] = "";
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            config.wepTxKeyIndex = 0;
+        }
+        if(Type == 2) //WIFICIPHER_WEP
+        {
+            config.hiddenSSID = true;
+            config.wepKeys[0]= "\"" + Password + "\"";
+            config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            config.wepTxKeyIndex = 0;
+        }
+        if(Type == 3) //WIFICIPHER_WPA
+        {
+            config.preSharedKey = "\"" + Password + "\"";
+            config.hiddenSSID = true;
+            config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            //config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            config.status = WifiConfiguration.Status.ENABLED;
+        }
+        return config;
     }
 }
