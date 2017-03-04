@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.1'
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         applicationId "com.example.mytalkers"
@@ -25,7 +25,7 @@ dependencies {
     compile files('libs/dropbox-android-sdk-1.6.3.jar')
     compile files('libs/mmseg4j-all-1.8.2-with-dic.jar')
     compile files('libs/json_simple-1.1.jar')
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:support-v4:25.0.1'
-    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:support-v4:25.2.0'
+    compile 'com.android.support:design:25.2.0'
 }
