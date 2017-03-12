@@ -3,34 +3,26 @@ package com.mytalker.core;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.chenlb.mmseg4j.ComplexSeg;
-import com.chenlb.mmseg4j.Dictionary;
-import com.chenlb.mmseg4j.MMSeg;
-import com.chenlb.mmseg4j.Seg;
-import com.chenlb.mmseg4j.Word;
 import com.utils.Check;
+import com.utils.Divider;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.io.Serializable;
-import java.io.StringReader;
+import java.util.ArrayList;
 
 public class LearnManager implements Serializable {
     private static final long serialVersionUID = -6919461967497580385L;
 
     private TalkerDBManager talkerDBManager;
-    private Dictionary dic;
-    private String [] spiltWords = new String[256];
-    private int pSpiltWords = 0;
     private Context context;
     private static final Object lock = new Object();
+    private Divider divider;
+    private ArrayList<String> myWords = new ArrayList<>();
 
     public LearnManager(Context context, TalkerDBManager dbManager)
     {
         this.context = context;
         talkerDBManager = dbManager;
-        System.setProperty("mmseg.dic.path", "./data");
-        dic = Dictionary.getInstance();
+        divider = new Divider("./data", myWords);
     }
 
     //=======================================學習===============================================
@@ -46,19 +38,21 @@ public class LearnManager implements Serializable {
                     }
                 }
 
-                System.out.println("# spilt result : " + spilt(preProcess(message)));
+                System.out.println("# spilt result : " + divider.spiltSentence(preProcess(message)));
 
                 //handle vocabulary
-                for(int i = 0 ; i < pSpiltWords ; i++){
-                    String word = spiltWords[i];
+                for(int i = 0 ; i < myWords.size() ; i++){
+                    String word = myWords.get(0);
                     if(!talkerDBManager.updateVoc(word)){
                         talkerDBManager.insertVoc(word);
                     }
                 }
                 //handle relation
-                for(int i = 0 ; i < pSpiltWords - 1 ; i++){
-                    if(!talkerDBManager.updateRelation(spiltWords[i], spiltWords[i+1])){
-                        talkerDBManager.insertRelation(spiltWords[i], spiltWords[i+1]);
+                for(int i = 0 ; i < myWords.size() - 1 ; i++){
+                    String current = myWords.get(i);
+                    String next = myWords.get(i + 1);
+                    if(!talkerDBManager.updateRelation(current, next)){
+                        talkerDBManager.insertRelation(current, next);
                     }
                 }
             }
@@ -67,39 +61,7 @@ public class LearnManager implements Serializable {
             }
         }
     }
-    //===============================================================================================
-
-    //==========================================斷字系統=============================================
-    private String segWords(String txt, String spiltSign) throws IOException {
-        pSpiltWords = 0;
-        Reader input = new StringReader(txt);
-        StringBuilder sb = new StringBuilder();
-        Seg seg = new ComplexSeg(dic);
-        MMSeg mmSeg = new MMSeg(input, seg);
-        Word word;
-        while((word = mmSeg.next()) != null) {
-            String w = word.getString();
-            if (Check.check_eng(w.charAt(0)))
-                w += " ";
-            spiltWords[pSpiltWords++] = w;
-            w += spiltSign;
-            sb.append(w);
-        }
-        return sb.toString();
-    }
-
-    private String spilt(String args) {
-        String txt;
-        if(args.length() > 0) {
-            txt = args;
-            try {
-                return segWords(txt, "|");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return args;
-    }
+    //==============================================================================================
 
     private String preProcess(String s){
         String tmp = "";
