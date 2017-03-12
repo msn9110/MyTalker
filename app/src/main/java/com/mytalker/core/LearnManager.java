@@ -29,7 +29,7 @@ public class LearnManager implements Serializable {
     {
         this.context = context;
         talkerDBManager = dbManager;
-        System.setProperty("mmseg.dic.path", "./src/HelloChinese/data");
+        System.setProperty("mmseg.dic.path", "./data");
         dic = Dictionary.getInstance();
     }
 

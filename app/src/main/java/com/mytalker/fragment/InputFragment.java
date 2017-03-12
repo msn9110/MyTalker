@@ -39,6 +39,7 @@ import com.mytalker.core.Speaker;
 import com.mytalker.core.TalkerDBManager;
 import com.utils.MyFile;
 import com.utils.NetworkManager;
+import com.utils.SentenceSpilter;
 import com.utils.TransferMode;
 
 import java.io.BufferedReader;
@@ -313,7 +314,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             }
             String line;
             while ((line = myReader.readLine()) != null){
-                myList.add(line);
+                myList.addAll(SentenceSpilter.getSentences(line));
+                //myList.add(line);
             }
             myReader.close();
             ArrayAdapter<String> listAdapter = new ArrayAdapter<>(mContext, myCustomItem, myList);
