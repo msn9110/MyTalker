@@ -30,33 +30,43 @@ public class LearnManager implements Serializable {
 
         synchronized (lock){
             try {
-                int sentenceLength = 1;
-                //handle sentence
-                if (message.length() > sentenceLength){
+                final int sentenceLength = 1;
+
+                ArrayList<String> sentences = Divider.getSentences(message);
+
+                for (String sentence : sentences){
+                    //handle sentence
+                    if (sentence.length() > sentenceLength){
+                        if(!talkerDBManager.updateSentence(sentence)){
+                            talkerDBManager.insertSentence(sentence);
+                        }
+                    }
+                    System.out.println("# spilt result : " + divider.spiltSentence(preProcess(sentence)));
+
+                    //handle vocabulary
+                    for(int i = 0 ; i < myWords.size() ; i++){
+                        String word = myWords.get(i);
+                        if(!talkerDBManager.updateVoc(word)){
+                            talkerDBManager.insertVoc(word);
+                        }
+                    }
+                    //handle relation
+                    for(int i = 0 ; i < myWords.size() - 1 ; i++){
+                        String current = myWords.get(i);
+                        String next = myWords.get(i + 1);
+                        if(!talkerDBManager.updateRelation(current, next)){
+                            talkerDBManager.insertRelation(current, next);
+                        }
+                    }
+                }
+
+                if (sentences.size() > 1 && message.length() > sentenceLength){
+                    //handle whole sentence
                     if(!talkerDBManager.updateSentence(message)){
                         talkerDBManager.insertSentence(message);
                     }
                 }
-
-                System.out.println("# spilt result : " + divider.spiltSentence(preProcess(message)));
-
-                //handle vocabulary
-                for(int i = 0 ; i < myWords.size() ; i++){
-                    String word = myWords.get(0);
-                    if(!talkerDBManager.updateVoc(word)){
-                        talkerDBManager.insertVoc(word);
-                    }
-                }
-                //handle relation
-                for(int i = 0 ; i < myWords.size() - 1 ; i++){
-                    String current = myWords.get(i);
-                    String next = myWords.get(i + 1);
-                    if(!talkerDBManager.updateRelation(current, next)){
-                        talkerDBManager.insertRelation(current, next);
-                    }
-                }
-            }
-            catch (Exception e){
+            } catch (Exception e){
                 Toast.makeText(context, "斷字失敗", Toast.LENGTH_SHORT).show();
             }
         }
