@@ -8,7 +8,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.utils.Check;
-import com.utils.SentenceSpilter;
+import com.utils.Divider;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
@@ -71,7 +71,7 @@ public class Speaker implements Serializable {
     }
 
     public void addSpeak(String string){
-        ArrayList<String> sentences = SentenceSpilter.getSentences(string);
+        ArrayList<String> sentences = Divider.getSentences(string);
         queue.addAll(sentences);
         //queue.add(string);
         monitor.wake();

@@ -3,7 +3,7 @@ package com.utils;
 
 import java.util.ArrayList;
 
-public class SentenceSpilter {
+public class Divider {
 
     static public ArrayList<String> getSentences(String message){
         ArrayList<String> result = new ArrayList<>();
