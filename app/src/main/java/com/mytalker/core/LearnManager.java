@@ -74,46 +74,38 @@ public class LearnManager implements Serializable {
     //==============================================================================================
 
     private String preProcess(String s){
-        String tmp = "";
-        int strlen = s.length();
+        final int maxCheckLength = 2;
+        String result = "";
+        int length = s.length();
+
         //check for content whether in database
-        for(int i = 0; i < strlen;) {
-            boolean flag = true;
-            char ch = s.charAt(i);
-            String str = String.valueOf(ch);
-            if(Check.check_sign(ch)){
-                tmp += " ";
-                i++;
-                continue;
-            }
+        for(int i = 0; i < length;) {
 
-            else if (Check.check_eng(ch)){
-                tmp += String.valueOf(ch);
+            if (Check.checkChar(s.charAt(i)) < 1){
+                result += s.substring(i, i + 1);
                 i++;
-                continue;
-            }
-            if (talkerDBManager.isExistVoc(str)) {
-                tmp = tmp + " " + str + " ";
-                i++;
-                continue;
-            }
+            } else {
+                String word = null;
+                for (int j = 0; j < maxCheckLength; j++){
+                    int endIndex = i + j + 1;
+                    word = endIndex < length ? s.substring(i, endIndex) : null;
+                    if (word == null)
+                        break;
+                    if (talkerDBManager.isExistVoc(word)){
+                        result += " " + word + " ";
+                        i += (j + 1);
+                        break;
+                    }
 
-            if (i + 1 == strlen)
-                flag = false;
-            //check the vocabulary in combination of current and next character whether is in the database
-            //if yes ,update weight in database, and continue loop
-            if (flag) {
-                str += String.valueOf(s.charAt(i + 1));
-                if (talkerDBManager.isExistVoc(str)) {
-                    tmp = tmp + " " + str + " ";
-                    i += 2;
-                    continue;
+                }
+
+                if (word == null){
+                    result += s.substring(i, i + 1);
+                    i++;
                 }
             }
-            str = String.valueOf(s.charAt(i));
-            tmp += str;
-            i++;
+
         }
-        return tmp;
+        return result;
     }
 }
