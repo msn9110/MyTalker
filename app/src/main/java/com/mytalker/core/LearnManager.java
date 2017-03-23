@@ -80,12 +80,14 @@ public class LearnManager implements Serializable {
 
         //check for content whether in database
         for(int i = 0; i < length;) {
-
+            // maintain original scheme in string if character is sign or english
             if (Check.checkChar(s.charAt(i)) < 1){
                 result += s.substring(i, i + 1);
                 i++;
             } else {
                 String word = null;
+                // check for current character or its combination of next 1 to maxCheckLength characters
+                // whether exist in db
                 for (int j = 0; j < maxCheckLength; j++){
                     int endIndex = i + j + 1;
                     word = endIndex < length ? s.substring(i, endIndex) : null;

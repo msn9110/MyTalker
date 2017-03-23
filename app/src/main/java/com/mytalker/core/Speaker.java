@@ -2,10 +2,8 @@ package com.mytalker.core;
 
 
 import android.content.Context;
-import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.utils.Check;
 import com.utils.Divider;
@@ -19,6 +17,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class Speaker implements Serializable {
+    interface SpeakingListener {
+        void onPreSpeak(final String message);
+    }
+    void setSpeakingListener(SpeakingListener listener) {
+        this.listener = listener;
+    }
+    private SpeakingListener listener;
     private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
     private static final int TW = 1, EN = 0;
@@ -32,11 +37,6 @@ public class Speaker implements Serializable {
     public Speaker(Context context){
         initSpeaker(context);
         monitor = new SpeakerQueueMonitor(this);
-        monitor.start();
-    }
-    Speaker(Context context, Handler handler, TextView display){
-        initSpeaker(context);
-        monitor = new SpeakerQueueMonitor(this, handler, display);
         monitor.start();
     }
 
@@ -189,17 +189,9 @@ public class Speaker implements Serializable {
         private Speaker speaker;
         private boolean toMonitor;
         private boolean isPaused = false;
-        private TextView mDisplay;
-        private Handler mHandler;
 
         SpeakerQueueMonitor(Speaker speaker){
             this.speaker = speaker;
-        }
-
-        SpeakerQueueMonitor(Speaker speaker, Handler handler, TextView display){
-            this.speaker = speaker;
-            mHandler = handler;
-            mDisplay = display;
         }
 
         @Override
@@ -210,16 +202,9 @@ public class Speaker implements Serializable {
                 if (! queue.isEmpty() && ! isPaused){
                     final String message = queue.peek();
                     if (message != null && message.length() > 0) {
-                        final int font = 6000 / (message.length() + 40);
                         Log.i("## SpeakerQueueMonitor", message);
-                        if (mDisplay != null)
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mDisplay.setTextSize(font);
-                                    mDisplay.setText(message);
-                                }
-                            });
+                        if (listener != null)
+                            listener.onPreSpeak(message);
                         speaker.speakSync(message);
                         queue.poll(); // replace remove
                     }

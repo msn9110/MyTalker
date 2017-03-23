@@ -12,7 +12,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 
-public class ReceiveManager extends Thread {
+public class ReceiveManager extends Thread implements Speaker.SpeakingListener {
     private static String TAG = "## ReceiveManager";
 
     private TextView mDisplay;
@@ -32,7 +32,8 @@ public class ReceiveManager extends Thread {
 
     private void onPreExecute() {
         toReceive = true;
-        mSpeaker = new Speaker(mContext, mHandler, mDisplay);
+        mSpeaker = new Speaker(mContext);
+        mSpeaker.setSpeakingListener(this);
         Log.i(TAG, "onPreExecute");
     }
 
@@ -77,5 +78,17 @@ public class ReceiveManager extends Thread {
 
     public void cancel(){
         onCancel();
+    }
+
+    @Override
+    public void onPreSpeak(final String message) {
+        final int font = 6000 / (message.length() + 40);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mDisplay.setTextSize(font);
+                mDisplay.setText(message);
+            }
+        });
     }
 }

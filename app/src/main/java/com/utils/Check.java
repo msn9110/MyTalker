@@ -19,7 +19,14 @@ public class Check {
     static public int checkChar(char ch){
         if(ch >= 32 && ch <= 64 || ch >= 91 && ch <= 96 || ch >= 123 && ch <= 126)
             return -1;
-        if(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
+        if(ch >= 'a' && ch <= 'z' ||
+                ch >= 'A' && ch <= 'Z' ||
+                0x0020 <= ch && ch <= 0x007F ||
+                0x00A0 <= ch && ch <= 0x00FF ||
+                0x0100 <= ch && ch <= 0x017F ||
+                0x0180 <= ch && ch <= 0x023F ||
+                0x0250 <= ch && ch <= 0x02AF ||
+                0x0370 <= ch && ch <= 0x03FF)
             return 0;
         return 1;
     }
