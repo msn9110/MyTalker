@@ -23,6 +23,7 @@
 
     <string name="nav_input">代言人</string>
     <string name="nav_display">顯示器</string>
+    <string name="nav_presentation">簡報</string>
     <string name="nav_backup">資料備份</string>
     <string name="nav_setting">設定</string>
     <string name="nav_help">說明</string>

@@ -6,6 +6,10 @@
             android:title="@string/nav_input"
             android:icon="@drawable/talker_input"/>
         <item
+            android:id="@+id/nav_presentation"
+            android:title="@string/nav_presentation"
+            android:icon="@drawable/talker_presentation"/>
+        <item
             android:id="@+id/nav_display"
             android:title="@string/nav_display"
             android:icon="@drawable/talker_display"/>

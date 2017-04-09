@@ -12,7 +12,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 
-public class ReceiveManager extends Thread implements Speaker.SpeakingListener {
+public class ReceiveManager extends Thread implements SpeakingListener {
     private static String TAG = "## ReceiveManager";
 
     private TextView mDisplay;

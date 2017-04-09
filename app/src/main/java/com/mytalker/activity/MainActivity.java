@@ -25,6 +25,7 @@ import com.mytalker.fragment.BackupFragment;
 import com.mytalker.fragment.DisplayFragment;
 import com.mytalker.fragment.HelpFragment;
 import com.mytalker.fragment.InputFragment;
+import com.mytalker.fragment.PresentFragment;
 import com.mytalker.fragment.SettingFragment;
 import com.utils.MyFile;
 import com.utils.WifiAdmin;
@@ -82,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 f = new DisplayFragment();
                 break;
+            case R.layout.fragment_presentation:
+                f = new PresentFragment();
+                break;
             case R.layout.fragment_backup:
                 f = new BackupFragment();
                 break;
@@ -110,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_display:
                 setFragment(R.layout.fragment_display);
+                break;
+            case R.id.nav_presentation:
+                setFragment(R.layout.fragment_presentation);
                 break;
             case R.id.nav_backup:
                 setFragment(R.layout.fragment_backup);

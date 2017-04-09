@@ -17,10 +17,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class Speaker implements Serializable {
-    interface SpeakingListener {
-        void onPreSpeak(final String message);
-    }
-    void setSpeakingListener(SpeakingListener listener) {
+
+    public void setSpeakingListener(SpeakingListener listener) {
         this.listener = listener;
     }
     private SpeakingListener listener;
@@ -269,3 +267,4 @@ public class Speaker implements Serializable {
         }
     }
 }
+
