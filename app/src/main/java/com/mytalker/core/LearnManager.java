@@ -16,13 +16,12 @@ public class LearnManager implements Serializable {
     private Context context;
     private static final Object lock = new Object();
     private Divider divider;
-    private ArrayList<String> myWords = new ArrayList<>();
 
     public LearnManager(Context context, TalkerDBManager dbManager)
     {
         this.context = context;
         talkerDBManager = dbManager;
-        divider = new Divider("./data", myWords);
+        divider = new Divider("./data");
     }
 
     //=======================================學習===============================================
@@ -41,7 +40,9 @@ public class LearnManager implements Serializable {
                             talkerDBManager.insertSentence(sentence);
                         }
                     }
-                    System.out.println("# spilt result : " + divider.spiltSentence(preProcess(sentence)));
+                    String tmp = preProcess(sentence);
+                    ArrayList<String> myWords = new ArrayList<>();
+                    System.out.println("### spilt result : " + divider.spiltSentence(tmp, myWords));
 
                     //handle vocabulary
                     for(int i = 0 ; i < myWords.size() ; i++){
@@ -98,7 +99,7 @@ public class LearnManager implements Serializable {
                         i += (j + 1);
                         break;
                     }
-
+                    word = null;
                 }
 
                 if (word == null){

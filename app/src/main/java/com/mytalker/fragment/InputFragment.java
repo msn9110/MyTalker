@@ -314,7 +314,8 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
             }
             String line;
             while ((line = myReader.readLine()) != null){
-                myList.addAll(Divider.getSentences(line));
+                if (line.replaceAll("\\s", "").length() > 0)
+                    myList.addAll(Divider.getSentences(line));
                 //myList.add(line);
             }
             myReader.close();
