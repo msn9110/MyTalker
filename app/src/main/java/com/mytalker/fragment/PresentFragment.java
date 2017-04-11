@@ -3,6 +3,9 @@ package com.mytalker.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -11,8 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +37,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class PresentFragment extends Fragment implements SpeakingListener, AdapterView.OnItemClickListener,
@@ -44,6 +50,7 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     private Handler mHandler = new Handler();
     private ListView fileList, functionList;
     private TextView txtDisplay;
+    private ImageView imgDisplay;
     private File currentFile = Environment.getExternalStoragePublicDirectory("MyTalker");
 
     @SuppressWarnings("deprecation")
@@ -72,6 +79,7 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
 
     private void initialize() {
         txtDisplay = (TextView) mView.findViewById(R.id.txtDisplay);
+        imgDisplay = (ImageView) mView.findViewById(R.id.imgDisplay);
         fileList = (ListView) mView.findViewById(R.id.fileList);
         functionList = (ListView) mView.findViewById(R.id.functionList);
 
@@ -112,8 +120,18 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
             for (File f : myFiles) {
                 if (f.isDirectory()) {
                     dirs.add(f.getName());
-                } else if (f.isFile() && f.getName().endsWith(".txt")) {
-                    files.add(f.getName());
+                } else if (f.isFile()) {
+                    Uri uri = Uri.fromFile(f);
+                    String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+                    String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+                    try {
+                        String type = mimeType.split("/")[0];
+                        List<String> types = Arrays.asList("text", "image");
+                        if (types.contains(type))
+                            files.add(f.getName());
+                    } catch (Exception ex) {
+                        Log.w(TAG, ex.getMessage());
+                    }
                 }
             }
             myList.addAll(dirs);
@@ -189,15 +207,26 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
                 currentFile = file;
                 setFileList();
             } else if (file.isFile()) {
-                if (longClick) {
-                    playTextFile(file);
-                } else {
-                    Log.d(TAG, "Long Click Called.");
-                    currentFile = new File(currentFile, select);
-                    Log.d(TAG, currentFile.getName());
-                    setList(getListContent(currentFile), fileList);
+                Uri uri = Uri.fromFile(file);
+                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+                String type = mimeType.split("/")[0];
+                switch (type) {
+                    case "text":
+                        if (longClick) {
+                            playTextFile(file);
+                        } else {
+                            Log.d(TAG, "Long Click Called.");
+                            currentFile = new File(currentFile, select);
+                            Log.d(TAG, currentFile.getName());
+                            setList(getListContent(currentFile), fileList);
+                        }
+                        break;
+                    case "image":
+                        Bitmap pic = BitmapFactory.decodeFile(file.getAbsolutePath());
+                        imgDisplay.setImageBitmap(pic);
+                        break;
                 }
-
             }
         }
     }
@@ -217,6 +246,10 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
             case CLEAR:
                 if (!longClick)
                     txtDisplay.setText("");
+                else {
+                    txtDisplay.setText("");
+                    imgDisplay.setImageResource(android.R.color.transparent);
+                }
                 break;
             case ALLPLAY:
                 if (currentFile.getName().endsWith(".txt"))
