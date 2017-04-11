@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.mytalker.R;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.SpeakingListener;
+import com.utils.Divider;
 import com.utils.MyFile;
 
 import java.io.BufferedReader;
@@ -28,11 +29,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class PresentFragment extends Fragment implements SpeakingListener, AdapterView.OnItemClickListener
+public class PresentFragment extends Fragment implements SpeakingListener, AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener
 {
     private final static String TAG = "## PresentFragment";
     private Context mContext;
@@ -41,7 +44,7 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     private Handler mHandler = new Handler();
     private ListView fileList, functionList;
     private TextView txtDisplay;
-    private File currentDir = Environment.getExternalStoragePublicDirectory("MyTalker");
+    private File currentFile = Environment.getExternalStoragePublicDirectory("MyTalker");
 
     @SuppressWarnings("deprecation")
     @Override
@@ -60,7 +63,7 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_presentation, container, false);
-        currentDir.mkdirs();
+        currentFile.mkdirs();
         mSpeaker = new Speaker(mContext);
         mSpeaker.setSpeakingListener(this);
         initialize();
@@ -77,16 +80,20 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
         setFileList();
         functionList.setOnItemClickListener(this);
         fileList.setOnItemClickListener(this);
+        functionList.setOnItemLongClickListener(this);
+        fileList.setOnItemLongClickListener(this);
     }
 
     final String ENCODING = "更改文件編碼";
+    final String CLEAR = "清除畫面";
+    final String ALLPLAY = "播放全部";
     private void setFunctionList() {
-        ArrayList<String> functions = new ArrayList<>(Arrays.asList("暫停/繼續", "停止", ENCODING));
+        ArrayList<String> functions = new ArrayList<>(Arrays.asList("暫停/繼續", "停止", ENCODING, CLEAR, ALLPLAY));
         setList(functions, functionList);
     }
 
     private void setFileList() {
-        setList(getFiles(currentDir), fileList);
+        setList(getListContent(currentFile), fileList);
     }
 
     private void setList(ArrayList<String> contents, ListView myList) {
@@ -95,21 +102,41 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     }
 
     final String BACK = "(上一頁)";
-    private ArrayList<String> getFiles(File dir) {
+    private ArrayList<String> getListContent(File target) {
         ArrayList<String> myList = new ArrayList<>();
         myList.add(BACK);
-        File[] myFiles = dir.listFiles();
-        ArrayList<String> dirs = new ArrayList<>();
-        ArrayList<String> files = new ArrayList<>();
-        for (File f : myFiles) {
-            if (f.isDirectory()) {
-                dirs.add(f.getName());
-            } else if (f.isFile() && f.getName().endsWith(".txt")) {
-                files.add(f.getName());
+        if (target.isDirectory()) {
+            File[] myFiles = target.listFiles();
+            ArrayList<String> dirs = new ArrayList<>();
+            ArrayList<String> files = new ArrayList<>();
+            for (File f : myFiles) {
+                if (f.isDirectory()) {
+                    dirs.add(f.getName());
+                } else if (f.isFile() && f.getName().endsWith(".txt")) {
+                    files.add(f.getName());
+                }
+            }
+            myList.addAll(dirs);
+            myList.addAll(files);
+        } else {
+            try {
+                String charset = MyFile.charset_target;
+                BufferedReader myReader;
+                File myFile = MyFile.getFile(target);
+                FileInputStream in = new FileInputStream(myFile);
+                myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
+                String line;
+                while ((line = myReader.readLine()) != null){
+                    if (line.replaceAll("\\s", "").length() > 0)
+                        myList.addAll(Divider.getSentences(line));
+                    //myList.add(line);
+                }
+                myReader.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
-        myList.addAll(dirs);
-        myList.addAll(files);
+
         return myList;
     }
 
@@ -125,40 +152,57 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
         });
     }
 
-    private void fileListItemClick(String select) {
-        if (select.contentEquals(BACK)) {
-            if (currentDir.equals(Environment.getExternalStorageDirectory()))
-                return;
-            currentDir = currentDir.getParentFile();
-            setFileList();
-        } else {
-            File file = new File(currentDir, select);
-            if (file.isDirectory()) {
-                currentDir = file;
-                setFileList();
-            } else {
-                try {
-                    File myFile = MyFile.getFile(file);
-                    FileInputStream fIn = new FileInputStream(myFile);
-                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                    String line;
-                    while ((line = myReader.readLine()) != null) {
-                        if(line.length() == 0)
-                            continue;
-                        mSpeaker.addSpeak(line);
-                    }
-                    myReader.close();
+    private void playTextFile(File file) {
+        try {
+            File myFile = MyFile.getFile(file);
+            FileInputStream fIn = new FileInputStream(myFile);
+            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+            String line;
+            while ((line = myReader.readLine()) != null) {
+                if(line.length() == 0)
+                    continue;
+                mSpeaker.addSpeak(line);
+            }
+            myReader.close();
 
-                } catch (FileNotFoundException e) {
-                    Log.e(TAG, "File not found: " + e.toString());
-                } catch (IOException e) {
-                    Log.e(TAG, "Can not read file: " + e.toString());
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Can not read file: " + e.toString());
+        }
+    }
+
+    private void fileListItemClick(String select, boolean longClick) {
+        Log.d(TAG, "file list");
+        if (select.contentEquals(BACK)) {
+            if (currentFile.equals(Environment.getExternalStorageDirectory()))
+                return;
+            currentFile = currentFile.getParentFile();
+            setFileList();
+        } else if (currentFile.isFile() && currentFile.getName().endsWith(".txt")) {
+            Log.d(TAG, "In else if.");
+            mSpeaker.addSpeak(select);
+        } else {
+            Log.d(TAG, "In else.");
+            File file = new File(currentFile, select);
+            if (file.isDirectory()) {
+                currentFile = file;
+                setFileList();
+            } else if (file.isFile()) {
+                if (longClick) {
+                    playTextFile(file);
+                } else {
+                    Log.d(TAG, "Long Click Called.");
+                    currentFile = new File(currentFile, select);
+                    Log.d(TAG, currentFile.getName());
+                    setList(getListContent(currentFile), fileList);
                 }
+
             }
         }
     }
 
-    private void functionListOnItemClick(String select){
+    private void functionListOnItemClick(String select, boolean longClick){
         switch (select){
             case "暫停/繼續":
                 mSpeaker.pause();
@@ -170,6 +214,14 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
                 MyFile.setCharset();
                 Toast.makeText(mContext, MyFile.charset, Toast.LENGTH_SHORT).show();
                 break;
+            case CLEAR:
+                if (!longClick)
+                    txtDisplay.setText("");
+                break;
+            case ALLPLAY:
+                if (currentFile.getName().endsWith(".txt"))
+                    playTextFile(currentFile);
+                break;
         }
     }
 
@@ -178,11 +230,25 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
         String select = ((TextView) view).getText().toString();
         switch (parent.getId()) {
             case R.id.fileList:
-                fileListItemClick(select);
+                fileListItemClick(select, false);
                 break;
             case R.id.functionList:
-                functionListOnItemClick(select);
+                functionListOnItemClick(select, false);
                 break;
         }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        String select = ((TextView) view).getText().toString();
+        switch (adapterView.getId()) {
+            case R.id.fileList:
+                fileListItemClick(select, true);
+                break;
+            case R.id.functionList:
+                functionListOnItemClick(select, true);
+                break;
+        }
+        return true;
     }
 }
