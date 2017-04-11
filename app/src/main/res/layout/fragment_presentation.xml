@@ -14,12 +14,26 @@
             android:id="@+id/functionList">
 
         </ListView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:orientation="horizontal"
+            android:background="@color/colorPrimary">
+
+        </LinearLayout>
         <ListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/fileList">
 
         </ListView>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:background="@color/colorPrimaryDark">
+
     </LinearLayout>
     <ScrollView
         android:layout_width="match_parent"

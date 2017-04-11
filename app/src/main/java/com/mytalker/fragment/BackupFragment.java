@@ -92,11 +92,11 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
         fileList.setAdapter(createAdapter());
     }
 
-
+    final String BACK = "(上一頁)";
     private void setDirFiles(){
         dirFiles.clear();
         ArrayList<String> myDirs = new ArrayList<>(), myFiles = new ArrayList<>();
-        myDirs.add("..");
+        myDirs.add(BACK);
         File[] files = currentDir.listFiles();
         String[] exts = new String[]{Ext, ".txt", "TXT"};
         for (File f : files){
@@ -137,12 +137,11 @@ public class BackupFragment extends Fragment implements View.OnClickListener, Ad
     }
 
     private void fileListItemOnClick(String select){
-        if(select.equals("..")){
-            if (! currentDir.getParentFile().equals(Environment.getExternalStorageDirectory())){ // check whether is external root
-                currentDir = currentDir.getParentFile(); // change to parent dir
-                reloadFileList();
+        if (select.contentEquals(BACK)) {
+            if (currentDir.equals(Environment.getExternalStorageDirectory()))
                 return;
-            }
+            currentDir = currentDir.getParentFile();
+            reloadFileList();
         }
         File file = new File(currentDir, select);
         if(file.isDirectory()){

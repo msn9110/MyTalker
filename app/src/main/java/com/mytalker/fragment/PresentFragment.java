@@ -5,7 +5,9 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,21 +15,30 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mytalker.R;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.SpeakingListener;
+import com.utils.MyFile;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 
 public class PresentFragment extends Fragment implements SpeakingListener, AdapterView.OnItemClickListener
 {
+    private final static String TAG = "## PresentFragment";
     private Context mContext;
     private View mView;
     private Speaker mSpeaker;
+    private Handler mHandler = new Handler();
     private ListView fileList, functionList;
     private TextView txtDisplay;
     private File currentDir = Environment.getExternalStoragePublicDirectory("MyTalker");
@@ -37,6 +48,12 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSpeaker.shutdown();
     }
 
     @Nullable
@@ -58,6 +75,7 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
         txtDisplay.setText("");
         setFunctionList();
         setFileList();
+        functionList.setOnItemClickListener(this);
         fileList.setOnItemClickListener(this);
     }
 
@@ -96,10 +114,15 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     }
 
     @Override
-    public void onPreSpeak(String message) {
-        int font = 6000 / (message.length() + 40);
-        txtDisplay.setTextSize(font);
-        txtDisplay.setText(message);
+    public void onPreSpeak(final String message) {
+        final int font = 6000 / (message.length() + 40);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                txtDisplay.setTextSize(font);
+                txtDisplay.setText(message);
+            }
+        });
     }
 
     private void fileListItemClick(String select) {
@@ -114,8 +137,39 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
                 currentDir = file;
                 setFileList();
             } else {
+                try {
+                    File myFile = MyFile.getFile(file);
+                    FileInputStream fIn = new FileInputStream(myFile);
+                    BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                    String line;
+                    while ((line = myReader.readLine()) != null) {
+                        if(line.length() == 0)
+                            continue;
+                        mSpeaker.addSpeak(line);
+                    }
+                    myReader.close();
 
+                } catch (FileNotFoundException e) {
+                    Log.e(TAG, "File not found: " + e.toString());
+                } catch (IOException e) {
+                    Log.e(TAG, "Can not read file: " + e.toString());
+                }
             }
+        }
+    }
+
+    private void functionListOnItemClick(String select){
+        switch (select){
+            case "暫停/繼續":
+                mSpeaker.pause();
+                break;
+            case "停止":
+                mSpeaker.stop();
+                break;
+            case ENCODING:
+                MyFile.setCharset();
+                Toast.makeText(mContext, MyFile.charset, Toast.LENGTH_SHORT).show();
+                break;
         }
     }
 
@@ -127,7 +181,7 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
                 fileListItemClick(select);
                 break;
             case R.id.functionList:
-
+                functionListOnItemClick(select);
                 break;
         }
     }
