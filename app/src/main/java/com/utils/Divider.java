@@ -30,7 +30,7 @@ public class Divider {
         Word word;
         while((word = mmSeg.next()) != null) {
             String w = word.getString();
-            if (Check.check_eng(w.charAt(0)))
+            if (Check.checkChar(w.charAt(0)) == 0) //eng word
                 w += " ";
             myWords.add(w);
             w += spiltSign;

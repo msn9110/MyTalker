@@ -1,34 +1,37 @@
 package com.utils;
 
 
+import java.util.regex.Pattern;
+
 public class Check {
-    static public boolean check_eng(char ch){
-        boolean ret=false;
-        if(ch>='a' && ch<='z' || ch>='A' && ch<='Z')
-            ret=true;
-        return ret;
+
+
+    // 根据UnicodeBlock方法判断中文标点符号
+    static private boolean isChinesePunctuation(char c) {
+        Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+        return (ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+                || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS
+                /*|| ub == Character.UnicodeBlock.VERTICAL_FORMS*/);
     }
 
-    static public boolean check_sign(char ch){
-        boolean ret=false;
-        if(ch>=32 && ch<=64 || ch>=91 && ch<=96 || ch>=123 && ch<=126)
-            ret=true;
-        return ret;
+    // 使用Unicode编码范围来判断汉字；这个方法不准确,因为还有很多汉字不在这个范围之内
+    static private boolean isChineseByRange(String str) {
+        if (str == null) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("[\\u4E00-\\u9FCC]+");
+        return pattern.matcher(str.trim()).find();
     }
+
 
     static public int checkChar(char ch){
-        if(ch >= 32 && ch <= 64 || ch >= 91 && ch <= 96 || ch >= 123 && ch <= 126)
+        if(ch >= 32 && ch <= 64 || ch >= 91 && ch <= 96 || ch >= 123 && ch <= 126 || isChinesePunctuation(ch))
             return -1;
-        if(ch >= 'a' && ch <= 'z' ||
-                ch >= 'A' && ch <= 'Z' ||
-                0x0020 <= ch && ch <= 0x007F ||
-                0x00A0 <= ch && ch <= 0x00FF ||
-                0x0100 <= ch && ch <= 0x017F ||
-                0x0180 <= ch && ch <= 0x023F ||
-                0x0250 <= ch && ch <= 0x02AF ||
-                0x0370 <= ch && ch <= 0x03FF)
-            return 0;
-        return 1;
+        if(isChineseByRange(String.valueOf(ch)))
+            return 1;
+        return 0;
     }
 
     static public int checkMode(String text){
