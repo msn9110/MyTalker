@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -14,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -25,16 +23,19 @@ import android.widget.Toast;
 import com.example.mytalker.R;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.SpeakingListener;
+import com.utils.CharsetDetector;
 import com.utils.Divider;
-import com.utils.MyFile;
+import com.utils.Utils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,7 +71,8 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_presentation, container, false);
-        currentFile.mkdirs();
+        if (!currentFile.mkdirs())
+            System.out.println("mkdir failed");
         mSpeaker = new Speaker(mContext);
         mSpeaker.setSpeakingListener(this);
         initialize();
@@ -92,11 +94,11 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
         fileList.setOnItemLongClickListener(this);
     }
 
-    final String ENCODING = "更改文件編碼";
+    final String TOSPILT = "分段";
     final String CLEAR = "清除畫面";
     final String ALLPLAY = "播放全部";
     private void setFunctionList() {
-        ArrayList<String> functions = new ArrayList<>(Arrays.asList("暫停/繼續", "停止", ENCODING, CLEAR, ALLPLAY));
+        ArrayList<String> functions = new ArrayList<>(Arrays.asList(TOSPILT, "暫停/繼續", "停止", CLEAR, ALLPLAY));
         setList(functions, functionList);
     }
 
@@ -121,11 +123,8 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
                 if (f.isDirectory()) {
                     dirs.add(f.getName());
                 } else if (f.isFile()) {
-                    Uri uri = Uri.fromFile(f);
-                    String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-                    String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
                     try {
-                        String type = mimeType.split("/")[0];
+                        String type = Utils.getMIMEType(f);
                         List<String> types = Arrays.asList("text", "image");
                         if (types.contains(type))
                             files.add(f.getName());
@@ -138,11 +137,9 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
             myList.addAll(files);
         } else {
             try {
-                String charset = MyFile.charset_target;
                 BufferedReader myReader;
-                File myFile = MyFile.getFile(target);
-                FileInputStream in = new FileInputStream(myFile);
-                myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
+                FileInputStream in = new FileInputStream(target);
+                myReader = new BufferedReader(new InputStreamReader(in, CharsetDetector.detect(target)));
                 String line;
                 while ((line = myReader.readLine()) != null){
                     if (line.replaceAll("\\s", "").length() > 0)
@@ -172,9 +169,8 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
 
     private void playTextFile(File file) {
         try {
-            File myFile = MyFile.getFile(file);
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+            FileInputStream fIn = new FileInputStream(file);
+            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn, CharsetDetector.detect(file)));
             String line;
             while ((line = myReader.readLine()) != null) {
                 if(line.length() == 0)
@@ -207,13 +203,10 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
                 currentFile = file;
                 setFileList();
             } else if (file.isFile()) {
-                Uri uri = Uri.fromFile(file);
-                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
-                String type = mimeType.split("/")[0];
+                String type = Utils.getMIMEType(file);
                 switch (type) {
                     case "text":
-                        if (longClick) {
+                        if (!longClick) {
                             playTextFile(file);
                         } else {
                             Log.d(TAG, "Long Click Called.");
@@ -233,15 +226,42 @@ public class PresentFragment extends Fragment implements SpeakingListener, Adapt
 
     private void functionListOnItemClick(String select, boolean longClick){
         switch (select){
+            case TOSPILT:
+                String type = Utils.getMIMEType(currentFile);
+                if (type.contentEquals("text")) {
+                    File targetDir = new File(currentFile.getParentFile(),  "(" + currentFile.getName() + ")");
+                    if (targetDir.mkdirs()) {
+                        String content = "";
+                        try {
+                            BufferedReader myReader;
+                            FileInputStream in = new FileInputStream(currentFile);
+                            myReader = new BufferedReader(new InputStreamReader(in, CharsetDetector.detect(currentFile)));
+                            String line;
+                            while ((line = myReader.readLine()) != null){
+                                if (line.replaceAll("\\s", "").length() > 0)
+                                    content += line + "\n";
+                            }
+                            myReader.close();
+                            String[] contents = content.split("###");
+                            for (int i = 0; i < contents.length; i++) {
+                                File outFile = new File(targetDir, String.valueOf(i + 1) + ".txt");
+                                FileOutputStream out = new FileOutputStream(outFile);
+                                BufferedWriter myWriter = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+                                myWriter.write(contents[i]);
+                                myWriter.close();
+                            }
+                            Toast.makeText(mContext, "分段成功!", Toast.LENGTH_SHORT).show();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+                break;
             case "暫停/繼續":
                 mSpeaker.pause();
                 break;
             case "停止":
                 mSpeaker.stop();
-                break;
-            case ENCODING:
-                MyFile.setCharset();
-                Toast.makeText(mContext, MyFile.charset, Toast.LENGTH_SHORT).show();
                 break;
             case CLEAR:
                 if (!longClick)

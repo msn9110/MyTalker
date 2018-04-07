@@ -1,12 +1,22 @@
 package com.utils;
 
 
+import android.net.Uri;
+import android.webkit.MimeTypeMap;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 
 public class Utils {
 
+    public static String getMIMEType(File file) {
+        Uri uri = Uri.fromFile(file);
+        String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
+        return mimeType.split("/")[0];
+    }
     /**
      * Convert byte array to hex string
      * @param bytes

@@ -22,48 +22,6 @@ import java.util.Locale;
 
 public class MyFile {
 
-    static private String[] MyCharset=new String[]{"BIG5","UTF-8"};
-    static private int next=0;
-    static public String charset="BIG5";
-    static public String charset_target="UTF-8";
-    static public String prefix="("+charset_target+")";
-
-    static public void setCharset(){
-        int size=MyCharset.length;
-        next=(next+1)%size;
-        charset=MyCharset[next];
-    }
-    static public File getFile(File inputFile){
-        File myDir=new File(Environment.getExternalStorageDirectory()+"/MyTalker/"+prefix);
-        mkdirs(myDir);
-        String name=inputFile.getName();
-        String origin_name=name;
-        name=name.toUpperCase();
-        if(name.contains(charset_target))
-            return inputFile;
-        String filename=prefix+origin_name;
-        File myFile=new File(myDir,filename);
-        try{
-
-            FileInputStream in = new FileInputStream(inputFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
-            FileOutputStream out=new FileOutputStream(new File(myDir,filename));
-            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName(charset_target)));
-
-            char[] buffer = new char[1024];
-            int read;
-            while ((read = myReader.read(buffer)) != -1) {
-                myWriter.write(buffer,0,read);
-            }
-            myReader.close();
-            // write the output file
-            myWriter.flush();
-            myWriter.close();
-        }catch (Exception ex){
-            Log.e("MyFile",ex.toString());
-        }
-        return myFile;
-    }
 
     static public void mkdirs(File dir) {
         //判斷文件夾是否存在,如果不存在則建立文件夾
@@ -136,16 +94,16 @@ public class MyFile {
     }
 
     static public void log(String sentence){
-        File dir=new File(Environment.getExternalStorageDirectory().getPath()+"/MyTalker/紀錄");
+        File dir=new File(Environment.getExternalStorageDirectory().getPath() + "/MyTalker/紀錄");
         mkdirs(dir);
-        DateFormat format=new SimpleDateFormat("yyyy-MM-dd", Locale.TAIWAN);
-        String filename= prefix+format.format(Calendar.getInstance().getTime())+".txt";
-        File file=new File(dir,filename);
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.TAIWAN);
+        String filename = format.format(Calendar.getInstance().getTime()) + ".txt";
+        File file = new File(dir, filename);
         try{
-            FileOutputStream out=new FileOutputStream(file,true);
-            BufferedWriter myWriter=new BufferedWriter(new OutputStreamWriter(out,Charset.forName(charset_target)));
+            FileOutputStream out = new FileOutputStream(file, true);
+            BufferedWriter myWriter = new BufferedWriter(new OutputStreamWriter(out, CharsetDetector.detect(file)));
             //myWriter.newLine();
-            myWriter.write(sentence+"\n");
+            myWriter.write(sentence + "\n");
             myWriter.flush();
             myWriter.close();
         }catch (Exception e){

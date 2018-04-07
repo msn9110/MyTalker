@@ -21,25 +21,25 @@ public class Speaker implements Serializable {
     public void setSpeakingListener(SpeakingListener listener) {
         this.listener = listener;
     }
-    private SpeakingListener listener;
+    private SpeakingListener listener; // callback to show the current speaking text
     private static final long serialVersionUID = -7060210544600464481L;
     //=============================================語音==============================================
     private static final int TW = 1, EN = 0;
     private static String[] LANG = new String[]{"EN", "TW"};
     private static Locale[] locales = new Locale[]{Locale.ENGLISH, Locale.TAIWAN};
-    private final int size = 2;
-    private TextToSpeech[] mTTS = new TextToSpeech[size];
-    private Deque<String> queue = new ArrayDeque<>();
+    private TextToSpeech[] mTTS;
+    private Deque<String> queue = new ArrayDeque<>(); // queue for speaking text
     private static final String TAG = "## Speaker";
-    private SpeakerQueueMonitor monitor;
+    private SpeakerQueueMonitor monitor; // a thread to monitor whether there is a text in a queue
     public Speaker(Context context){
+        mTTS = new TextToSpeech[locales.length];
         initSpeaker(context);
         monitor = new SpeakerQueueMonitor(this);
         monitor.start();
     }
 
     private void initSpeaker(Context context){
-        for (int i = 0; i < size; i++){
+        for (int i = 0; i < mTTS.length; i++){
             final int j = i;
             mTTS[j] = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
                 @Override
@@ -258,7 +258,7 @@ public class Speaker implements Serializable {
                     Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                Log.i("## Listener", "interrupt !");
+                Log.i("## BusySpeakerListener", "interrupt !");
             }
         }
 

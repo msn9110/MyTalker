@@ -37,6 +37,7 @@ import com.mytalker.core.LearnManager;
 import com.mytalker.core.Sender;
 import com.mytalker.core.Speaker;
 import com.mytalker.core.TalkerDBManager;
+import com.utils.CharsetDetector;
 import com.utils.Divider;
 import com.utils.MyFile;
 import com.utils.NetworkManager;
@@ -171,7 +172,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
     File currentDir;
     File appDir = new File(Environment.getExternalStorageDirectory(), "MyTalker");//使用者可透過此目錄下的文件隨時抽換main list的常用詞句
-    final String fileEncoding = "-->更改文件編碼";
     final String BACK = "..(回上一頁)";
 
     private void initialize(){
@@ -250,13 +250,10 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
         File[] myFiles = dir.listFiles();
         List<String> dirs = new ArrayList<>();
         List<String> files = new ArrayList<>();
-        list.add(fileEncoding);
         if(!APPDir)
             list.add(BACK);
 
         for (File f : myFiles) {
-            if(MyFile.prefix.equals(f.getName()))
-                continue;
             if(f.isDirectory())
                 dirs.add(f.getName());
             else
@@ -301,16 +298,15 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
 
     private void setMainList(File file){
         ArrayList<String> myList = new ArrayList<>();
-        String charset = MyFile.charset_target;
         try{
             BufferedReader myReader;
             if (file.exists()){
-                File myFile = MyFile.getFile(file);
-                FileInputStream in = new FileInputStream(myFile);
-                myReader = new BufferedReader(new InputStreamReader(in, Charset.forName(charset)));
+                FileInputStream in = new FileInputStream(file);
+                myReader = new BufferedReader(new InputStreamReader(in, CharsetDetector.detect(file)));
             } else {
-                InputStream in = mContext.getAssets().open("words.txt");
-                myReader = new BufferedReader(new InputStreamReader(in, Charset.forName("BIG5")));
+                String filename = "words.txt";
+                InputStream in = mContext.getAssets().open(filename);
+                myReader = new BufferedReader(new InputStreamReader(in, CharsetDetector.detect(new File(filename))));
             }
             String line;
             while ((line = myReader.readLine()) != null){
@@ -393,11 +389,6 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                 setFileList(currentDir.getParentFile());
                 break;
 
-            case fileEncoding:
-                MyFile.setCharset();
-                Toast.makeText(mContext, MyFile.charset, Toast.LENGTH_SHORT).show();
-                break;
-
             default:
                 if(file.isDirectory())
                     setFileList(file);
@@ -405,11 +396,10 @@ public class InputFragment extends Fragment implements AdapterView.OnItemClickLi
                     if(!mySettings[speechMode])
                         setMainList(file);
                     else {
-                        final File Selection = new File(currentDir, select);
+                        final File selectedFile = new File(currentDir, select);
                         try {
-                            File myFile = MyFile.getFile(Selection);
-                            FileInputStream fIn = new FileInputStream(myFile);
-                            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                            FileInputStream fIn = new FileInputStream(selectedFile);
+                            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn, CharsetDetector.detect(selectedFile)));
                             String line;
                             while ((line = myReader.readLine()) != null) {
                                 if(line.length() == 0)

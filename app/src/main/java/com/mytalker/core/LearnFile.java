@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.utils.CharsetDetector;
 import com.utils.MyFile;
 
 import java.io.BufferedReader;
@@ -91,9 +92,9 @@ public class LearnFile extends AsyncTask<Void,Integer,Integer> {
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             MyFile.mkdirs(dir);
             // create the file in which we will write the contents
-            File myFile = MyFile.getFile(new File(path));
+            File myFile = new File(path);
             FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn, CharsetDetector.detect(myFile)));
             String aDataRow;
             while ((aDataRow = myReader.readLine()) != null) {
                 Data.add(aDataRow);
