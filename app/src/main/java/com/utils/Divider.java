@@ -55,7 +55,7 @@ public class Divider {
     static public ArrayList<String> getSentences(String message){
         ArrayList<String> result = new ArrayList<>();
         //message = message.replaceAll("(\\W\\s\\W)", "$1,$3");
-        String regex = "(?<=[,.，。])";
+        String regex = "(?<=[,.，。\\s])";
 
         String[] temp = message.split(regex);
         result.addAll(Arrays.asList(temp));

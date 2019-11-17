@@ -140,6 +140,8 @@ public class Speaker implements Serializable {
                 count++;
             }
             msg[count] += String.valueOf(ch);
+            if (65 <= ch && ch <= 90)
+                msg[count] += " ";
         }
         return count;
     }

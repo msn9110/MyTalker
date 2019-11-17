@@ -31,6 +31,8 @@ public class Check {
             return -1;
         if(isChineseByRange(String.valueOf(ch)))
             return 1;
+        if (65 <= ch && ch <= 90)
+            return 2;
         return 0;
     }
 
