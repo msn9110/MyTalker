@@ -20,6 +20,8 @@ public class CharsetDetector {
                 break;
             }
         }
+        if (charset == null)
+            charset = Charset.forName("UTF-8");
         System.out.printf("\t[Test] Using '%s' encoding!\n", charset);
         return charset;
     }
@@ -61,7 +63,7 @@ public class CharsetDetector {
 
     public static Charset detect(File f) {
 
-        String[] charsetsToBeTested = {"UTF-8", "big5", "windows-1253", "ISO-8859-7"};
+        String[] charsetsToBeTested = {"UTF-8", "big5"};
 
         CharsetDetector cd = new CharsetDetector();
         Charset charset = cd.detectCharset(f, charsetsToBeTested);
